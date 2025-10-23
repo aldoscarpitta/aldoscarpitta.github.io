@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aldoweb</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: black;
+            color: white;
+            margin: 40px;
+            font-size: 14px;
+            line-height: 1.6;
+            position: relative;
+            min-height: calc(100vh - 80px);
+        }
+        .line {
+            display: block;
+            white-space: pre-wrap;
+        }
+        .tag {
+            color: #666;
+        }
+        .content {
+            color: #fff;
+        }
+        a {
+            color: #fff;
+            text-decoration: underline;
+        }
+        a:hover {
+            background: #fff;
+            color: #000;
+        }
+        .projects {
+            margin-top: 30px;
+        }
+        .project-link {
+            display: block;
+            margin: 5px 0;
+        }
+        footer {
+            margin-top: 60px;
+            text-align: right;
+            color: #999;
+        }
+        .audio-control {
+            background: none;
+            border: none;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+        }
+        .audio-control:hover {
+            background: #fff;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+<div style="margin-bottom: 20px;">
+<span class="line"><span class="tag">&lt;audio&gt;</span><button class="audio-control" onclick="document.getElementById('track').play()">play</button> <button class="audio-control" onclick="document.getElementById('track').pause(); document.getElementById('track').currentTime = 0;">stop</button><span class="tag">&lt;/audio&gt;</span></span>
+</div>
+
+<audio id="track" style="display: none;">
+    <source src="Glass_resampled.mp3" type="audio/mpeg">
+</audio>
+
+<span class="line"><span class="tag">&lt;p&gt;</span><span class="content">Aldo is an improviser, sound-artist, and curator who creates site-specific experiences to enable collective listening. His work investigates how time enables encounters and connections between people across different moments, using sound to reveal the relationships between communities, spaces, and their histories. Working with participants as co-creators, his practice has evolved from individual consciousness exploration toward collaborative investigation, where listening becomes a method for discovering how strangers can connect through shared acoustic experiences.</span><span class="tag">&lt;/p&gt;</span></span>
+
+<div class="projects">
+<span class="line"><span class="tag">&lt;h2&gt;</span><span class="content">projects</span><span class="tag">&lt;/h2&gt;</span></span>
+
+<span class="line project-link"><span class="tag">&lt;a href="passaeggi-sonori.html"&gt;</span><span class="content"><a href="passaeggi-sonori.html">Passaeggi Sonori (2025)</a></span><span class="tag">&lt;/a&gt;</span></span>
+
+<span class="line project-link"><span class="tag">&lt;a href="golden-record.html"&gt;</span><span class="content"><a href="golden-record.html">Golden Record (2023)</a></span><span class="tag">&lt;/a&gt;</span></span>
+
+<span class="line project-link"><span class="tag">&lt;a href="toccami.html"&gt;</span><span class="content"><a href="toccami.html">Toccami (2022)</a></span><span class="tag">&lt;/a&gt;</span></span>
+
+<span class="line project-link"><span class="tag">&lt;a href="die-tatsachen.html"&gt;</span><span class="content"><a href="die-tatsachen.html">Die Tatsachen auf dem Tisch (2022)</a></span><span class="tag">&lt;/a&gt;</span></span>
+
+<span class="line project-link"><span class="tag">&lt;a href="harbours.html"&gt;</span><span class="content"><a href="harbours.html">Harbours (2022-ongoing)</a></span><span class="tag">&lt;/a&gt;</span></span>
+
+<span class="line project-link"><span class="tag">&lt;a href="malaterra.html"&gt;</span><span class="content"><a href="malaterra.html">Malaterra (2018-ongoing)</a></span><span class="tag">&lt;/a&gt;</span></span>
+</div>
+
+<footer>
+<span class="content">Aldo Scarpitta</span>
+</footer>
+
+</body>
+</html>
