@@ -1,38 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://aldoweb.xyz/</loc>
-    <changefreq>monthly</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://aldoweb.xyz/passaeggi-sonori.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://aldoweb.xyz/golden-record.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://aldoweb.xyz/toccami.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://aldoweb.xyz/die-tatsachen.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://aldoweb.xyz/harbours.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://aldoweb.xyz/malaterra.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.8</priority>
-  </url>
+<url>
+<loc>https://aldoweb.xyz/</loc>
+</url>
+<url>
+<loc>https://aldoweb.xyz/passaeggi-sonori.html</loc>
+</url>
+<url>
+<loc>https://aldoweb.xyz/golden-record.html</loc>
+</url>
+<url>
+<loc>https://aldoweb.xyz/toccami.html</loc>
+</url>
+<url>
+<loc>https://aldoweb.xyz/die-tatsachen.html</loc>
+</url>
+<url>
+<loc>https://aldoweb.xyz/harbours.html</loc>
+</url>
+<url>
+<loc>https://aldoweb.xyz/malaterra.html</loc>
+</url>
 </urlset>
