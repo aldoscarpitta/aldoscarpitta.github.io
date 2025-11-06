@@ -72,6 +72,10 @@
 <body>
 
 <div style="margin-bottom: 20px;">
+<span class="line"><span class="tag">&lt;button onclick="changeColor('#444')"&gt;</span><button class="audio-control" onclick="changeColor('#444')">dark</button><span class="tag">&lt;/button&gt;</span> <span class="tag">&lt;button onclick="changeColor('#666')"&gt;</span><button class="audio-control" onclick="changeColor('#666')">gray</button><span class="tag">&lt;/button&gt;</span> <span class="tag">&lt;button onclick="changeColor('#999')"&gt;</span><button class="audio-control" onclick="changeColor('#999')">light</button><span class="tag">&lt;/button&gt;</span></span>
+</div>
+    
+<div style="margin-bottom: 20px;">
 <span class="line"><span class="tag">&lt;audio&gt;</span><button class="audio-control" onclick="document.getElementById('track1').play()">play</button> <button class="audio-control" onclick="document.getElementById('track1').pause(); document.getElementById('track1').currentTime = 0;">stop</button><span class="tag">&lt;/audio&gt;</span> <span class="tag">&lt;!-- Venice.mp3 --&gt;</span></span>
 <span class="line"><span class="tag">&lt;audio&gt;</span><button class="audio-control" onclick="document.getElementById('track2').play()">play</button> <button class="audio-control" onclick="document.getElementById('track2').pause(); document.getElementById('track2').currentTime = 0;">stop</button><span class="tag">&lt;/audio&gt;</span> <span class="tag">&lt;!-- Glass_resampled.mp3 --&gt;</span></span>
 </div>
@@ -119,5 +123,16 @@
 <span class="tag">Aldo Scarpitta</span>
 </footer>
 
+<script>
+function changeColor(color) {
+    document.querySelectorAll('.tag').forEach(el => el.style.color = color);
+    localStorage.setItem('tagColor', color);
+}
+window.onload = function() {
+    const savedColor = localStorage.getItem('tagColor');
+    if (savedColor) changeColor(savedColor);
+}
+</script>
+    
 </body>
 </html>
