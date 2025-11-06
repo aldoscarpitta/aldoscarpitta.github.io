@@ -98,6 +98,16 @@
 
 <span class="line"><span class="tag">&lt;p&gt;</span><span class="content">Supported by: Biennale di Venezia</span><span class="tag">&lt;/p&gt;</span></span>
 
+<script>
+function changeColor(color) {
+    document.querySelectorAll('.tag').forEach(el => el.style.color = color);
+    localStorage.setItem('tagColor', color);
+}
+window.onload = function() {
+    const savedColor = localStorage.getItem('tagColor');
+    if (savedColor) changeColor(savedColor);
+}
+</script>    
 
 </body>
 </html>
