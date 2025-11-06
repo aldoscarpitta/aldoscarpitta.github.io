@@ -88,5 +88,16 @@
 <span class="line"><span class="tag">&lt;a href="https://soundcloud.com/aldoesse/sets/harbours?si=5913972a64944686b87d01f7e42fc533&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing"&gt;</span><span class="content"><a href="https://soundcloud.com/aldoesse/sets/harbours?si=5913972a64944686b87d01f7e42fc533&utm_source=clipboard&utm_medium=text&utm_campaign=social_sharing">harbours</a></span><span class="tag">&lt;/a&gt;</span></span>
 </div>
 
+<script>
+function changeColor(color) {
+    document.querySelectorAll('.tag').forEach(el => el.style.color = color);
+    localStorage.setItem('tagColor', color);
+}
+window.onload = function() {
+    const savedColor = localStorage.getItem('tagColor');
+    if (savedColor) changeColor(savedColor);
+}
+</script>    
+    
 </body>
 </html>
