@@ -131,17 +131,6 @@ window.onload = function() {
     if (savedColor) changeColor(savedColor);
 }
 </script>
-
-<script>
-function changeColor(color) {
-    document.querySelectorAll('.tag').forEach(el => el.style.color = color);
-    localStorage.setItem('tagColor', color);
-}
-window.onload = function() {
-    const savedColor = localStorage.getItem('tagColor');
-    if (savedColor) changeColor(savedColor);
-}
-</script>
     
 </body>
 </html>
