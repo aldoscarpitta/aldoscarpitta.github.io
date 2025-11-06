@@ -129,6 +129,17 @@
 <div style="text-align: right; margin-top: 30px;">
 <span class="line"><span class="tag">&lt;a href="Map.pdf" download&gt;</span><span class="content"><a href="Map.pdf" download>Map</a></span><span class="tag">&lt;/a&gt;</span></span>
 </div>
+
+<script>
+function changeColor(color) {
+    document.querySelectorAll('.tag').forEach(el => el.style.color = color);
+    localStorage.setItem('tagColor', color);
+}
+window.onload = function() {
+    const savedColor = localStorage.getItem('tagColor');
+    if (savedColor) changeColor(savedColor);
+}
+</script>    
     
 </body>
 </html>
