@@ -93,6 +93,17 @@
 <div style="text-align: right; margin-top: 10px;">
 <span class="line"><span class="tag">&lt;a href="https://vimeo.com/1130375592/915b092179?share=copy&fl=sv&fe=ci"&gt;</span><span class="content"><a href="https://vimeo.com/1130375592/915b092179?share=copy&fl=sv&fe=ci">interactions</a></span><span class="tag">&lt;/a&gt;</span></span>
 </div>
+
+<script>
+function changeColor(color) {
+    document.querySelectorAll('.tag').forEach(el => el.style.color = color);
+    localStorage.setItem('tagColor', color);
+}
+window.onload = function() {
+    const savedColor = localStorage.getItem('tagColor');
+    if (savedColor) changeColor(savedColor);
+}
+</script>
     
 </body>
 </html>
