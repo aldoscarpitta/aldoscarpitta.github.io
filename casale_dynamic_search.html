@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Casale - Motore di Ricerca AI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Crimson Pro', serif;
+            line-height: 1.7;
+            color: #1a1a1a;
+            background: #fafaf8;
+            min-height: 100vh;
+        }
+        
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            background-image: url('data:image/svg+xml,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="3" numOctaves="4" /></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" /></svg>');
+            z-index: 1000;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 30px;
+            position: relative;
+        }
+        
+        .header {
+            margin-bottom: 60px;
+            border-bottom: 2px solid #1a1a1a;
+            padding-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 4.5em;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 15px;
+            line-height: 0.95;
+        }
+        
+        .header .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #666;
+        }
+        
+        .status-bar {
+            background: #1a1a1a;
+            color: white;
+            padding: 12px 20px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.loading {
+            background: #ff9800;
+        }
+        
+        .status-dot.error {
+            background: #f44336;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .search-area {
+            background: white;
+            border: 2px solid #1a1a1a;
+            box-shadow: 8px 8px 0 #1a1a1a;
+            padding: 40px;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .search-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        #searchInput {
+            flex: 1;
+            padding: 18px 20px;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.15em;
+            border: 2px solid #1a1a1a;
+            background: #fafaf8;
+            transition: all 0.2s;
+        }
+        
+        #searchInput:focus {
+            outline: none;
+            background: white;
+            box-shadow: 4px 4px 0 #1a1a1a;
+            transform: translate(-2px, -2px);
+        }
+        
+        .search-btn {
+            padding: 18px 35px;
+            background: #1a1a1a;
+            color: white;
+            border: 2px solid #1a1a1a;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 700;
+        }
+        
+        .search-btn:hover:not(:disabled) {
+            background: white;
+            color: #1a1a1a;
+            transform: translate(-2px, -2px);
+            box-shadow: 4px 4px 0 #1a1a1a;
+        }
+        
+        .search-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .example-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+            color: #666;
+        }
+        
+        .example-tag {
+            padding: 8px 15px;
+            background: #fafaf8;
+            border: 1px solid #1a1a1a;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75em;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .example-tag:hover {
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        .response-area {
+            min-height: 300px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 80px 20px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #666;
+        }
+        
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        .answer-card {
+            background: white;
+            border: 2px solid #1a1a1a;
+            padding: 50px;
+            margin-bottom: 30px;
+            box-shadow: 8px 8px 0 #1a1a1a;
+            position: relative;
+        }
+        
+        .answer-card::before {
+            content: '"';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 6em;
+            line-height: 1;
+            color: #eee;
+            font-family: Georgia, serif;
+        }
+        
+        .answer-content {
+            font-size: 1.2em;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .answer-content p {
+            margin-bottom: 1.2em;
+        }
+        
+        .citation {
+            background: linear-gradient(120deg, #fff9c4 0%, #fff59d 100%);
+            padding: 2px 6px;
+            font-weight: 600;
+            border-bottom: 2px solid #fbc02d;
+        }
+        
+        .sources-section {
+            border-top: 2px solid #eee;
+            padding-top: 25px;
+            margin-top: 25px;
+        }
+        
+        .sources-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .source-item {
+            padding: 15px;
+            background: #fafaf8;
+            border-left: 3px solid #1a1a1a;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        
+        .source-item a {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 600;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        
+        .source-item a:hover {
+            background: #1a1a1a;
+            color: white;
+        }
+        
+        .error-message {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .error-message h3 {
+            color: #c62828;
+            margin-bottom: 15px;
+        }
+        
+        .setup-instructions {
+            background: #e3f2fd;
+            border: 2px dashed #1976d2;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .setup-instructions h3 {
+            font-family: 'Space Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+        
+        .setup-instructions code {
+            background: #1a1a1a;
+            color: #4caf50;
+            padding: 2px 6px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+        }
+        
+        .footer {
+            margin-top: 80px;
+            padding-top: 30px;
+            border-top: 2px solid #1a1a1a;
+            text-align: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 3em;
+            }
+            
+            .search-area {
+                padding: 25px;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .answer-card {
+                padding: 30px;
+            }
+            
+            .answer-content {
+                font-size: 1.1em;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grain"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>Il Casale</h1>
+            <div class="subtitle">Motore di Ricerca AI • Connesso a Google Drive</div>
+        </div>
+        
+        <div class="status-bar" id="statusBar">
+            <div class="status-indicator">
+                <div class="status-dot loading" id="statusDot"></div>
+                <span id="statusText">Caricamento database...</span>
+            </div>
+            <div id="statsText">---</div>
+        </div>
+        
+        <div class="setup-instructions" id="setupInstructions">
+            <h3>⚙️ Setup Necessario</h3>
+            <p>Per utilizzare questo motore di ricerca, devi configurare il Google Apps Script:</p>
+            <ol style="margin: 15px 0; padding-left: 30px; line-height: 1.8;">
+                <li>Apri <strong>script.google.com</strong></li>
+                <li>Crea un nuovo progetto e incolla lo script</li>
+                <li>Fai Deploy come <strong>Web App</strong></li>
+                <li>Copia l'URL e inseriscilo qui sotto nel codice alla riga <code>SCRIPT_URL</code></li>
+            </ol>
+            <p style="margin-top: 15px; color: #666; font-size: 0.95em;">
+                Consulta il file <strong>SETUP_INSTRUCTIONS.md</strong> per la guida completa.
+            </p>
+        </div>
+        
+        <div class="search-area">
+            <div class="search-label">Fai una domanda</div>
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Es: Quanto costa il biglietto del festival? Chi si occupa dei bandi?" 
+                    autocomplete="off"
+                    disabled
+                >
+                <button class="search-btn" id="searchBtn" onclick="askQuestion()" disabled>Cerca</button>
+            </div>
+            
+            <div class="example-label">Esempi di domande:</div>
+            <div class="examples">
+                <span class="example-tag" onclick="askExample('Quanto costa il biglietto del festival 2024?')">Prezzi biglietti</span>
+                <span class="example-tag" onclick="askExample('Chi si occupa dei bandi?')">Referenti bandi</span>
+                <span class="example-tag" onclick="askExample('Date del festival 2025')">Date festival</span>
+                <span class="example-tag" onclick="askExample('Budget festival')">Budget</span>
+                <span class="example-tag" onclick="askExample('4ever punk residenze')">4ever Punk</span>
+                <span class="example-tag" onclick="askExample('situazione affitto casale')">Affitto Casale</span>
+            </div>
+        </div>
+        
+        <div class="response-area" id="responseArea"></div>
+        
+        <div class="footer">
+            Powered by Claude AI + Google Apps Script • Il Casale APS
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION - UPDATE THIS WITH YOUR GOOGLE APPS SCRIPT WEB APP URL!
+        // ============================================
+        
+        const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE';
+        // Example: 'https://script.google.com/macros/s/AKfycbyXXXXXXXXXX/exec'
+        
+        // ============================================
+        // SYSTEM VARIABLES
+        // ============================================
+        
+        let documentDatabase = null;
+        let isSearching = false;
+        let isReady = false;
+        
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        
+        async function init() {
+            updateStatus('loading', 'Connessione a Google Drive...');
+            
+            // Check if URL is configured
+            if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
+                updateStatus('error', 'Script non configurato');
+                document.getElementById('setupInstructions').style.display = 'block';
+                showError('⚙️ Configurazione Necessaria', 
+                    'Devi configurare l\'URL del Google Apps Script. Consulta le istruzioni sopra.');
+                return;
+            }
+            
+            document.getElementById('setupInstructions').style.display = 'none';
+            
+            // Load document database from Google Apps Script
+            try {
+                const response = await fetch(SCRIPT_URL);
+                
+                if (!response.ok) {
+                    throw new Error('Errore nel caricamento');
+                }
+                
+                documentDatabase = await response.json();
+                
+                updateStatus('ready', 'Database caricato');
+                document.getElementById('statsText').textContent = 
+                    `${documentDatabase.totalDocuments} documenti • ~${documentDatabase.approximateWords.toLocaleString()} parole`;
+                
+                // Enable search
+                document.getElementById('searchInput').disabled = false;
+                document.getElementById('searchBtn').disabled = false;
+                isReady = true;
+                
+                showWelcome();
+                
+            } catch (error) {
+                console.error('Errore caricamento database:', error);
+                updateStatus('error', 'Errore connessione');
+                showError('❌ Errore di Connessione', 
+                    'Impossibile caricare il database documenti. Verifica la configurazione del Google Apps Script.');
+            }
+        }
+        
+        function updateStatus(state, text) {
+            const dot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            dot.className = `status-dot ${state}`;
+            statusText.textContent = text;
+        }
+        
+        // ============================================
+        // SEARCH FUNCTIONALITY
+        // ============================================
+        
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !isSearching && isReady) {
+                askQuestion();
+            }
+        });
+        
+        async function askExample(query) {
+            document.getElementById('searchInput').value = query;
+            await askQuestion();
+        }
+        
+        async function askQuestion() {
+            if (isSearching || !isReady) return;
+            
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                showMessage('Per favore inserisci una domanda.');
+                return;
+            }
+            
+            isSearching = true;
+            const btn = document.getElementById('searchBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sto pensando...';
+            updateStatus('loading', 'Analisi in corso...');
+            
+            const responseArea = document.getElementById('responseArea');
+            responseArea.innerHTML = '<div class="loading">Sto analizzando i documenti</div>';
+            
+            try {
+                // Build context from all documents
+                const context = buildContext(documentDatabase.documents);
+                
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1500,
+                        messages: [{
+                            role: 'user',
+                            content: `Sei un assistente AI per l'associazione Il Casale. Rispondi alla seguente domanda basandoti SOLO sulle informazioni nei documenti forniti. 
+
+Rispondi in modo discorsivo e naturale, come se stessi parlando con un membro dell'associazione. Cita i documenti specifici quando menzioni informazioni (es: "Secondo il report di aprile 2025...").
+
+Se l'informazione non è nei documenti, dillo chiaramente. Mantieni un tono amichevole e informativo.
+
+DATABASE DOCUMENTI:
+${context}
+
+DOMANDA: ${query}
+
+Rispondi in italiano in modo conversazionale.`
+                        }]
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Errore nella risposta AI');
+                }
+                
+                const data = await response.json();
+                const answer = data.content[0].text;
+                
+                displayAnswer(answer, query);
+                updateStatus('ready', 'Database caricato');
+                
+            } catch (error) {
+                console.error('Errore:', error);
+                updateStatus('ready', 'Database caricato');
+                showError('⚠️ Errore', 'Si è verificato un errore durante la ricerca. Riprova.');
+            } finally {
+                isSearching = false;
+                btn.disabled = false;
+                btn.textContent = 'Cerca';
+            }
+        }
+        
+        function buildContext(documents) {
+            let context = '';
+            
+            documents.forEach(doc => {
+                context += `\n\n=== ${doc.name} (${doc.year}) ===\n`;
+                context += `URL: ${doc.url}\n`;
+                
+                if (doc.sections && doc.sections.length > 0) {
+                    doc.sections.forEach(section => {
+                        context += `\n## ${section.title}\n${section.content}\n`;
+                    });
+                } else {
+                    context += `\n${doc.content}\n`;
+                }
+            });
+            
+            return context;
+        }
+        
+        // ============================================
+        // DISPLAY FUNCTIONS
+        // ============================================
+        
+        function displayAnswer(answer, query) {
+            const responseArea = document.getElementById('responseArea');
+            
+            // Find which documents were likely referenced
+            const referencedDocs = findReferencedDocuments(answer);
+            
+            responseArea.innerHTML = `
+                <div class="answer-card">
+                    <div class="answer-content">
+                        ${formatAnswer(answer)}
+                    </div>
+                    <div class="sources-section">
+                        <div class="sources-title">📚 Fonti consultate</div>
+                        ${referencedDocs.map(doc => `
+                            <div class="source-item">
+                                📄 <a href="${doc.url}" target="_blank">${doc.name}</a>
+                                <span style="color: #666; margin-left: 10px;">(${doc.year})</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function findReferencedDocuments(answer) {
+            if (!documentDatabase || !documentDatabase.documents) return [];
+            
+            // Return top 5 most recent documents as likely sources
+            return documentDatabase.documents
+                .sort((a, b) => new Date(b.modified) - new Date(a.modified))
+                .slice(0, 5);
+        }
+        
+        function formatAnswer(text) {
+            const paragraphs = text.split('\n\n').filter(p => p.trim());
+            return paragraphs.map(p => {
+                // Highlight potential citations (text in quotes or references to documents)
+                let formatted = p
+                    .replace(/"([^"]+)"/g, '<span class="citation">"$1"</span>')
+                    .replace(/secondo il (report|documento|riunione) (di |del )?([^,.]+)/gi, 
+                        '<span class="citation">secondo il $1 $2$3</span>');
+                
+                return `<p>${formatted}</p>`;
+            }).join('');
+        }
+        
+        function showWelcome() {
+            const responseArea = document.getElementById('responseArea');
+            responseArea.innerHTML = `
+                <div class="answer-card">
+                    <div class="answer-content">
+                        <p>👋 <strong>Benvenuto!</strong> Il database documenti è stato caricato con successo.</p>
+                        <p>Sono pronto a rispondere alle tue domande basandomi su <strong>${documentDatabase.totalDocuments} documenti</strong> dell'associazione Il Casale.</p>
+                        <p>Prova a farmi una domanda usando la barra di ricerca qui sopra, oppure clicca su uno degli esempi!</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showMessage(message) {
+            const responseArea = document.getElementById('responseArea');
+            responseArea.innerHTML = `
+                <div class="answer-card">
+                    <div class="answer-content">
+                        <p>${message}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showError(title, message) {
+            const responseArea = document.getElementById('responseArea');
+            responseArea.innerHTML = `
+                <div class="error-message">
+                    <h3>${title}</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+        
+        // ============================================
+        // START APPLICATION
+        // ============================================
+        
+        // Initialize when page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
