@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Il Casale - Motore di Ricerca</title>
+    <title>Il Casale - Ricerca Intelligente</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap');
         
@@ -19,44 +19,31 @@
             color: #1a1a1a;
             background: #fafaf8;
             min-height: 100vh;
-        }
-        
-        .grain {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            opacity: 0.03;
-            background-image: url('data:image/svg+xml,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="3" numOctaves="4" /></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" /></svg>');
-            z-index: 1000;
+            padding: 20px;
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 60px 30px;
-            position: relative;
         }
         
         .header {
-            margin-bottom: 60px;
-            border-bottom: 2px solid #1a1a1a;
+            text-align: center;
+            margin-bottom: 50px;
             padding-bottom: 30px;
+            border-bottom: 3px solid #1a1a1a;
         }
         
         .header h1 {
-            font-size: 4.5em;
+            font-size: 3.5em;
             font-weight: 700;
-            letter-spacing: -0.03em;
-            margin-bottom: 15px;
-            line-height: 0.95;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px;
         }
         
         .header .subtitle {
             font-family: 'Space Mono', monospace;
-            font-size: 0.95em;
+            font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 0.15em;
             color: #666;
@@ -65,12 +52,12 @@
         .status-bar {
             background: #1a1a1a;
             color: white;
-            padding: 12px 20px;
+            padding: 15px 25px;
+            margin-bottom: 30px;
             font-family: 'Space Mono', monospace;
             font-size: 0.75em;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            margin-bottom: 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -79,37 +66,32 @@
         .status-indicator {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: #4caf50;
-            animation: pulse 2s infinite;
         }
         
         .status-dot.loading {
             background: #ff9800;
-        }
-        
-        .status-dot.error {
-            background: #f44336;
+            animation: pulse 1s infinite;
         }
         
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.3; }
         }
         
-        .search-area {
+        .search-box {
             background: white;
-            border: 2px solid #1a1a1a;
-            box-shadow: 8px 8px 0 #1a1a1a;
-            padding: 40px;
-            margin-bottom: 50px;
-            position: relative;
+            border: 3px solid #1a1a1a;
+            padding: 35px;
+            margin-bottom: 40px;
+            box-shadow: 10px 10px 0 rgba(0,0,0,0.1);
         }
         
         .search-label {
@@ -121,48 +103,42 @@
             font-weight: 700;
         }
         
-        .search-box {
+        .input-group {
             display: flex;
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         
-        #searchInput {
+        #questionInput {
             flex: 1;
-            padding: 18px 20px;
+            padding: 18px;
             font-family: 'Crimson Pro', serif;
-            font-size: 1.15em;
+            font-size: 1.1em;
             border: 2px solid #1a1a1a;
             background: #fafaf8;
-            transition: all 0.2s;
         }
         
-        #searchInput:focus {
+        #questionInput:focus {
             outline: none;
             background: white;
-            box-shadow: 4px 4px 0 #1a1a1a;
-            transform: translate(-2px, -2px);
         }
         
         .search-btn {
-            padding: 18px 35px;
+            padding: 18px 40px;
             background: #1a1a1a;
             color: white;
-            border: 2px solid #1a1a1a;
+            border: none;
             font-family: 'Space Mono', monospace;
-            font-size: 0.9em;
+            font-size: 0.85em;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             cursor: pointer;
-            transition: all 0.2s;
             font-weight: 700;
+            transition: all 0.2s;
         }
         
         .search-btn:hover:not(:disabled) {
-            background: white;
-            color: #1a1a1a;
-            transform: translate(-2px, -2px);
-            box-shadow: 4px 4px 0 #1a1a1a;
+            background: #333;
         }
         
         .search-btn:disabled {
@@ -173,26 +149,16 @@
         .examples {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
-        }
-        
-        .example-label {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.75em;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 10px;
-            color: #666;
+            gap: 10px;
         }
         
         .example-tag {
-            padding: 8px 15px;
-            background: #fafaf8;
-            border: 1px solid #1a1a1a;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.75em;
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            font-size: 0.85em;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: all 0.2s;
         }
         
         .example-tag:hover {
@@ -200,31 +166,70 @@
             color: white;
         }
         
-        .response-area {
-            min-height: 300px;
+        .results-container {
+            min-height: 200px;
         }
         
-        .results-info {
+        .quick-answer {
+            background: #e8f5e9;
+            border: 3px solid #4caf50;
+            padding: 30px;
             margin-bottom: 30px;
-            padding: 20px;
-            background: #e3f2fd;
-            border-left: 4px solid #1976d2;
+            box-shadow: 8px 8px 0 rgba(76, 175, 80, 0.1);
+        }
+        
+        .quick-answer-title {
             font-family: 'Space Mono', monospace;
             font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: #2e7d32;
+        }
+        
+        .quick-answer-item {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4caf50;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+        
+        .quick-answer-item strong {
+            color: #2e7d32;
+            font-weight: 700;
+        }
+        
+        .quick-answer-source {
+            margin-top: 10px;
+            font-size: 0.85em;
+            color: #666;
+            font-style: italic;
+        }
+        
+        .detailed-results {
+            margin-top: 40px;
+        }
+        
+        .detailed-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 25px;
+            font-weight: 700;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
         }
         
         .result-card {
             background: white;
             border: 2px solid #1a1a1a;
-            padding: 35px;
-            margin-bottom: 25px;
-            box-shadow: 6px 6px 0 #1a1a1a;
-            transition: all 0.2s;
-        }
-        
-        .result-card:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 8px 8px 0 #1a1a1a;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.05);
         }
         
         .result-header {
@@ -242,36 +247,34 @@
             text-transform: uppercase;
             letter-spacing: 0.1em;
             font-weight: 700;
-            color: #1a1a1a;
         }
         
         .result-meta {
             text-align: right;
             font-size: 0.85em;
-            color: #666;
         }
         
-        .result-doc-name {
+        .result-doc {
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
         }
         
         .result-year {
+            color: #666;
             font-family: 'Space Mono', monospace;
-            font-size: 0.9em;
         }
         
         .result-content {
-            font-size: 1.1em;
-            line-height: 1.8;
+            font-size: 1.05em;
+            line-height: 1.9;
             margin-bottom: 20px;
         }
         
         .highlight {
-            background: linear-gradient(120deg, #fff9c4 0%, #fff59d 100%);
-            padding: 2px 6px;
+            background: linear-gradient(120deg, #fff59d 0%, #fff176 100%);
+            padding: 2px 5px;
             font-weight: 600;
-            border-bottom: 2px solid #fbc02d;
+            border-radius: 2px;
         }
         
         .result-link {
@@ -282,7 +285,7 @@
             text-decoration: none;
             color: #1a1a1a;
             font-family: 'Space Mono', monospace;
-            font-size: 0.8em;
+            font-size: 0.75em;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             transition: all 0.2s;
@@ -310,73 +313,30 @@
             margin-bottom: 15px;
         }
         
-        .no-results p {
-            color: #666;
+        .welcome {
+            text-align: center;
+            padding: 60px 30px;
+            background: white;
+            border: 2px dashed #ddd;
+        }
+        
+        .welcome h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+        
+        .welcome p {
             font-size: 1.1em;
-        }
-        
-        .error-message {
-            background: #ffebee;
-            border: 2px solid #f44336;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .error-message h3 {
-            color: #c62828;
-            margin-bottom: 15px;
-        }
-        
-        .setup-instructions {
-            background: #e3f2fd;
-            border: 2px dashed #1976d2;
-            padding: 30px;
-            margin-bottom: 40px;
-        }
-        
-        .setup-instructions h3 {
-            font-family: 'Space Mono', monospace;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 15px;
-            font-size: 0.9em;
-        }
-        
-        .setup-instructions code {
-            background: #1a1a1a;
-            color: #4caf50;
-            padding: 2px 6px;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.85em;
-        }
-        
-        .footer {
-            margin-top: 80px;
-            padding-top: 30px;
-            border-top: 2px solid #1a1a1a;
-            text-align: center;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.75em;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
             color: #666;
         }
         
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 3em;
+                font-size: 2.5em;
             }
             
-            .search-area {
-                padding: 25px;
-            }
-            
-            .search-box {
+            .input-group {
                 flex-direction: column;
-            }
-            
-            .result-card {
-                padding: 25px;
             }
             
             .result-header {
@@ -387,75 +347,53 @@
             .result-meta {
                 text-align: left;
             }
-            
-            .status-bar {
-                flex-direction: column;
-                gap: 10px;
-            }
         }
     </style>
 </head>
 <body>
-    <div class="grain"></div>
-    
     <div class="container">
         <div class="header">
-            <h1>Il Casale</h1>
-            <div class="subtitle">Motore di Ricerca Documenti • Connesso a Google Drive</div>
+            <h1>🎭 Il Casale</h1>
+            <div class="subtitle">Ricerca Intelligente Documenti</div>
         </div>
         
-        <div class="status-bar" id="statusBar">
+        <div class="status-bar">
             <div class="status-indicator">
                 <div class="status-dot loading" id="statusDot"></div>
-                <span id="statusText">Caricamento database...</span>
+                <span id="statusText">Caricamento...</span>
             </div>
             <div id="statsText">---</div>
         </div>
         
-        <div class="setup-instructions" id="setupInstructions" style="display: none;">
-            <h3>⚙️ Setup Necessario</h3>
-            <p>Per utilizzare questo motore di ricerca, devi configurare il Google Apps Script:</p>
-            <ol style="margin: 15px 0; padding-left: 30px; line-height: 1.8;">
-                <li>Apri <strong>script.google.com</strong></li>
-                <li>Crea un nuovo progetto e incolla lo script</li>
-                <li>Fai Deploy come <strong>Web App</strong></li>
-                <li>Copia l'URL e inseriscilo qui sotto nel codice alla riga <code>SCRIPT_URL</code></li>
-            </ol>
-            <p style="margin-top: 15px; color: #666; font-size: 0.95em;">
-                Consulta il file <strong>SETUP_INSTRUCTIONS.md</strong> per la guida completa.
-            </p>
-        </div>
-        
-        <div class="search-area">
+        <div class="search-box">
             <div class="search-label">Cerca informazioni</div>
-            <div class="search-box">
+            <div class="input-group">
                 <input 
                     type="text" 
-                    id="searchInput" 
-                    placeholder="Es: prezzi biglietti, chi si occupa bandi, date festival 2025..." 
-                    autocomplete="off"
+                    id="questionInput" 
+                    placeholder="Es: Quanto costa il biglietto? Chi si occupa dei bandi?"
                     disabled
                 >
-                <button class="search-btn" id="searchBtn" onclick="search()" disabled>Cerca</button>
+                <button class="search-btn" id="searchBtn" onclick="search()" disabled>
+                    Cerca
+                </button>
             </div>
-            
-            <div class="example-label">Esempi di ricerche:</div>
             <div class="examples">
-                <span class="example-tag" onclick="searchExample('prezzo biglietto')">Prezzi biglietti</span>
-                <span class="example-tag" onclick="searchExample('bandi')">Bandi</span>
-                <span class="example-tag" onclick="searchExample('date festival 2025')">Date festival</span>
+                <span class="example-tag" onclick="searchExample('prezzo biglietto')">Prezzi</span>
+                <span class="example-tag" onclick="searchExample('chi si occupa bandi')">Bandi</span>
+                <span class="example-tag" onclick="searchExample('date festival 2025')">Date 2025</span>
                 <span class="example-tag" onclick="searchExample('budget')">Budget</span>
                 <span class="example-tag" onclick="searchExample('4ever punk')">4ever Punk</span>
-                <span class="example-tag" onclick="searchExample('affitto casale')">Affitto Casale</span>
+                <span class="example-tag" onclick="searchExample('affitto casale')">Affitto</span>
                 <span class="example-tag" onclick="searchExample('volontari')">Volontari</span>
-                <span class="example-tag" onclick="searchExample('referenti')">Referenti</span>
             </div>
         </div>
         
-        <div class="response-area" id="responseArea"></div>
-        
-        <div class="footer">
-            Powered by Google Apps Script • Il Casale APS
+        <div class="results-container" id="resultsContainer">
+            <div class="welcome">
+                <h2>👋 Benvenuto</h2>
+                <p>Cerca informazioni nei documenti del Casale</p>
+            </div>
         </div>
     </div>
 
@@ -465,13 +403,12 @@
         // ============================================
         
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydDRedibh1pI3_4xunYzMpjw3kkef_FdHxx8x-atHr2wEtRnsZ0mmwjberyF06I6c9/exec';
-        // Example: 'https://script.google.com/macros/s/AKfycbyXXXXXXXXXX/exec'
         
         // ============================================
-        // SYSTEM VARIABLES
+        // STATE
         // ============================================
         
-        let documentDatabase = null;
+        let database = null;
         let isSearching = false;
         let isReady = false;
         
@@ -480,45 +417,32 @@
         // ============================================
         
         async function init() {
-            updateStatus('loading', 'Connessione a Google Drive...');
+            updateStatus('loading', 'Caricamento...');
             
-            // Check if URL is configured
-            if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE') {
-                updateStatus('error', 'Script non configurato');
-                document.getElementById('setupInstructions').style.display = 'block';
-                showError('⚙️ Configurazione Necessaria', 
-                    'Devi configurare l\'URL del Google Apps Script. Consulta le istruzioni sopra.');
+            if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+                updateStatus('error', 'Non configurato');
+                showError('Configurazione necessaria', 'Inserisci l\'URL del Google Apps Script.');
                 return;
             }
             
-            document.getElementById('setupInstructions').style.display = 'none';
-            
-            // Load document database
             try {
                 const response = await fetch(SCRIPT_URL);
+                if (!response.ok) throw new Error('Errore');
                 
-                if (!response.ok) {
-                    throw new Error('Errore nel caricamento');
-                }
+                database = await response.json();
                 
-                documentDatabase = await response.json();
-                
-                updateStatus('ready', 'Database caricato');
+                updateStatus('ready', 'Pronto');
                 document.getElementById('statsText').textContent = 
-                    `${documentDatabase.totalDocuments} documenti • ~${documentDatabase.approximateWords.toLocaleString()} parole`;
+                    `${database.totalDocuments} documenti • ${database.approximateWords.toLocaleString()} parole`;
                 
-                // Enable search
-                document.getElementById('searchInput').disabled = false;
+                document.getElementById('questionInput').disabled = false;
                 document.getElementById('searchBtn').disabled = false;
                 isReady = true;
                 
-                showWelcome();
-                
             } catch (error) {
-                console.error('Errore caricamento database:', error);
-                updateStatus('error', 'Errore connessione');
-                showError('❌ Errore di Connessione', 
-                    'Impossibile caricare il database documenti. Verifica la configurazione del Google Apps Script.');
+                console.error('Init error:', error);
+                updateStatus('error', 'Errore');
+                showError('Errore connessione', 'Verifica la configurazione.');
             }
         }
         
@@ -531,26 +455,26 @@
         }
         
         // ============================================
-        // SEARCH FUNCTIONALITY
+        // SEARCH
         // ============================================
         
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !isSearching && isReady) {
+        document.getElementById('questionInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && isReady && !isSearching) {
                 search();
             }
         });
         
         function searchExample(query) {
-            document.getElementById('searchInput').value = query;
+            document.getElementById('questionInput').value = query;
             search();
         }
         
         function search() {
-            if (isSearching || !isReady) return;
+            if (!isReady || isSearching) return;
             
-            const query = document.getElementById('searchInput').value.trim();
+            const query = document.getElementById('questionInput').value.trim();
             if (!query) {
-                showMessage('Per favore inserisci una ricerca.');
+                alert('Inserisci una domanda');
                 return;
             }
             
@@ -558,168 +482,221 @@
             const btn = document.getElementById('searchBtn');
             btn.disabled = true;
             btn.textContent = 'Ricerca...';
-            updateStatus('loading', 'Ricerca in corso...');
             
-            // Perform search
-            const results = performSearch(query);
+            // Perform intelligent search
+            const results = performIntelligentSearch(query);
             
             // Display results
-            displayResults(results, query);
+            displaySmartResults(results, query);
             
-            updateStatus('ready', 'Database caricato');
             isSearching = false;
             btn.disabled = false;
             btn.textContent = 'Cerca';
         }
         
-        function performSearch(query) {
-            const keywords = query.toLowerCase().split(/\s+/).filter(k => k.length > 2);
+        function performIntelligentSearch(query) {
+            const keywords = extractKeywords(query);
             const results = [];
             
-            documentDatabase.documents.forEach(doc => {
-                // Search in each section
+            database.documents.forEach(doc => {
                 if (doc.sections && doc.sections.length > 0) {
                     doc.sections.forEach(section => {
-                        const sectionText = (section.title + ' ' + section.content).toLowerCase();
-                        let score = 0;
+                        const analysis = analyzeSection(section, keywords, query);
                         
-                        // Calculate relevance score
-                        keywords.forEach(keyword => {
-                            // Title matches are worth more
-                            const titleMatches = (section.title.toLowerCase().match(new RegExp(keyword, 'g')) || []).length;
-                            score += titleMatches * 50;
-                            
-                            // Content matches
-                            const contentMatches = (sectionText.match(new RegExp(keyword, 'g')) || []).length;
-                            score += contentMatches * 10;
-                        });
-                        
-                        if (score > 0) {
+                        if (analysis.score > 0) {
                             results.push({
                                 docName: doc.name,
                                 docUrl: doc.url,
                                 year: doc.year,
                                 sectionTitle: section.title,
                                 content: section.content,
-                                score: score
+                                score: analysis.score,
+                                relevantParts: analysis.relevantParts,
+                                context: analysis.context
                             });
                         }
                     });
-                } else {
-                    // Search in full document content
-                    const docText = doc.content.toLowerCase();
-                    let score = 0;
+                }
+            });
+            
+            // Sort by relevance
+            results.sort((a, b) => b.score - a.score);
+            
+            return results;
+        }
+        
+        function extractKeywords(query) {
+            // Remove question words
+            const stopWords = ['quanto', 'come', 'quando', 'dove', 'chi', 'cosa', 'che', 'quale', 
+                               'costa', 'sono', 'si', 'la', 'il', 'del', 'della', 'per', 'con', 'da'];
+            
+            return query.toLowerCase()
+                .split(/\s+/)
+                .filter(word => word.length > 2 && !stopWords.includes(word));
+        }
+        
+        function analyzeSection(section, keywords, originalQuery) {
+            const sectionText = (section.title + ' ' + section.content).toLowerCase();
+            let score = 0;
+            let relevantParts = [];
+            
+            // Check for exact phrase match
+            if (sectionText.includes(originalQuery.toLowerCase())) {
+                score += 100;
+            }
+            
+            // Check title matches (worth more)
+            keywords.forEach(keyword => {
+                if (section.title.toLowerCase().includes(keyword)) {
+                    score += 50;
+                }
+            });
+            
+            // Check content matches and extract context
+            keywords.forEach(keyword => {
+                const regex = new RegExp(keyword, 'gi');
+                const matches = sectionText.match(regex);
+                if (matches) {
+                    score += matches.length * 10;
                     
-                    keywords.forEach(keyword => {
-                        const matches = (docText.match(new RegExp(keyword, 'g')) || []).length;
-                        score += matches * 10;
+                    // Extract sentences containing the keyword
+                    const sentences = section.content.split(/[.!?]+/);
+                    sentences.forEach(sentence => {
+                        if (sentence.toLowerCase().includes(keyword)) {
+                            relevantParts.push(sentence.trim());
+                        }
                     });
-                    
-                    if (score > 0) {
-                        results.push({
-                            docName: doc.name,
-                            docUrl: doc.url,
-                            year: doc.year,
-                            sectionTitle: 'CONTENUTO',
-                            content: doc.content,
-                            score: score
-                        });
+                }
+            });
+            
+            // Get context (surrounding sentences)
+            const context = extractContext(section.content, keywords);
+            
+            return { score, relevantParts, context };
+        }
+        
+        function extractContext(content, keywords) {
+            const sentences = content.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0);
+            const relevantSentences = [];
+            
+            sentences.forEach((sentence, index) => {
+                const hasKeyword = keywords.some(kw => sentence.toLowerCase().includes(kw));
+                if (hasKeyword) {
+                    // Include this sentence and neighbors for context
+                    const start = Math.max(0, index - 1);
+                    const end = Math.min(sentences.length, index + 2);
+                    for (let i = start; i < end; i++) {
+                        if (!relevantSentences.includes(sentences[i])) {
+                            relevantSentences.push(sentences[i]);
+                        }
                     }
                 }
             });
             
-            // Sort by score (highest first)
-            results.sort((a, b) => b.score - a.score);
-            
-            return results.slice(0, 10); // Return top 10 results
+            return relevantSentences.join('. ') + '.';
         }
         
         // ============================================
-        // DISPLAY FUNCTIONS
+        // DISPLAY
         // ============================================
         
-        function displayResults(results, query) {
-            const responseArea = document.getElementById('responseArea');
+        function displaySmartResults(results, query) {
+            const container = document.getElementById('resultsContainer');
             
             if (results.length === 0) {
-                responseArea.innerHTML = `
+                container.innerHTML = `
                     <div class="no-results">
                         <div class="no-results-icon">🔍</div>
-                        <h3>Nessun risultato trovato</h3>
-                        <p>Prova con parole chiave diverse o clicca su uno degli esempi</p>
+                        <h3>Nessun risultato</h3>
+                        <p>Prova con parole diverse o clicca su un esempio</p>
                     </div>
                 `;
                 return;
             }
             
-            const keywords = query.toLowerCase().split(/\s+/).filter(k => k.length > 2);
+            // Build quick answer from top results
+            const quickAnswerHTML = buildQuickAnswer(results.slice(0, 3), query);
             
-            const resultsHTML = results.map(result => {
-                // Highlight keywords in content
-                let highlightedContent = result.content;
-                keywords.forEach(keyword => {
-                    const regex = new RegExp(`(${keyword})`, 'gi');
-                    highlightedContent = highlightedContent.replace(regex, '<span class="highlight">$1</span>');
+            // Build detailed results
+            const detailedHTML = buildDetailedResults(results.slice(0, 8), query);
+            
+            container.innerHTML = `
+                ${quickAnswerHTML}
+                ${detailedHTML}
+            `;
+        }
+        
+        function buildQuickAnswer(topResults, query) {
+            const keywords = extractKeywords(query);
+            
+            const items = topResults.map(result => {
+                let context = result.context || result.content.substring(0, 300);
+                
+                // Highlight keywords
+                keywords.forEach(kw => {
+                    const regex = new RegExp(`(${kw})`, 'gi');
+                    context = context.replace(regex, '<span class="highlight">$1</span>');
                 });
                 
-                // Truncate content if too long
-                if (highlightedContent.length > 500) {
-                    highlightedContent = highlightedContent.substring(0, 500) + '...';
-                }
+                return `
+                    <div class="quick-answer-item">
+                        ${context}
+                        <div class="quick-answer-source">
+                            — ${result.sectionTitle}, ${result.docName} (${result.year})
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            return `
+                <div class="quick-answer">
+                    <div class="quick-answer-title">✨ Risposta Rapida</div>
+                    ${items}
+                </div>
+            `;
+        }
+        
+        function buildDetailedResults(results, query) {
+            const keywords = extractKeywords(query);
+            
+            const cards = results.map(result => {
+                let content = result.context || result.content.substring(0, 400);
+                
+                // Highlight keywords
+                keywords.forEach(kw => {
+                    const regex = new RegExp(`(${kw})`, 'gi');
+                    content = content.replace(regex, '<span class="highlight">$1</span>');
+                });
                 
                 return `
                     <div class="result-card">
                         <div class="result-header">
                             <div class="result-section">${result.sectionTitle}</div>
                             <div class="result-meta">
-                                <div class="result-doc-name">${result.docName}</div>
+                                <div class="result-doc">${result.docName}</div>
                                 <div class="result-year">📅 ${result.year}</div>
                             </div>
                         </div>
-                        <div class="result-content">${highlightedContent}</div>
+                        <div class="result-content">${content}${content.length >= 400 ? '...' : ''}</div>
                         <a href="${result.docUrl}" target="_blank" class="result-link">
-                            📄 Apri documento completo
+                            📄 Vedi documento completo
                         </a>
                     </div>
                 `;
             }).join('');
             
-            responseArea.innerHTML = `
-                <div class="results-info">
-                    📊 Trovati <strong>${results.length}</strong> risultati per "<strong>${query}</strong>"
-                </div>
-                ${resultsHTML}
-            `;
-        }
-        
-        function showWelcome() {
-            const responseArea = document.getElementById('responseArea');
-            responseArea.innerHTML = `
-                <div class="result-card">
-                    <div class="result-content">
-                        <p style="font-size: 1.2em;">👋 <strong>Benvenuto!</strong></p>
-                        <p>Il database è stato caricato con <strong>${documentDatabase.totalDocuments} documenti</strong> dall'archivio Il Casale.</p>
-                        <p>Usa la barra di ricerca per trovare informazioni specifiche, oppure clicca su uno degli esempi.</p>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function showMessage(message) {
-            const responseArea = document.getElementById('responseArea');
-            responseArea.innerHTML = `
-                <div class="result-card">
-                    <div class="result-content">
-                        <p>${message}</p>
-                    </div>
+            return `
+                <div class="detailed-results">
+                    <div class="detailed-title">📚 Tutte le informazioni trovate</div>
+                    ${cards}
                 </div>
             `;
         }
         
         function showError(title, message) {
-            const responseArea = document.getElementById('responseArea');
-            responseArea.innerHTML = `
-                <div class="error-message">
+            document.getElementById('resultsContainer').innerHTML = `
+                <div class="no-results">
+                    <div class="no-results-icon">⚠️</div>
                     <h3>${title}</h3>
                     <p>${message}</p>
                 </div>
@@ -727,7 +704,7 @@
         }
         
         // ============================================
-        // START APPLICATION
+        // START
         // ============================================
         
         window.addEventListener('load', init);
