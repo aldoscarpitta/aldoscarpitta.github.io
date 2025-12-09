@@ -34,6 +34,15 @@
             border-bottom: 3px solid #1a1a1a;
         }
         
+        .header img {
+            max-width: 250px;
+            height: auto;
+            margin-bottom: 25px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
         .header h1 {
             font-size: 3.5em;
             font-weight: 700;
@@ -208,6 +217,43 @@
         
         .results-container {
             min-height: 200px;
+        }
+        
+        .folder-links {
+            background: #fff3e0;
+            border: 3px solid #ff9800;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 8px 8px 0 rgba(255, 152, 0, 0.1);
+        }
+        
+        .folder-links-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: #e65100;
+        }
+        
+        .folder-link {
+            display: inline-block;
+            padding: 12px 20px;
+            margin: 5px;
+            background: white;
+            border: 2px solid #ff9800;
+            text-decoration: none;
+            color: #e65100;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .folder-link:hover {
+            background: #ff9800;
+            color: white;
         }
         
         .quick-answer {
@@ -408,6 +454,10 @@
                 font-size: 2.5em;
             }
             
+            .header img {
+                max-width: 180px;
+            }
+            
             .input-group {
                 flex-direction: column;
             }
@@ -433,7 +483,8 @@
     
     <div class="container">
         <div class="header">
-            <h1>🎭 Il Casale</h1>
+            <img src="logocasale.png" alt="Il Casale">
+            <h1>Il Casale</h1>
             <div class="subtitle">Ricerca Intelligente Documenti</div>
         </div>
         
@@ -446,12 +497,12 @@
         </div>
         
         <div class="search-box">
-            <div class="search-label">Cerca informazioni</div>
+            <div class="search-label">Cerca per parole chiave</div>
             <div class="input-group">
                 <input 
                     type="text" 
                     id="questionInput" 
-                    placeholder="Es: Quanto costa il biglietto? Chi si occupa dei bandi?"
+                    placeholder="Es: prezzi, bandi, volontari, 4ever punk, budget..."
                     disabled
                 >
                 <button class="search-btn" id="searchBtn" onclick="search()" disabled>
@@ -459,20 +510,20 @@
                 </button>
             </div>
             <div class="examples">
-                <span class="example-tag" onclick="searchExample('prezzo biglietto')">Prezzi</span>
-                <span class="example-tag" onclick="searchExample('chi si occupa bandi')">Bandi</span>
-                <span class="example-tag" onclick="searchExample('date festival 2025')">Date 2025</span>
+                <span class="example-tag" onclick="searchExample('prezzi biglietti')">Prezzi</span>
+                <span class="example-tag" onclick="searchExample('bandi')">Bandi</span>
+                <span class="example-tag" onclick="searchExample('festival 2025')">Festival 2025</span>
                 <span class="example-tag" onclick="searchExample('budget')">Budget</span>
                 <span class="example-tag" onclick="searchExample('4ever punk')">4ever Punk</span>
-                <span class="example-tag" onclick="searchExample('affitto casale')">Affitto</span>
                 <span class="example-tag" onclick="searchExample('volontari')">Volontari</span>
+                <span class="example-tag" onclick="searchExample('affitto casale')">Affitto</span>
             </div>
         </div>
         
         <div class="results-container" id="resultsContainer">
             <div class="welcome">
                 <h2>👋 Benvenuto</h2>
-                <p>Cerca informazioni nei documenti del Casale</p>
+                <p>Usa parole chiave per cercare informazioni nei documenti del Casale</p>
             </div>
         </div>
     </div>
@@ -482,8 +533,24 @@
         // CONFIGURATION
         // ============================================
         
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydDRedibh1pI3_4xunYzMpjw3kkef_FdHxx8x-atHr2wEtRnsZ0mmwjberyF06I6c9/exec';
-        const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+        const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+        const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
+        
+        // Folder mapping for direct links
+        const FOLDER_MAPPING = {
+            'report': { id: '1Od2ExcFCiCVsU3R2zxhhLljiorZXNzvc', name: 'Report e Riunioni' },
+            'riunione': { id: '1Od2ExcFCiCVsU3R2zxhhLljiorZXNzvc', name: 'Report e Riunioni' },
+            'riunioni': { id: '1Od2ExcFCiCVsU3R2zxhhLljiorZXNzvc', name: 'Report e Riunioni' },
+            'assemblea': { id: '1Od2ExcFCiCVsU3R2zxhhLljiorZXNzvc', name: 'Report e Riunioni' },
+            'verbale': { id: '1Od2ExcFCiCVsU3R2zxhhLljiorZXNzvc', name: 'Report e Riunioni' },
+            'verbali': { id: '1Od2ExcFCiCVsU3R2zxhhLljiorZXNzvc', name: 'Report e Riunioni' },
+            'festival': { id: '1gN63vet7MGU_UVa6Ygwkd_DM5QxmhwCR', name: 'Festival e Organizzazione' },
+            'organizzazione': { id: '1gN63vet7MGU_UVa6Ygwkd_DM5QxmhwCR', name: 'Festival e Organizzazione' },
+            'programmazione': { id: '1gN63vet7MGU_UVa6Ygwkd_DM5QxmhwCR', name: 'Festival e Organizzazione' },
+            'palchi': { id: '1gN63vet7MGU_UVa6Ygwkd_DM5QxmhwCR', name: 'Festival e Organizzazione' },
+            'allestimenti': { id: '1gN63vet7MGU_UVa6Ygwkd_DM5QxmhwCR', name: 'Festival e Organizzazione' },
+            'logistica': { id: '1gN63vet7MGU_UVa6Ygwkd_DM5QxmhwCR', name: 'Festival e Organizzazione' }
+        };
         
         // ============================================
         // STATE
@@ -509,7 +576,6 @@
             }
             
             try {
-                // Try to load from local cache first (browser cache)
                 const cachedData = loadFromCache();
                 
                 if (cachedData) {
@@ -518,7 +584,6 @@
                     finishInit();
                     loadingOverlay.style.display = 'none';
                     
-                    // Still fetch fresh data in background for next time
                     fetchFreshData().then(freshData => {
                         if (freshData) {
                             database = freshData;
@@ -526,7 +591,6 @@
                         }
                     });
                 } else {
-                    // No cache, fetch fresh
                     console.log('✗ No cache, fetching fresh data');
                     const freshData = await fetchFreshData();
                     
@@ -570,10 +634,6 @@
             isReady = true;
         }
         
-        // ============================================
-        // BROWSER CACHE MANAGEMENT
-        // ============================================
-        
         function saveToCache(data) {
             try {
                 const cacheData = {
@@ -595,11 +655,9 @@
                 const cacheData = JSON.parse(cached);
                 const age = Date.now() - cacheData.timestamp;
                 
-                // Check if cache is still valid
                 if (age < CACHE_DURATION) {
                     return cacheData.data;
                 } else {
-                    // Cache expired
                     localStorage.removeItem('casale_documents_cache');
                     return null;
                 }
@@ -615,6 +673,42 @@
             
             dot.className = `status-dot ${state}`;
             statusText.textContent = text;
+        }
+        
+        // ============================================
+        // FOLDER LINKS
+        // ============================================
+        
+        function findRelevantFolders(query) {
+            const keywords = query.toLowerCase().split(/\s+/);
+            const folders = new Set();
+            
+            keywords.forEach(keyword => {
+                if (FOLDER_MAPPING[keyword]) {
+                    folders.add(FOLDER_MAPPING[keyword]);
+                }
+            });
+            
+            return Array.from(folders);
+        }
+        
+        function buildFolderLinksHTML(folders) {
+            if (folders.length === 0) return '';
+            
+            const links = folders.map(folder => `
+                <a href="https://drive.google.com/drive/folders/${folder.id}" 
+                   target="_blank" 
+                   class="folder-link">
+                    📁 ${folder.name}
+                </a>
+            `).join('');
+            
+            return `
+                <div class="folder-links">
+                    <div class="folder-links-title">📂 Cartelle correlate su Google Drive</div>
+                    ${links}
+                </div>
+            `;
         }
         
         // ============================================
@@ -637,7 +731,7 @@
             
             const query = document.getElementById('questionInput').value.trim();
             if (!query) {
-                alert('Inserisci una domanda');
+                alert('Inserisci una parola chiave');
                 return;
             }
             
@@ -646,10 +740,7 @@
             btn.disabled = true;
             btn.textContent = 'Ricerca...';
             
-            // Perform intelligent search
             const results = performIntelligentSearch(query);
-            
-            // Display results
             displaySmartResults(results, query);
             
             isSearching = false;
@@ -674,7 +765,6 @@
                                 sectionTitle: section.title,
                                 content: section.content,
                                 score: analysis.score,
-                                relevantParts: analysis.relevantParts,
                                 context: analysis.context
                             });
                         }
@@ -682,14 +772,11 @@
                 }
             });
             
-            // Sort by relevance
             results.sort((a, b) => b.score - a.score);
-            
             return results;
         }
         
         function extractKeywords(query) {
-            // Remove question words
             const stopWords = ['quanto', 'come', 'quando', 'dove', 'chi', 'cosa', 'che', 'quale', 
                                'costa', 'sono', 'si', 'la', 'il', 'del', 'della', 'per', 'con', 'da'];
             
@@ -701,41 +788,23 @@
         function analyzeSection(section, keywords, originalQuery) {
             const sectionText = (section.title + ' ' + section.content).toLowerCase();
             let score = 0;
-            let relevantParts = [];
             
-            // Check for exact phrase match
             if (sectionText.includes(originalQuery.toLowerCase())) {
                 score += 100;
             }
             
-            // Check title matches (worth more)
             keywords.forEach(keyword => {
                 if (section.title.toLowerCase().includes(keyword)) {
                     score += 50;
                 }
+                
+                const matches = (sectionText.match(new RegExp(keyword, 'gi')) || []).length;
+                score += matches * 10;
             });
             
-            // Check content matches and extract context
-            keywords.forEach(keyword => {
-                const regex = new RegExp(keyword, 'gi');
-                const matches = sectionText.match(regex);
-                if (matches) {
-                    score += matches.length * 10;
-                    
-                    // Extract sentences containing the keyword
-                    const sentences = section.content.split(/[.!?]+/);
-                    sentences.forEach(sentence => {
-                        if (sentence.toLowerCase().includes(keyword)) {
-                            relevantParts.push(sentence.trim());
-                        }
-                    });
-                }
-            });
-            
-            // Get context (surrounding sentences)
             const context = extractContext(section.content, keywords);
             
-            return { score, relevantParts, context };
+            return { score, context };
         }
         
         function extractContext(content, keywords) {
@@ -745,7 +814,6 @@
             sentences.forEach((sentence, index) => {
                 const hasKeyword = keywords.some(kw => sentence.toLowerCase().includes(kw));
                 if (hasKeyword) {
-                    // Include this sentence and neighbors for context
                     const start = Math.max(0, index - 1);
                     const end = Math.min(sentences.length, index + 2);
                     for (let i = start; i < end; i++) {
@@ -760,11 +828,10 @@
         }
         
         // ============================================
-        // DISPLAY WITH PRESERVED FORMATTING
+        // DISPLAY
         // ============================================
         
         function formatTextWithStructure(text) {
-            // Preserve line breaks and paragraph structure
             let formatted = text
                 .split('\n')
                 .map(line => line.trim())
@@ -774,7 +841,6 @@
             let inList = false;
             
             formatted.forEach(line => {
-                // Detect list items
                 if (line.match(/^[-•*]\s+/) || line.match(/^\d+\.\s+/)) {
                     if (!inList) {
                         html += '<ul>';
@@ -806,19 +872,22 @@
                     <div class="no-results">
                         <div class="no-results-icon">🔍</div>
                         <h3>Nessun risultato</h3>
-                        <p>Prova con parole diverse o clicca su un esempio</p>
+                        <p>Prova con parole chiave diverse o clicca su un esempio</p>
                     </div>
                 `;
                 return;
             }
             
-            // Build quick answer from top results
-            const quickAnswerHTML = buildQuickAnswer(results.slice(0, 3), query);
+            // Check for relevant folders
+            const folders = findRelevantFolders(query);
+            const folderLinksHTML = buildFolderLinksHTML(folders);
             
-            // Build detailed results
+            // Build results
+            const quickAnswerHTML = buildQuickAnswer(results.slice(0, 3), query);
             const detailedHTML = buildDetailedResults(results.slice(0, 8), query);
             
             container.innerHTML = `
+                ${folderLinksHTML}
                 ${quickAnswerHTML}
                 ${detailedHTML}
             `;
@@ -829,11 +898,8 @@
             
             const items = topResults.map(result => {
                 let context = result.context || result.content.substring(0, 500);
-                
-                // Format with preserved structure
                 let formattedContext = formatTextWithStructure(context);
                 
-                // Highlight keywords
                 keywords.forEach(kw => {
                     const regex = new RegExp(`(${kw})`, 'gi');
                     formattedContext = formattedContext.replace(regex, '<span class="highlight">$1</span>');
@@ -862,11 +928,8 @@
             
             const cards = results.map(result => {
                 let content = result.context || result.content.substring(0, 600);
-                
-                // Format with preserved structure
                 let formattedContent = formatTextWithStructure(content);
                 
-                // Highlight keywords
                 keywords.forEach(kw => {
                     const regex = new RegExp(`(${kw})`, 'gi');
                     formattedContent = formattedContent.replace(regex, '<span class="highlight">$1</span>');
