@@ -70,8 +70,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
         }
         
         .status-indicator {
@@ -221,71 +219,41 @@
             min-height: 200px;
         }
         
-        .folders-section {
+        .folder-links {
             background: #fff3e0;
             border: 3px solid #ff9800;
-            padding: 30px;
+            padding: 25px;
             margin-bottom: 30px;
             box-shadow: 8px 8px 0 rgba(255, 152, 0, 0.1);
         }
         
-        .folders-title {
+        .folder-links-title {
             font-family: 'Space Mono', monospace;
-            font-size: 0.9em;
+            font-size: 0.85em;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             font-weight: 700;
             color: #e65100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
         
-        .folder-item {
+        .folder-link {
+            display: inline-block;
+            padding: 12px 20px;
+            margin: 5px;
             background: white;
-            padding: 18px 20px;
-            margin-bottom: 12px;
-            border-left: 4px solid #ff9800;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            border: 2px solid #ff9800;
+            text-decoration: none;
+            color: #e65100;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+            font-weight: 600;
             transition: all 0.2s;
         }
         
-        .folder-item:hover {
-            transform: translateX(5px);
-            box-shadow: 4px 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .folder-name {
-            font-size: 1.05em;
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-        
-        .folder-path {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 5px;
-        }
-        
-        .folder-link-btn {
-            padding: 10px 20px;
+        .folder-link:hover {
             background: #ff9800;
             color: white;
-            text-decoration: none;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.75em;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 700;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-        
-        .folder-link-btn:hover {
-            background: #f57c00;
         }
         
         .quick-answer {
@@ -502,12 +470,6 @@
             .result-meta {
                 text-align: left;
             }
-            
-            .folder-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
         }
     </style>
 </head>
@@ -515,14 +477,15 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-content">
             <div class="loading-spinner"></div>
-            <div class="loading-text">Caricamento documenti e cartelle...</div>
+            <div class="loading-text">Caricamento documenti...</div>
         </div>
     </div>
     
     <div class="container">
         <div class="header">
             <img src="logocasale.png" alt="Il Casale">
-            <div class="subtitle">Ricerca Intelligente • Documenti e Cartelle</div>
+            <h1>Il Casale</h1>
+            <div class="subtitle">Ricerca Intelligente Documenti</div>
         </div>
         
         <div class="status-bar">
@@ -553,14 +516,14 @@
                 <span class="example-tag" onclick="searchExample('budget')">Budget</span>
                 <span class="example-tag" onclick="searchExample('4ever punk')">4ever Punk</span>
                 <span class="example-tag" onclick="searchExample('volontari')">Volontari</span>
-                <span class="example-tag" onclick="searchExample('report')">Report</span>
+                <span class="example-tag" onclick="searchExample('affitto casale')">Affitto</span>
             </div>
         </div>
         
         <div class="results-container" id="resultsContainer">
             <div class="welcome">
                 <h2>👋 Benvenuto</h2>
-                <p>Cerca in tutti i documenti e cartelle di Google Drive</p>
+                <p>Usa parole chiave per cercare informazioni nei documenti del Casale</p>
             </div>
         </div>
     </div>
@@ -570,7 +533,7 @@
         // CONFIGURATION
         // ============================================
         
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhHVeQI6vyRkRbwJUyx8tqLzoHbahoDCkyH2Scp-KTYgNWaSIPoASnE03F9ltDO5Ki/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydDRedibh1pI3_4xunYzMpjw3kkef_FdHxx8x-atHr2wEtRnsZ0mmwjberyF06I6c9/exec';
         const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
         
         // ============================================
@@ -647,9 +610,8 @@
         
         function finishInit() {
             updateStatus('ready', 'Pronto');
-            const folderCount = database.folders ? database.folders.length : 0;
             document.getElementById('statsText').textContent = 
-                `${database.totalDocuments} documenti • ${folderCount} cartelle • ${database.approximateWords.toLocaleString()} parole`;
+                `${database.totalDocuments} documenti • ${database.approximateWords.toLocaleString()} parole`;
             
             document.getElementById('questionInput').disabled = false;
             document.getElementById('searchBtn').disabled = false;
@@ -698,31 +660,28 @@
         }
         
         // ============================================
-        // FOLDER SEARCH
+        // FOLDER LINKS - DYNAMIC SEARCH
         // ============================================
         
-        function searchFolders(query) {
-            if (!database.folders) return [];
+        function findRelevantFolders(query) {
+            if (!database || !database.folders) return [];
             
-            const keywords = extractKeywords(query);
+            const keywords = query.toLowerCase().split(/\s+/).filter(k => k.length > 2);
             const matchedFolders = [];
             
             database.folders.forEach(folder => {
+                const folderName = folder.name.toLowerCase();
                 let score = 0;
-                const folderText = (folder.name + ' ' + (folder.path || '')).toLowerCase();
                 
-                // Check for exact query match
-                if (folderText.includes(query.toLowerCase())) {
+                // Check for exact phrase match
+                if (folderName.includes(query.toLowerCase())) {
                     score += 100;
                 }
                 
-                // Check keywords
+                // Check for individual keyword matches
                 keywords.forEach(keyword => {
-                    if (folder.name.toLowerCase().includes(keyword)) {
-                        score += 50; // Name matches are very important
-                    }
-                    if (folder.path && folder.path.toLowerCase().includes(keyword)) {
-                        score += 20; // Path matches are somewhat important
+                    if (folderName.includes(keyword)) {
+                        score += 50;
                     }
                 });
                 
@@ -734,10 +693,30 @@
                 }
             });
             
-            // Sort by score
+            // Sort by relevance
             matchedFolders.sort((a, b) => b.score - a.score);
             
-            return matchedFolders.slice(0, 8); // Top 8 folders
+            // Return top 5 most relevant folders
+            return matchedFolders.slice(0, 5);
+        }
+        
+        function buildFolderLinksHTML(folders) {
+            if (folders.length === 0) return '';
+            
+            const links = folders.map(folder => `
+                <a href="${folder.url}" 
+                   target="_blank" 
+                   class="folder-link">
+                    📁 ${folder.name}
+                </a>
+            `).join('');
+            
+            return `
+                <div class="folder-links">
+                    <div class="folder-links-title">📂 Cartelle correlate su Google Drive</div>
+                    ${links}
+                </div>
+            `;
         }
         
         // ============================================
@@ -769,11 +748,8 @@
             btn.disabled = true;
             btn.textContent = 'Ricerca...';
             
-            // Search both folders and documents
-            const matchedFolders = searchFolders(query);
-            const documentResults = performIntelligentSearch(query);
-            
-            displayCombinedResults(matchedFolders, documentResults, query);
+            const results = performIntelligentSearch(query);
+            displaySmartResults(results, query);
             
             isSearching = false;
             btn.disabled = false;
@@ -896,69 +872,32 @@
             return html || `<p>${text}</p>`;
         }
         
-        function displayCombinedResults(folders, documents, query) {
+        function displaySmartResults(results, query) {
             const container = document.getElementById('resultsContainer');
             
-            if (folders.length === 0 && documents.length === 0) {
+            if (results.length === 0) {
                 container.innerHTML = `
                     <div class="no-results">
                         <div class="no-results-icon">🔍</div>
                         <h3>Nessun risultato</h3>
-                        <p>Prova con parole chiave diverse</p>
+                        <p>Prova con parole chiave diverse o clicca su un esempio</p>
                     </div>
                 `;
                 return;
             }
             
-            // Build HTML sections
-            const foldersHTML = buildFoldersSection(folders, query);
-            const quickAnswerHTML = documents.length > 0 ? buildQuickAnswer(documents.slice(0, 3), query) : '';
-            const detailedHTML = documents.length > 0 ? buildDetailedResults(documents.slice(0, 8), query) : '';
+            // Check for relevant folders
+            const folders = findRelevantFolders(query);
+            const folderLinksHTML = buildFolderLinksHTML(folders);
+            
+            // Build results
+            const quickAnswerHTML = buildQuickAnswer(results.slice(0, 3), query);
+            const detailedHTML = buildDetailedResults(results.slice(0, 8), query);
             
             container.innerHTML = `
-                ${foldersHTML}
+                ${folderLinksHTML}
                 ${quickAnswerHTML}
                 ${detailedHTML}
-            `;
-        }
-        
-        function buildFoldersSection(folders, query) {
-            if (folders.length === 0) return '';
-            
-            const keywords = extractKeywords(query);
-            
-            const folderItems = folders.map(folder => {
-                let displayName = folder.name;
-                let displayPath = folder.path || '';
-                
-                // Highlight keywords in folder name
-                keywords.forEach(kw => {
-                    const regex = new RegExp(`(${kw})`, 'gi');
-                    displayName = displayName.replace(regex, '<span class="highlight">$1</span>');
-                    displayPath = displayPath.replace(regex, '<span class="highlight">$1</span>');
-                });
-                
-                return `
-                    <div class="folder-item">
-                        <div>
-                            <div class="folder-name">📁 ${displayName}</div>
-                            ${displayPath ? `<div class="folder-path">${displayPath}</div>` : ''}
-                        </div>
-                        <a href="${folder.url}" target="_blank" class="folder-link-btn">
-                            Apri Cartella
-                        </a>
-                    </div>
-                `;
-            }).join('');
-            
-            return `
-                <div class="folders-section">
-                    <div class="folders-title">
-                        <span>📂 Cartelle correlate</span>
-                        <span style="font-size: 0.9em; font-weight: normal;">${folders.length} trovate</span>
-                    </div>
-                    ${folderItems}
-                </div>
             `;
         }
         
@@ -986,7 +925,7 @@
             
             return `
                 <div class="quick-answer">
-                    <div class="quick-answer-title">✨ Informazioni nei Documenti</div>
+                    <div class="quick-answer-title">✨ Risposta Rapida</div>
                     ${items}
                 </div>
             `;
@@ -1023,7 +962,7 @@
             
             return `
                 <div class="detailed-results">
-                    <div class="detailed-title">📄 Tutti i Dettagli nei Documenti</div>
+                    <div class="detailed-title">📚 Tutte le informazioni trovate</div>
                     ${cards}
                 </div>
             `;
