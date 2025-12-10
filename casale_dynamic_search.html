@@ -417,6 +417,20 @@
             border-radius: 2px;
         }
         
+        .all-keywords-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7em;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+        
         .result-link {
             display: inline-block;
             padding: 10px 20px;
@@ -807,6 +821,8 @@
                                 content: section.content,
                                 score: analysis.score,
                                 titleMatch: analysis.titleMatch,
+                                hasAllKeywords: analysis.hasAllKeywords,
+                                keywordsFound: analysis.keywordsFound,
                                 context: analysis.context
                             });
                         }
@@ -814,18 +830,31 @@
                 }
             });
             
-            // Sort results: title matches first, then by date
+            // Sort results with smart priority:
+            // 1. Title matches first
+            // 2. Within any group: ALL keywords present first
+            // 3. Then by number of keywords found
+            // 4. Then by date (newest first)
+            // 5. Then by score
             results.sort((a, b) => {
-                // First priority: title matches
+                // Priority 1: Title matches go first
                 if (a.titleMatch && !b.titleMatch) return -1;
                 if (!a.titleMatch && b.titleMatch) return 1;
                 
-                // Second priority: within same group, sort by date (newest first)
-                if (a.titleMatch === b.titleMatch) {
-                    return new Date(b.modified) - new Date(a.modified);
+                // Priority 2: Results with ALL keywords first
+                if (a.hasAllKeywords && !b.hasAllKeywords) return -1;
+                if (!a.hasAllKeywords && b.hasAllKeywords) return 1;
+                
+                // Priority 3: More keywords found = higher priority
+                if (a.keywordsFound !== b.keywordsFound) {
+                    return b.keywordsFound - a.keywordsFound;
                 }
                 
-                // Third priority: by relevance score
+                // Priority 4: Within same group, sort by date (newest first)
+                const dateCompare = new Date(b.modified) - new Date(a.modified);
+                if (dateCompare !== 0) return dateCompare;
+                
+                // Priority 5: Finally by relevance score
                 return b.score - a.score;
             });
             
@@ -846,6 +875,7 @@
             const docNameLower = docName.toLowerCase();
             let score = 0;
             let titleMatch = false;
+            let keywordsFound = 0;
             
             // Check for title match in document name
             keywords.forEach(keyword => {
@@ -860,8 +890,12 @@
                 score += 50;
             }
             
-            // Check title matches in section
+            // Check which keywords are present
             keywords.forEach(keyword => {
+                if (sectionText.includes(keyword)) {
+                    keywordsFound++;
+                }
+                
                 if (section.title.toLowerCase().includes(keyword)) {
                     score += 30;
                 }
@@ -870,9 +904,12 @@
                 score += matches * 5;
             });
             
+            // Check if ALL keywords are present
+            const hasAllKeywords = keywordsFound === keywords.length;
+            
             const context = extractContext(section.content, keywords);
             
-            return { score, titleMatch, context };
+            return { score, titleMatch, hasAllKeywords, keywordsFound, context };
         }
         
         function extractContext(content, keywords) {
@@ -1053,11 +1090,14 @@
                     formattedContext = formattedContext.replace(regex, '<span class="highlight">$1</span>');
                 });
                 
+                // Add badge if contains all keywords
+                const badge = result.hasAllKeywords ? '<span class="all-keywords-badge">✓ Tutte le parole</span>' : '';
+                
                 return `
                     <div class="quick-answer-item">
                         ${formattedContext}
                         <div class="quick-answer-source">
-                            — ${result.sectionTitle}, ${result.docName} (${result.year})
+                            — ${result.sectionTitle}, ${result.docName} (${result.year}) ${badge}
                         </div>
                     </div>
                 `;
@@ -1095,10 +1135,13 @@
                 
                 const date = new Date(result.modified).toLocaleDateString('it-IT');
                 
+                // Add badge if contains all keywords
+                const badge = result.hasAllKeywords ? '<span class="all-keywords-badge">✓ Tutte le parole</span>' : '';
+                
                 return `
                     <div class="result-card">
                         <div class="result-header">
-                            <div class="result-section">${result.sectionTitle}</div>
+                            <div class="result-section">${result.sectionTitle} ${badge}</div>
                             <div class="result-meta">
                                 <div class="result-doc">${result.docName}</div>
                                 <div class="result-year">📅 ${date}</div>
