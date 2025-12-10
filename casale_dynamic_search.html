@@ -991,7 +991,18 @@
             
             const keywords = extractKeywords(query);
             
-            const items = titleMatches.map(result => {
+            // Deduplicate by document URL (only show each document once)
+            const uniqueDocs = [];
+            const seenUrls = new Set();
+            
+            titleMatches.forEach(result => {
+                if (!seenUrls.has(result.docUrl)) {
+                    seenUrls.add(result.docUrl);
+                    uniqueDocs.push(result);
+                }
+            });
+            
+            const items = uniqueDocs.map(result => {
                 let formattedName = result.docName;
                 
                 // Highlight keywords in title
@@ -1025,7 +1036,15 @@
             
             const keywords = extractKeywords(query);
             
-            const items = topResults.map(result => {
+            // Limit to max 2 sections per document to avoid repetition
+            const docCount = {};
+            const limitedResults = topResults.filter(result => {
+                const docKey = result.docUrl;
+                docCount[docKey] = (docCount[docKey] || 0) + 1;
+                return docCount[docKey] <= 2; // Max 2 sections per document
+            });
+            
+            const items = limitedResults.map(result => {
                 let context = result.context || result.content.substring(0, 500);
                 let formattedContext = formatTextWithStructure(context);
                 
@@ -1057,7 +1076,15 @@
             
             const keywords = extractKeywords(query);
             
-            const cards = results.map(result => {
+            // Limit to max 2 sections per document to avoid repetition
+            const docCount = {};
+            const limitedResults = results.filter(result => {
+                const docKey = result.docUrl;
+                docCount[docKey] = (docCount[docKey] || 0) + 1;
+                return docCount[docKey] <= 2; // Max 2 sections per document
+            });
+            
+            const cards = limitedResults.map(result => {
                 let content = result.context || result.content.substring(0, 600);
                 let formattedContent = formatTextWithStructure(content);
                 
