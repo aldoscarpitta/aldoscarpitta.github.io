@@ -222,7 +222,7 @@
         .folder-links {
             background: #fff3e0;
             border: 3px solid #ff9800;
-            padding: 25px;
+            padding: 30px;
             margin-bottom: 30px;
             box-shadow: 8px 8px 0 rgba(255, 152, 0, 0.1);
         }
@@ -239,21 +239,43 @@
         
         .folder-link {
             display: inline-block;
-            padding: 12px 20px;
-            margin: 5px;
+            padding: 15px 25px;
+            margin: 8px;
             background: white;
             border: 2px solid #ff9800;
             text-decoration: none;
             color: #e65100;
             font-family: 'Space Mono', monospace;
-            font-size: 0.85em;
-            font-weight: 600;
+            font-size: 0.9em;
+            font-weight: 700;
             transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
         
         .folder-link:hover {
             background: #ff9800;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0 rgba(255, 152, 0, 0.3);
+        }
+        
+        .title-matches {
+            background: #e3f2fd;
+            border: 3px solid #2196f3;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 8px 8px 0 rgba(33, 150, 243, 0.1);
+        }
+        
+        .title-matches-header {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: #1565c0;
         }
         
         .quick-answer {
@@ -501,7 +523,7 @@
                 <input 
                     type="text" 
                     id="questionInput" 
-                    placeholder="Es: prezzi, bandi, volontari, 4ever punk, budget..."
+                    placeholder="Es: budget, bandi, volontari, 4ever punk..."
                     disabled
                 >
                 <button class="search-btn" id="searchBtn" onclick="search()" disabled>
@@ -509,13 +531,13 @@
                 </button>
             </div>
             <div class="examples">
-                <span class="example-tag" onclick="searchExample('prezzi biglietti')">Prezzi</span>
+                <span class="example-tag" onclick="searchExample('budget')">Budget</span>
                 <span class="example-tag" onclick="searchExample('bandi')">Bandi</span>
                 <span class="example-tag" onclick="searchExample('festival 2025')">Festival 2025</span>
-                <span class="example-tag" onclick="searchExample('budget')">Budget</span>
+                <span class="example-tag" onclick="searchExample('prezzi')">Prezzi</span>
                 <span class="example-tag" onclick="searchExample('4ever punk')">4ever Punk</span>
                 <span class="example-tag" onclick="searchExample('volontari')">Volontari</span>
-                <span class="example-tag" onclick="searchExample('affitto casale')">Affitto</span>
+                <span class="example-tag" onclick="searchExample('report')">Report</span>
             </div>
         </div>
         
@@ -540,6 +562,7 @@
         // ============================================
         
         let database = null;
+        let folderMap = {}; // Will store unique folders
         let isSearching = false;
         let isReady = false;
         
@@ -564,12 +587,14 @@
                 if (cachedData) {
                     console.log('✓ Loaded from browser cache');
                     database = cachedData;
+                    buildFolderMap();
                     finishInit();
                     loadingOverlay.style.display = 'none';
                     
                     fetchFreshData().then(freshData => {
                         if (freshData) {
                             database = freshData;
+                            buildFolderMap();
                             saveToCache(freshData);
                         }
                     });
@@ -579,6 +604,7 @@
                     
                     if (freshData) {
                         database = freshData;
+                        buildFolderMap();
                         saveToCache(freshData);
                         finishInit();
                     } else {
@@ -596,6 +622,36 @@
             }
         }
         
+        function buildFolderMap() {
+            folderMap = {};
+            database.documents.forEach(doc => {
+                if (doc.parentFolderId && doc.parentFolderName) {
+                    if (!folderMap[doc.parentFolderId]) {
+                        folderMap[doc.parentFolderId] = {
+                            id: doc.parentFolderId,
+                            name: doc.parentFolderName,
+                            keywords: new Set()
+                        };
+                    }
+                    // Extract keywords from documents in this folder
+                    const docKeywords = extractKeywordsFromText(doc.name + ' ' + doc.content);
+                    docKeywords.forEach(kw => folderMap[doc.parentFolderId].keywords.add(kw));
+                }
+            });
+            console.log('Folder map built:', folderMap);
+        }
+        
+        function extractKeywordsFromText(text) {
+            const stopWords = ['quanto', 'come', 'quando', 'dove', 'chi', 'cosa', 'che', 'quale', 
+                               'costa', 'sono', 'si', 'la', 'il', 'del', 'della', 'per', 'con', 'da',
+                               'dei', 'gli', 'le', 'una', 'un'];
+            
+            return text.toLowerCase()
+                .split(/\s+/)
+                .filter(word => word.length > 3 && !stopWords.includes(word))
+                .slice(0, 100); // Limit to first 100 words
+        }
+        
         async function fetchFreshData() {
             try {
                 const response = await fetch(SCRIPT_URL);
@@ -609,8 +665,9 @@
         
         function finishInit() {
             updateStatus('ready', 'Pronto');
+            const folderCount = Object.keys(folderMap).length;
             document.getElementById('statsText').textContent = 
-                `${database.totalDocuments} documenti • ${database.approximateWords.toLocaleString()} parole`;
+                `${database.totalDocuments} documenti • ${folderCount} cartelle`;
             
             document.getElementById('questionInput').disabled = false;
             document.getElementById('searchBtn').disabled = false;
@@ -659,63 +716,39 @@
         }
         
         // ============================================
-        // FOLDER LINKS - DYNAMIC SEARCH
+        // FOLDER DETECTION
         // ============================================
         
         function findRelevantFolders(query) {
-            if (!database || !database.folders) return [];
+            const keywords = extractKeywords(query);
+            const relevantFolders = [];
             
-            const keywords = query.toLowerCase().split(/\s+/).filter(k => k.length > 2);
-            const matchedFolders = [];
-            
-            database.folders.forEach(folder => {
-                const folderName = folder.name.toLowerCase();
-                let score = 0;
+            Object.values(folderMap).forEach(folder => {
+                let matchScore = 0;
                 
-                // Check for exact phrase match
-                if (folderName.includes(query.toLowerCase())) {
-                    score += 100;
-                }
-                
-                // Check for individual keyword matches
-                keywords.forEach(keyword => {
-                    if (folderName.includes(keyword)) {
-                        score += 50;
+                // Check if folder name matches
+                keywords.forEach(kw => {
+                    if (folder.name.toLowerCase().includes(kw)) {
+                        matchScore += 10;
+                    }
+                    // Check if keyword appears in folder's document keywords
+                    if (folder.keywords.has(kw)) {
+                        matchScore += 1;
                     }
                 });
                 
-                if (score > 0) {
-                    matchedFolders.push({
+                if (matchScore > 0) {
+                    relevantFolders.push({
                         ...folder,
-                        score: score
+                        matchScore: matchScore
                     });
                 }
             });
             
-            // Sort by relevance
-            matchedFolders.sort((a, b) => b.score - a.score);
+            // Sort by match score
+            relevantFolders.sort((a, b) => b.matchScore - a.matchScore);
             
-            // Return top 5 most relevant folders
-            return matchedFolders.slice(0, 5);
-        }
-        
-        function buildFolderLinksHTML(folders) {
-            if (folders.length === 0) return '';
-            
-            const links = folders.map(folder => `
-                <a href="${folder.url}" 
-                   target="_blank" 
-                   class="folder-link">
-                    📁 ${folder.name}
-                </a>
-            `).join('');
-            
-            return `
-                <div class="folder-links">
-                    <div class="folder-links-title">📂 Cartelle correlate su Google Drive</div>
-                    ${links}
-                </div>
-            `;
+            return relevantFolders;
         }
         
         // ============================================
@@ -762,16 +795,18 @@
             database.documents.forEach(doc => {
                 if (doc.sections && doc.sections.length > 0) {
                     doc.sections.forEach(section => {
-                        const analysis = analyzeSection(section, keywords, query);
+                        const analysis = analyzeSection(section, keywords, query, doc.name, doc.modified);
                         
                         if (analysis.score > 0) {
                             results.push({
                                 docName: doc.name,
                                 docUrl: doc.url,
                                 year: doc.year,
+                                modified: doc.modified,
                                 sectionTitle: section.title,
                                 content: section.content,
                                 score: analysis.score,
+                                titleMatch: analysis.titleMatch,
                                 context: analysis.context
                             });
                         }
@@ -779,7 +814,21 @@
                 }
             });
             
-            results.sort((a, b) => b.score - a.score);
+            // Sort results: title matches first, then by date
+            results.sort((a, b) => {
+                // First priority: title matches
+                if (a.titleMatch && !b.titleMatch) return -1;
+                if (!a.titleMatch && b.titleMatch) return 1;
+                
+                // Second priority: within same group, sort by date (newest first)
+                if (a.titleMatch === b.titleMatch) {
+                    return new Date(b.modified) - new Date(a.modified);
+                }
+                
+                // Third priority: by relevance score
+                return b.score - a.score;
+            });
+            
             return results;
         }
         
@@ -792,26 +841,38 @@
                 .filter(word => word.length > 2 && !stopWords.includes(word));
         }
         
-        function analyzeSection(section, keywords, originalQuery) {
+        function analyzeSection(section, keywords, originalQuery, docName, docModified) {
             const sectionText = (section.title + ' ' + section.content).toLowerCase();
+            const docNameLower = docName.toLowerCase();
             let score = 0;
+            let titleMatch = false;
             
+            // Check for title match in document name
+            keywords.forEach(keyword => {
+                if (docNameLower.includes(keyword)) {
+                    titleMatch = true;
+                    score += 100; // High score for title match
+                }
+            });
+            
+            // Check for exact phrase match
             if (sectionText.includes(originalQuery.toLowerCase())) {
-                score += 100;
+                score += 50;
             }
             
+            // Check title matches in section
             keywords.forEach(keyword => {
                 if (section.title.toLowerCase().includes(keyword)) {
-                    score += 50;
+                    score += 30;
                 }
                 
                 const matches = (sectionText.match(new RegExp(keyword, 'gi')) || []).length;
-                score += matches * 10;
+                score += matches * 5;
             });
             
             const context = extractContext(section.content, keywords);
             
-            return { score, context };
+            return { score, titleMatch, context };
         }
         
         function extractContext(content, keywords) {
@@ -885,22 +946,83 @@
                 return;
             }
             
-            // Check for relevant folders
+            // Find relevant folders
             const folders = findRelevantFolders(query);
             const folderLinksHTML = buildFolderLinksHTML(folders);
             
-            // Build results
-            const quickAnswerHTML = buildQuickAnswer(results.slice(0, 3), query);
-            const detailedHTML = buildDetailedResults(results.slice(0, 8), query);
+            // Separate title matches from other results
+            const titleMatches = results.filter(r => r.titleMatch);
+            const otherResults = results.filter(r => !r.titleMatch);
+            
+            // Build sections
+            const titleMatchesHTML = buildTitleMatchesHTML(titleMatches, query);
+            const quickAnswerHTML = buildQuickAnswer(otherResults.slice(0, 3), query);
+            const detailedHTML = buildDetailedResults(otherResults.slice(0, 8), query);
             
             container.innerHTML = `
                 ${folderLinksHTML}
+                ${titleMatchesHTML}
                 ${quickAnswerHTML}
                 ${detailedHTML}
             `;
         }
         
+        function buildFolderLinksHTML(folders) {
+            if (folders.length === 0) return '';
+            
+            const links = folders.map(folder => `
+                <a href="https://drive.google.com/drive/folders/${folder.id}" 
+                   target="_blank" 
+                   class="folder-link">
+                    📁 ${folder.name}
+                </a>
+            `).join('');
+            
+            return `
+                <div class="folder-links">
+                    <div class="folder-links-title">📂 Cartelle rilevanti su Google Drive</div>
+                    ${links}
+                </div>
+            `;
+        }
+        
+        function buildTitleMatchesHTML(titleMatches, query) {
+            if (titleMatches.length === 0) return '';
+            
+            const keywords = extractKeywords(query);
+            
+            const items = titleMatches.map(result => {
+                let formattedName = result.docName;
+                
+                // Highlight keywords in title
+                keywords.forEach(kw => {
+                    const regex = new RegExp(`(${kw})`, 'gi');
+                    formattedName = formattedName.replace(regex, '<span class="highlight">$1</span>');
+                });
+                
+                const date = new Date(result.modified).toLocaleDateString('it-IT');
+                
+                return `
+                    <div class="quick-answer-item">
+                        <strong>${formattedName}</strong>
+                        <div class="quick-answer-source">
+                            Modificato: ${date} • <a href="${result.docUrl}" target="_blank">Apri documento</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            return `
+                <div class="title-matches">
+                    <div class="title-matches-header">🎯 File con titoli corrispondenti</div>
+                    ${items}
+                </div>
+            `;
+        }
+        
         function buildQuickAnswer(topResults, query) {
+            if (topResults.length === 0) return '';
+            
             const keywords = extractKeywords(query);
             
             const items = topResults.map(result => {
@@ -924,13 +1046,15 @@
             
             return `
                 <div class="quick-answer">
-                    <div class="quick-answer-title">✨ Risposta Rapida</div>
+                    <div class="quick-answer-title">✨ Informazioni trovate</div>
                     ${items}
                 </div>
             `;
         }
         
         function buildDetailedResults(results, query) {
+            if (results.length === 0) return '';
+            
             const keywords = extractKeywords(query);
             
             const cards = results.map(result => {
@@ -942,13 +1066,15 @@
                     formattedContent = formattedContent.replace(regex, '<span class="highlight">$1</span>');
                 });
                 
+                const date = new Date(result.modified).toLocaleDateString('it-IT');
+                
                 return `
                     <div class="result-card">
                         <div class="result-header">
                             <div class="result-section">${result.sectionTitle}</div>
                             <div class="result-meta">
                                 <div class="result-doc">${result.docName}</div>
-                                <div class="result-year">📅 ${result.year}</div>
+                                <div class="result-year">📅 ${date}</div>
                             </div>
                         </div>
                         <div class="result-content">${formattedContent}</div>
@@ -961,7 +1087,7 @@
             
             return `
                 <div class="detailed-results">
-                    <div class="detailed-title">📚 Tutte le informazioni trovate</div>
+                    <div class="detailed-title">📚 Altri risultati (ordinati per data)</div>
                     ${cards}
                 </div>
             `;
