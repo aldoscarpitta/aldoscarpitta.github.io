@@ -221,6 +221,29 @@
   .pin-key.empty { background:none; border:none; cursor:default; }
   .pin-error-msg { font-size:0.78rem; color:var(--danger); margin-top:16px; min-height:20px; text-align:center; }
   #appContent { display:none; }
+
+  /* ── SYNC ── */
+  .sync-dot {
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    margin-left:5px; vertical-align:middle; flex-shrink:0;
+    transition:background .3s;
+  }
+  .sync-dot.ok     { background:var(--savings); }
+  .sync-dot.busy   { background:var(--warn); animation:pulse .8s infinite; }
+  .sync-dot.err    { background:var(--danger); }
+  .sync-dot.off    { background:var(--ink3); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  .sync-modal-body { display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+  .sync-modal-body label { font-size:0.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); display:block; margin-bottom:4px; }
+  .sync-modal-body input { font-size:0.8rem; font-family:monospace; }
+  .sync-hint { font-size:0.72rem; color:var(--ink3); line-height:1.5; margin-bottom:14px; }
+  .sync-hint a { color:var(--income-c); }
+  .sync-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .sync-actions button { flex:1; min-width:100px; padding:9px; border-radius:var(--radius-sm); border:none; font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:600; cursor:pointer; }
+  .btn-export { background:var(--surface2); color:var(--ink2); border:1px solid var(--border2) !important; }
+  .btn-import-label { flex:1; min-width:100px; padding:9px; border-radius:var(--radius-sm); background:var(--surface2); color:var(--ink2); border:1px solid var(--border2); font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:600; cursor:pointer; text-align:center; }
+  .sync-status-line { font-size:0.72rem; color:var(--ink3); margin-top:10px; min-height:18px; text-align:center; }
 </style>
 </head>
 <body>
@@ -255,9 +278,10 @@
 <!-- ── APP ── -->
 <div id="appContent">
   <h1>Budget</h1>
-  <p>50 · 30 · 20</p>
+  <p id="splitLabel">50 · 30 · 20</p>
   <div class="header-actions">
-    <button class="icon-btn" onclick="openSettings()" title="Adjust splits">⚙ Splits</button>
+    <button class="icon-btn" onclick="openSyncModal()" title="Sync &amp; Backup">☁<span class="sync-dot off" id="syncDot"></span></button>
+    <button class="icon-btn" onclick="openSettings()" title="Adjust splits">⚙</button>
   </div>
 </header>
 
@@ -461,6 +485,46 @@
   </div>
 </div>
 
+<!-- SYNC MODAL -->
+<div class="modal-overlay" id="syncModal">
+  <div class="modal">
+    <h2>☁ Sync &amp; Backup</h2>
+
+    <p class="sync-hint">
+      Sync across devices using a private <strong>GitHub Gist</strong> — free, instant, your data stays in your GitHub account.<br><br>
+      <strong>One-time setup:</strong><br>
+      1. Go to <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a> → generate a classic token with <strong>gist</strong> scope only.<br>
+      2. Go to <a href="https://gist.github.com" target="_blank">gist.github.com</a> → create a <strong>secret</strong> gist with any filename → copy the ID from the URL.<br>
+      3. Paste both below and tap Save.
+    </p>
+
+    <div class="sync-modal-body">
+      <div>
+        <label>GitHub Personal Access Token</label>
+        <input type="password" id="gistToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+      </div>
+      <div>
+        <label>Gist ID</label>
+        <input type="text" id="gistId" placeholder="e.g. 4a3bc8d2e1f09c7b5a2d" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="modal-btns" style="margin-bottom:12px;">
+      <button class="btn-cancel" onclick="closeSyncModal()">Cancel</button>
+      <button class="btn-save" onclick="saveGistConfig()">Save &amp; Sync Now</button>
+    </div>
+
+    <div style="height:1px;background:var(--border);margin-bottom:12px;"></div>
+    <p style="font-size:0.72rem;color:var(--ink3);margin-bottom:8px;">Manual backup — works without Gist</p>
+    <div class="sync-actions">
+      <button class="btn-export sync-actions" onclick="exportJSON()">⬇ Export JSON</button>
+      <label class="btn-import-label">⬆ Import JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
+    </div>
+
+    <div class="sync-status-line" id="syncStatusLine"></div>
+  </div>
+</div>
+
 <!-- SETTINGS MODAL -->
 <div class="modal-overlay" id="settingsModal">
   <div class="modal">
@@ -547,33 +611,171 @@ let recurring = [];
 let recurringIncome = [];
 let splits = { needs: 50, wants: 30, savings: 20 };
 
-// ── Storage ───────────────────────────────────────────────────────────────────
+// ── Storage & Gist Sync ───────────────────────────────────────────────────────
+const LS_KEY       = 'budget-v3';
+const LS_GIST_CFG  = 'budget-gist-cfg';
+const GIST_FILE    = 'budget-data.json';
+
+let gistCfg = null; // { token, gistId }
+
+function setSyncDot(state) { // 'ok'|'busy'|'err'|'off'
+  const d = document.getElementById('syncDot');
+  if (d) d.className = `sync-dot ${state}`;
+}
+
+function loadGistCfg() {
+  try { gistCfg = JSON.parse(localStorage.getItem(LS_GIST_CFG)); } catch(e) { gistCfg = null; }
+}
+
+async function gistRead() {
+  if (!gistCfg) return null;
+  const r = await fetch(`https://api.github.com/gists/${gistCfg.gistId}`, {
+    headers: { Authorization: `token ${gistCfg.token}`, Accept: 'application/vnd.github.v3+json' }
+  });
+  if (!r.ok) throw new Error(`Gist read failed: ${r.status}`);
+  const g = await r.json();
+  const file = g.files[GIST_FILE];
+  if (!file) return null;
+  return JSON.parse(file.content);
+}
+
+async function gistWrite(payload) {
+  if (!gistCfg) return;
+  const body = { files: { [GIST_FILE]: { content: payload } } };
+  const r = await fetch(`https://api.github.com/gists/${gistCfg.gistId}`, {
+    method: 'PATCH',
+    headers: { Authorization: `token ${gistCfg.token}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(`Gist write failed: ${r.status}`);
+}
+
 async function loadData() {
-  try {
-    let raw = null;
-    if (window.storage) {
-      const r = await window.storage.get('budget-v3');
-      if (r) raw = r.value;
-    } else {
-      raw = localStorage.getItem('budget-v3');
+  loadGistCfg();
+  // always load localStorage first as fallback
+  let localRaw = null;
+  try { localRaw = localStorage.getItem(LS_KEY); } catch(e) {}
+
+  if (gistCfg) {
+    setSyncDot('busy');
+    try {
+      const remote = await gistRead();
+      if (remote) {
+        data = remote.months || {};
+        recurring = remote.recurring || [];
+        recurringIncome = remote.recurringIncome || [];
+        splits = remote.splits || { needs:50, wants:30, savings:20 };
+        // write back to localStorage as offline cache
+        localStorage.setItem(LS_KEY, JSON.stringify(remote));
+        setSyncDot('ok');
+        return;
+      }
+    } catch(e) {
+      setSyncDot('err');
+      console.warn('Gist load failed, using localStorage:', e);
     }
-    if (raw) {
-      const d = JSON.parse(raw);
+  } else {
+    setSyncDot('off');
+  }
+
+  // fallback to localStorage
+  try {
+    if (localRaw) {
+      const d = JSON.parse(localRaw);
       data = d.months || {};
       recurring = d.recurring || [];
       recurringIncome = d.recurringIncome || [];
-      splits = d.splits || { needs: 50, wants: 30, savings: 20 };
+      splits = d.splits || { needs:50, wants:30, savings:20 };
     }
-  } catch(e) { data = {}; recurring = []; splits = { needs:50, wants:30, savings:20 }; }
+  } catch(e) { data = {}; recurring = []; recurringIncome = []; splits = { needs:50, wants:30, savings:20 }; }
 }
 
 async function saveData() {
   const payload = JSON.stringify({ months: data, recurring, recurringIncome, splits });
-  try {
-    if (window.storage) await window.storage.set('budget-v3', payload);
-    else localStorage.setItem('budget-v3', payload);
-  } catch(e) {}
+  // always save locally first
+  try { localStorage.setItem(LS_KEY, payload); } catch(e) {}
+
+  if (gistCfg) {
+    setSyncDot('busy');
+    try {
+      await gistWrite(payload);
+      setSyncDot('ok');
+    } catch(e) {
+      setSyncDot('err');
+      console.warn('Gist save failed:', e);
+    }
+  }
 }
+
+// ── Export / Import ───────────────────────────────────────────────────────────
+function exportJSON() {
+  const payload = JSON.stringify({ months: data, recurring, recurringIncome, splits }, null, 2);
+  const blob = new Blob([payload], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `budget-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  document.getElementById('syncStatusLine').textContent = 'Backup downloaded ✓';
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      data = d.months || {};
+      recurring = d.recurring || [];
+      recurringIncome = d.recurringIncome || [];
+      splits = d.splits || { needs:50, wants:30, savings:20 };
+      await saveData();
+      document.getElementById('splitLabel').textContent = `${splits.needs} · ${splits.wants} · ${splits.savings}`;
+      render();
+      document.getElementById('syncStatusLine').textContent = 'Import successful ✓';
+      toast('Data imported ✓');
+    } catch(err) {
+      document.getElementById('syncStatusLine').textContent = 'Import failed — invalid file.';
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ── Gist Config Modal ─────────────────────────────────────────────────────────
+function openSyncModal() {
+  if (gistCfg) {
+    document.getElementById('gistToken').value = gistCfg.token || '';
+    document.getElementById('gistId').value    = gistCfg.gistId || '';
+  }
+  document.getElementById('syncStatusLine').textContent = gistCfg ? '✓ Gist sync is active' : 'No Gist configured — local only';
+  document.getElementById('syncModal').classList.add('open');
+}
+function closeSyncModal() { document.getElementById('syncModal').classList.remove('open'); }
+
+async function saveGistConfig() {
+  const token  = document.getElementById('gistToken').value.trim();
+  const gistId = document.getElementById('gistId').value.trim();
+  if (!token || !gistId) { document.getElementById('syncStatusLine').textContent = 'Please fill in both fields.'; return; }
+  gistCfg = { token, gistId };
+  localStorage.setItem(LS_GIST_CFG, JSON.stringify(gistCfg));
+  document.getElementById('syncStatusLine').textContent = 'Testing connection…';
+  setSyncDot('busy');
+  try {
+    await gistWrite(JSON.stringify({ months: data, recurring, recurringIncome, splits }));
+    setSyncDot('ok');
+    document.getElementById('syncStatusLine').textContent = '✓ Connected and synced!';
+    toast('Gist sync enabled ✓');
+    setTimeout(closeSyncModal, 1200);
+  } catch(e) {
+    setSyncDot('err');
+    document.getElementById('syncStatusLine').textContent = `Connection failed: ${e.message}`;
+  }
+}
+
+document.getElementById('syncModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('syncModal')) closeSyncModal();
+});
 
 function getMonthKey() { return `${currentYear}-${String(currentMonth+1).padStart(2,'0')}`; }
 function getMonthData() {
@@ -763,7 +965,7 @@ function saveSplits() {
   if (n<1||w<1||s<1) { toast('Each split must be at least 1%'); return; }
   splits = { needs:n, wants:w, savings:s };
   // update subtitle
-  document.querySelector('header p').textContent = `${n} · ${w} · ${s}`;
+  document.getElementById('splitLabel').textContent = `${n} · ${w} · ${s}`;
   saveData(); closeSettings(); render(); toast('Splits updated ✓');
 }
 document.getElementById('settingsModal').addEventListener('click', e => {
@@ -986,7 +1188,7 @@ function checkURLParams() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 (async () => {
   await loadData();
-  document.querySelector('header p').textContent = `${splits.needs} · ${splits.wants} · ${splits.savings}`;
+  document.getElementById('splitLabel').textContent = `${splits.needs} · ${splits.wants} · ${splits.savings}`;
   updateMonthLabel();
   render();
   checkURLParams();
