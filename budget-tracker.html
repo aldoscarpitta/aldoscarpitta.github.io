@@ -220,7 +220,6 @@
   .pin-key.del { font-size:1rem; color:var(--ink2); }
   .pin-key.empty { background:none; border:none; cursor:default; }
   .pin-error-msg { font-size:0.78rem; color:var(--danger); margin-top:16px; min-height:20px; text-align:center; }
-  .pin-change-link { font-size:0.72rem; color:var(--ink3); margin-top:24px; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
   #appContent { display:none; }
 </style>
 </head>
@@ -251,7 +250,6 @@
     <button class="pin-key del" onclick="pinDel()">⌫</button>
   </div>
   <div class="pin-error-msg" id="pinError"></div>
-  <div class="pin-change-link" id="pinChangeLink" onclick="showChangePin()" style="display:none">Change PIN</div>
 </div>
 
 <!-- ── APP ── -->
@@ -477,23 +475,14 @@
 
 <script>
 // ── PIN LOCK ──────────────────────────────────────────────────────────────────
-const DEFAULT_PIN = '1234';
+const PIN = '2729';
 const SESSION_KEY = 'budget-unlocked';
-const PIN_STORAGE_KEY = 'budget-pin';
 
 let pinEntry = '';
-let pinChanging = false;
-let pinChangeStep = 0; // 0=enter new, 1=confirm new
-let pinNewTemp = '';
-
-function getStoredPin() {
-  return localStorage.getItem(PIN_STORAGE_KEY) || DEFAULT_PIN;
-}
 
 function unlock() {
   document.getElementById('lockScreen').style.display = 'none';
   document.getElementById('appContent').style.display = 'block';
-  document.getElementById('pinChangeLink').style.display = 'block';
   sessionStorage.setItem(SESSION_KEY, '1');
 }
 
@@ -501,93 +490,32 @@ function pinKey(digit) {
   if (pinEntry.length >= 4) return;
   pinEntry += digit;
   updateDots('filled');
-  if (pinEntry.length === 4) {
-    setTimeout(() => checkPin(), 120);
-  }
+  if (pinEntry.length === 4) setTimeout(() => checkPin(), 120);
 }
 
 function pinDel() {
-  if (pinEntry.length > 0) {
-    pinEntry = pinEntry.slice(0, -1);
-    updateDots('filled');
-  }
+  if (pinEntry.length > 0) { pinEntry = pinEntry.slice(0,-1); updateDots('filled'); }
 }
 
 function updateDots(fillClass) {
   for (let i = 0; i < 4; i++) {
-    const dot = document.getElementById('dot-'+i);
-    dot.className = 'pin-dot' + (i < pinEntry.length ? ' '+fillClass : '');
+    document.getElementById('dot-'+i).className = 'pin-dot' + (i < pinEntry.length ? ' '+fillClass : '');
   }
 }
 
 function checkPin() {
-  if (pinChanging) {
-    handleChangePinInput();
-    return;
-  }
-  if (pinEntry === getStoredPin()) {
+  if (pinEntry === PIN) {
     updateDots('filled');
     setTimeout(unlock, 150);
   } else {
     updateDots('error');
     document.getElementById('pinError').textContent = 'Incorrect PIN. Try again.';
-    setTimeout(() => {
-      pinEntry = '';
-      updateDots('');
-      document.getElementById('pinError').textContent = '';
-    }, 900);
+    setTimeout(() => { pinEntry = ''; updateDots(''); document.getElementById('pinError').textContent = ''; }, 900);
   }
 }
 
-function showChangePin() {
-  // must be already unlocked to change PIN
-  pinChanging = true;
-  pinChangeStep = 0;
-  pinNewTemp = '';
-  pinEntry = '';
-  updateDots('');
-  document.getElementById('lockScreen').style.display = 'flex';
-  document.getElementById('appContent').style.display = 'none';
-  document.querySelector('#lockScreen p').textContent = 'Enter new PIN';
-  document.getElementById('pinError').textContent = '';
-}
-
-function handleChangePinInput() {
-  if (pinChangeStep === 0) {
-    pinNewTemp = pinEntry;
-    pinEntry = '';
-    updateDots('');
-    document.querySelector('#lockScreen p').textContent = 'Confirm new PIN';
-    pinChangeStep = 1;
-  } else {
-    if (pinEntry === pinNewTemp) {
-      localStorage.setItem(PIN_STORAGE_KEY, pinEntry);
-      pinChanging = false;
-      pinEntry = '';
-      document.querySelector('#lockScreen p').textContent = 'Enter your PIN';
-      document.getElementById('pinError').textContent = '';
-      unlock();
-      toast('PIN updated ✓');
-    } else {
-      updateDots('error');
-      document.getElementById('pinError').textContent = "PINs don't match. Start over.";
-      setTimeout(() => {
-        pinChanging = false;
-        pinChangeStep = 0;
-        pinNewTemp = '';
-        pinEntry = '';
-        updateDots('');
-        document.querySelector('#lockScreen p').textContent = 'Enter new PIN';
-        document.getElementById('pinError').textContent = '';
-      }, 1000);
-    }
-  }
-}
-
-// Check session — stay unlocked if same browser session
-if (sessionStorage.getItem(SESSION_KEY)) {
-  unlock();
-}
+// Stay unlocked within same browser session
+if (sessionStorage.getItem(SESSION_KEY)) unlock();
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let currentDate = new Date();
