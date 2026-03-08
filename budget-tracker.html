@@ -388,10 +388,12 @@
 
   <!-- RECURRING PANEL -->
   <div class="add-panel" id="panel-recurring">
+
+    <!-- RECURRING EXPENSES -->
     <h3>Recurring expenses</h3>
     <div class="recurring-list" id="recurringList"></div>
     <div class="sep"></div>
-    <h3 style="margin-bottom:10px">Add new recurring</h3>
+    <h3 style="margin-bottom:10px">Add new recurring expense</h3>
     <div class="input-row" style="margin-bottom:7px">
       <input type="text" id="recDesc" placeholder="Description (e.g. Rent, Netflix)">
       <input type="number" id="recAmount" placeholder="€" min="0.01" step="0.01">
@@ -402,7 +404,23 @@
       <button class="cat-btn" id="rbtn-savings" onclick="selectRecCat('savings')">💰 Savings</button>
     </div>
     <button class="action-btn expense" onclick="addRecurring()">Save Recurring Expense</button>
-    <button class="apply-btn" onclick="applyRecurring()">↺ Import all recurring into this month</button>
+    <button class="apply-btn" onclick="applyRecurring()">↺ Import all recurring expenses</button>
+
+    <!-- DIVIDER -->
+    <div style="height:1px; background:var(--border); margin:18px 0;"></div>
+
+    <!-- RECURRING INCOME -->
+    <h3>Recurring income</h3>
+    <div class="recurring-list" id="recurringIncomeList"></div>
+    <div class="sep"></div>
+    <h3 style="margin-bottom:10px">Add new recurring income</h3>
+    <div class="input-row" style="margin-bottom:10px">
+      <input type="text" id="recIncDesc" placeholder="Source (e.g. Salary, Rent)">
+      <input type="number" id="recIncAmount" placeholder="€" min="0.01" step="0.01">
+    </div>
+    <button class="action-btn income" onclick="addRecurringIncome()">Save Recurring Income</button>
+    <button class="apply-btn" style="border-color:rgba(107,159,255,.3); color:var(--income-c);" onclick="applyRecurringIncome()">↺ Import all recurring income</button>
+
   </div>
 
   <!-- TRANSACTION LIST -->
@@ -526,6 +544,7 @@ let selectedRecCat = null;
 let activeFilter = 'all';
 let data = {};
 let recurring = [];
+let recurringIncome = [];
 let splits = { needs: 50, wants: 30, savings: 20 };
 
 // ── Storage ───────────────────────────────────────────────────────────────────
@@ -542,13 +561,14 @@ async function loadData() {
       const d = JSON.parse(raw);
       data = d.months || {};
       recurring = d.recurring || [];
+      recurringIncome = d.recurringIncome || [];
       splits = d.splits || { needs: 50, wants: 30, savings: 20 };
     }
   } catch(e) { data = {}; recurring = []; splits = { needs:50, wants:30, savings:20 }; }
 }
 
 async function saveData() {
-  const payload = JSON.stringify({ months: data, recurring, splits });
+  const payload = JSON.stringify({ months: data, recurring, recurringIncome, splits });
   try {
     if (window.storage) await window.storage.set('budget-v3', payload);
     else localStorage.setItem('budget-v3', payload);
@@ -582,7 +602,7 @@ function switchTab(tab) {
     document.getElementById('tab-'+t).classList.toggle('active', t===tab);
     document.getElementById('panel-'+t).classList.toggle('visible', t===tab);
   });
-  if (tab === 'recurring') renderRecurring();
+  if (tab === 'recurring') { renderRecurring(); renderRecurringIncome(); }
 }
 
 // ── Category buttons ──────────────────────────────────────────────────────────
@@ -673,6 +693,47 @@ function renderRecurring() {
       <div class="rec-info">${esc(r.desc)}<small>${emojis[r.cat]} ${r.cat}</small></div>
       <div class="rec-amount" style="color:var(--${r.cat==='savings'?'savings':r.cat==='wants'?'wants':'needs'})">${fmt(r.amount)}</div>
       <button class="rec-del" onclick="deleteRecurring(${r.id})">✕</button>
+    </div>`).join('');
+}
+
+// ── Recurring Income ──────────────────────────────────────────────────────────
+function addRecurringIncome() {
+  const desc = document.getElementById('recIncDesc').value.trim();
+  const amount = parseFloat(document.getElementById('recIncAmount').value);
+  if (!desc) { toast('Add a source description'); return; }
+  if (!amount || amount <= 0) { toast('Enter a valid amount'); return; }
+  recurringIncome.push({ id: Date.now(), desc, amount });
+  saveData(); renderRecurringIncome(); toast('Recurring income saved ✓');
+  document.getElementById('recIncDesc').value = '';
+  document.getElementById('recIncAmount').value = '';
+}
+
+function deleteRecurringIncome(id) {
+  recurringIncome = recurringIncome.filter(r => r.id !== id);
+  saveData(); renderRecurringIncome(); toast('Recurring income removed');
+}
+
+function applyRecurringIncome() {
+  if (!recurringIncome.length) { toast('No recurring income saved'); return; }
+  const md = getMonthData();
+  recurringIncome.forEach(r => {
+    md.transactions.push({ id: Date.now()+Math.random(), desc: r.desc, amount: r.amount, type:'income', cat:'income', date: todayStr() });
+  });
+  saveData(); render(); toast(`${recurringIncome.length} recurring income imported ✓`);
+}
+
+function renderRecurringIncome() {
+  const list = document.getElementById('recurringIncomeList');
+  if (!recurringIncome.length) {
+    list.innerHTML = `<div style="color:var(--ink3);font-size:0.78rem;padding:4px 0">No recurring income saved yet.</div>`;
+    return;
+  }
+  list.innerHTML = recurringIncome.map(r => `
+    <div class="rec-item">
+      <div class="rec-dot dot-income"></div>
+      <div class="rec-info">${esc(r.desc)}<small>💵 income</small></div>
+      <div class="rec-amount" style="color:var(--income-c)">+${fmt(r.amount)}</div>
+      <button class="rec-del" onclick="deleteRecurringIncome(${r.id})">✕</button>
     </div>`).join('');
 }
 
@@ -838,6 +899,8 @@ document.getElementById('incDesc').onkeydown = e => { if(e.key==='Enter') docume
 document.getElementById('incAmount').onkeydown = e => { if(e.key==='Enter') addIncome(); };
 document.getElementById('recDesc').onkeydown = e => { if(e.key==='Enter') document.getElementById('recAmount').focus(); };
 document.getElementById('recAmount').onkeydown = e => { if(e.key==='Enter') addRecurring(); };
+document.getElementById('recIncDesc').onkeydown = e => { if(e.key==='Enter') document.getElementById('recIncAmount').focus(); };
+document.getElementById('recIncAmount').onkeydown = e => { if(e.key==='Enter') addRecurringIncome(); };
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 let toastTimer;
