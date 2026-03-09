@@ -1,0 +1,2089 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ── THEMES ── */
+:root {
+  --needs:#e05a4a; --needs-soft:rgba(224,90,74,.13);
+  --wants:#d4860e; --wants-soft:rgba(212,134,14,.13);
+  --savings:#3aaa66; --savings-soft:rgba(58,170,102,.13);
+  --income-c:#6b9fff; --income-soft:rgba(107,159,255,.13);
+  --ok:#3aaa66; --warn:#d4860e; --danger:#e05a4a;
+  --radius:14px; --radius-sm:8px;
+}
+[data-theme="dark"], :root {
+  --bg:#0a0a0a; --surface:#141414; --surface2:#1c1c1c; --surface3:#242424;
+  --ink:#f0ece0; --ink2:#a09880; --ink3:#5a5448;
+  --border:#222; --border2:#2e2e2e; --hbg:#000;
+  --chart-grid:rgba(255,255,255,.06);
+}
+[data-theme="light"] {
+  --bg:#f5f2ec; --surface:#ffffff; --surface2:#ede9e1; --surface3:#e4dfd5;
+  --ink:#1a1714; --ink2:#6b6356; --ink3:#a09880;
+  --border:#ddd8ce; --border2:#cdc7bc; --hbg:#faf8f4;
+  --chart-grid:rgba(0,0,0,.06);
+}
+
+/* ── RESET ── */
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; padding-bottom:70px; transition:background .25s,color .25s; }
+
+/* ── HEADER ── */
+header { background:var(--hbg); border-bottom:1px solid var(--border); padding:20px 20px 16px; text-align:center; position:relative; }
+header h1 { font-family:'Playfair Display',serif; font-size:clamp(1.4rem,5vw,2rem); font-weight:700; letter-spacing:-.02em; }
+header p { font-size:.7rem; color:var(--ink3); margin-top:3px; letter-spacing:.14em; text-transform:uppercase; }
+.header-actions { position:absolute; top:18px; right:12px; display:flex; gap:6px; }
+.icon-btn { background:none; border:1px solid var(--border2); border-radius:7px; padding:5px 9px; cursor:pointer; font-size:.85rem; color:var(--ink2); transition:all .15s; }
+.icon-btn:hover { background:var(--surface2); color:var(--ink); }
+
+/* ── MONTH BAR ── */
+.month-bar { background:var(--hbg); border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:center; gap:16px; padding:10px 20px; position:sticky; top:0; z-index:100; }
+.month-bar button { background:none; border:1px solid var(--border2); border-radius:6px; padding:4px 11px; cursor:pointer; font-size:1rem; color:var(--ink2); transition:all .15s; }
+.month-bar button:hover { background:var(--surface2); color:var(--ink); }
+.month-label { font-family:'Playfair Display',serif; font-weight:600; font-size:1rem; min-width:165px; text-align:center; }
+
+/* ── CONTAINER ── */
+.container { max-width:640px; margin:0 auto; padding:16px 14px; }
+
+/* ── STAT CARDS ── */
+.income-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; }
+.stat-card .label { font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:var(--ink3); margin-bottom:4px; }
+.stat-card .value { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; letter-spacing:-.02em; }
+.stat-card .sub { font-size:.75rem; color:var(--ink2); margin-top:3px; }
+.income-val{color:var(--income-c)} .balance-positive{color:var(--ok)} .balance-negative{color:var(--danger)} .balance-neutral{color:var(--ink2)}
+
+/* ── SAFE BANNER ── */
+.safe-banner { background:linear-gradient(135deg,rgba(58,170,102,.15),rgba(58,170,102,.05)); border:1px solid rgba(58,170,102,.25); border-radius:var(--radius); padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; }
+.safe-banner .safe-label { font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--savings); opacity:.8; margin-bottom:2px; }
+.safe-banner .safe-val { font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:var(--savings); }
+.safe-banner .safe-desc { font-size:.75rem; color:var(--ink2); max-width:160px; text-align:right; line-height:1.4; }
+.safe-banner.warn { background:linear-gradient(135deg,rgba(212,134,14,.15),rgba(212,134,14,.05)); border-color:rgba(212,134,14,.25); }
+.safe-banner.warn .safe-label,.safe-banner.warn .safe-val { color:var(--warn); }
+.safe-banner.danger { background:linear-gradient(135deg,rgba(224,90,74,.15),rgba(224,90,74,.05)); border-color:rgba(224,90,74,.25); }
+.safe-banner.danger .safe-label,.safe-banner.danger .safe-val { color:var(--danger); }
+.safe-banner.empty { display:none; }
+
+/* ── RING BUCKETS ── */
+.buckets { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px; }
+.bucket { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 12px 12px; display:flex; flex-direction:column; align-items:center; }
+.bucket-ring { position:relative; width:72px; height:72px; margin-bottom:10px; }
+.bucket-ring svg { transform:rotate(-90deg); }
+.ring-bg { fill:none; stroke:var(--border2); stroke-width:6; }
+.ring-fill { fill:none; stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset .6s cubic-bezier(.4,0,.2,1); }
+.ring-label { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.ring-pct { font-size:.78rem; font-weight:700; line-height:1; }
+.ring-sub { font-size:.55rem; color:var(--ink3); letter-spacing:.05em; margin-top:1px; }
+.bucket-name { font-family:'Playfair Display',serif; font-size:.85rem; font-weight:600; margin-bottom:3px; }
+.bucket-alloc { font-size:.72rem; color:var(--ink3); margin-bottom:4px; }
+.bucket-spent { font-weight:600; font-size:.95rem; }
+.bucket-of { font-size:.7rem; color:var(--ink3); }
+.bucket-over { font-size:.62rem; font-weight:600; margin-top:3px; }
+.bucket-rollover { font-size:.6rem; color:var(--income-c); margin-top:2px; }
+.ring-ok{stroke:var(--ok)} .ring-warn{stroke:var(--warn)} .ring-danger{stroke:var(--danger)}
+.ring-pct.ok{color:var(--ok)} .ring-pct.warn{color:var(--warn)} .ring-pct.danger{color:var(--danger)}
+.bucket-spent.ok{color:var(--ok)} .bucket-spent.warn{color:var(--warn)} .bucket-spent.danger{color:var(--danger)}
+.bucket-over.danger{color:var(--danger)}
+
+/* ── TABS ── */
+.tabs { display:flex; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:4px; margin-bottom:12px; gap:2px; overflow-x:auto; scrollbar-width:none; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab-btn { flex:1; min-width:fit-content; padding:7px 8px; background:none; border:none; border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.75rem; font-weight:500; color:var(--ink2); transition:all .18s; white-space:nowrap; }
+.tab-btn.active { background:var(--surface3); color:var(--ink); font-weight:600; }
+
+/* ── ADD PANELS ── */
+.add-panel { background:var(--surface); border-radius:var(--radius); border:1px solid var(--border); padding:15px; margin-bottom:12px; display:none; }
+.add-panel.visible { display:block; }
+.add-panel h3 { font-family:'Playfair Display',serif; font-size:.92rem; margin-bottom:11px; color:var(--ink2); }
+.input-row { display:grid; grid-template-columns:1fr 95px; gap:7px; margin-bottom:7px; }
+input[type="text"],input[type="number"],select { background:var(--surface2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:9px 11px; font-family:'DM Sans',sans-serif; font-size:.86rem; color:var(--ink); outline:none; width:100%; transition:border .15s; }
+input::placeholder { color:var(--ink3); }
+input:focus,select:focus { border-color:var(--ink2); }
+select option { background:var(--surface2); }
+.category-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:9px; }
+.cat-btn { padding:7px 5px; border-radius:var(--radius-sm); border:1px solid var(--border2); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.73rem; font-weight:600; text-align:center; transition:all .15s; background:var(--surface2); color:var(--ink2); }
+.cat-btn:hover { border-color:var(--ink3); color:var(--ink); }
+.cat-btn.selected-needs{background:var(--needs-soft);border-color:var(--needs);color:var(--needs)}
+.cat-btn.selected-wants{background:var(--wants-soft);border-color:var(--wants);color:var(--wants)}
+.cat-btn.selected-savings{background:var(--savings-soft);border-color:var(--savings);color:var(--savings)}
+.action-btn { width:100%; border:none; border-radius:var(--radius-sm); padding:10px; font-family:'DM Sans',sans-serif; font-size:.86rem; font-weight:600; cursor:pointer; transition:all .15s; }
+.action-btn.expense { background:var(--surface2); color:var(--ink); border:1px solid var(--border2); }
+.action-btn.expense:hover { background:var(--surface3); }
+.action-btn.income { background:var(--income-soft); color:var(--income-c); border:1px solid rgba(107,159,255,.25); }
+.action-btn.income:hover { background:rgba(107,159,255,.2); }
+
+/* ── RECURRING ── */
+.recurring-list { display:flex; flex-direction:column; gap:5px; margin-bottom:10px; }
+.rec-item { background:var(--surface2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:8px 11px; display:flex; align-items:center; gap:9px; }
+.rec-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.rec-info { flex:1; font-size:.82rem; }
+.rec-info small { color:var(--ink3); font-size:.68rem; margin-left:5px; }
+.rec-amount { font-weight:600; font-size:.82rem; }
+.rec-del { background:none; border:none; cursor:pointer; color:var(--ink3); font-size:.86rem; padding:2px 5px; border-radius:4px; transition:all .15s; opacity:.5; }
+.rec-del:hover { background:var(--needs-soft); color:var(--needs); opacity:1; }
+.apply-btn { width:100%; background:none; color:var(--savings); border:1px dashed rgba(58,170,102,.3); border-radius:var(--radius-sm); padding:8px; font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:500; cursor:pointer; transition:all .15s; margin-top:5px; }
+.apply-btn:hover { background:var(--savings-soft); border-color:var(--savings); }
+.apply-btn.income-style { color:var(--income-c); border-color:rgba(107,159,255,.3); }
+.apply-btn.income-style:hover { background:var(--income-soft); border-color:var(--income-c); }
+.sep { height:1px; background:var(--border); margin:10px 0; }
+
+/* ── TRANSACTIONS ── */
+.txn-header-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:9px; }
+.txn-header-row h3 { font-family:'Playfair Display',serif; font-size:.95rem; color:var(--ink2); }
+.filter-chips { display:flex; gap:4px; flex-wrap:wrap; }
+.chip { padding:3px 9px; border-radius:100px; border:1px solid var(--border2); background:none; font-family:'DM Sans',sans-serif; font-size:.67rem; font-weight:500; cursor:pointer; color:var(--ink3); transition:all .15s; }
+.chip.active { background:var(--surface2); color:var(--ink); border-color:var(--ink3); }
+.txn-list { display:flex; flex-direction:column; gap:5px; }
+.txn-item { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); padding:9px 12px; display:flex; align-items:center; gap:9px; animation:slideIn .2s ease; }
+@keyframes slideIn { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
+.txn-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.dot-needs{background:var(--needs)} .dot-wants{background:var(--wants)} .dot-savings{background:var(--savings)} .dot-income{background:var(--income-c)}
+.txn-info { flex:1; min-width:0; }
+.txn-desc { font-weight:500; font-size:.84rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.txn-meta { font-size:.68rem; color:var(--ink3); margin-top:1px; }
+.txn-amount { font-weight:600; font-size:.86rem; white-space:nowrap; }
+.txn-amount.needs{color:var(--needs)} .txn-amount.wants{color:var(--wants)} .txn-amount.savings{color:var(--savings)} .txn-amount.income{color:var(--income-c)}
+.txn-del { background:none; border:none; cursor:pointer; color:var(--ink3); font-size:.86rem; padding:2px 4px; border-radius:4px; transition:all .15s; opacity:.4; }
+.txn-del:hover { background:var(--needs-soft); color:var(--needs); opacity:1; }
+.empty-state { text-align:center; padding:28px 20px; color:var(--ink3); font-size:.82rem; }
+.empty-state .icon { font-size:1.6rem; margin-bottom:7px; }
+
+/* ── TRENDS PANEL ── */
+.trends-panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
+.trends-panel h3 { font-family:'Playfair Display',serif; font-size:.92rem; color:var(--ink2); margin-bottom:14px; }
+.chart-wrap { position:relative; height:200px; }
+.trends-legend { display:flex; gap:12px; margin-top:12px; flex-wrap:wrap; }
+.legend-item { display:flex; align-items:center; gap:5px; font-size:.68rem; color:var(--ink2); }
+.legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.no-trends { text-align:center; padding:40px 20px; color:var(--ink3); font-size:.8rem; }
+
+/* ── NET WORTH ── */
+.nw-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
+.nw-section h3 { font-family:'Playfair Display',serif; font-size:.92rem; color:var(--ink2); margin-bottom:12px; }
+.nw-display { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px; }
+.nw-card { background:var(--surface2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:10px 12px; text-align:center; }
+.nw-card .nw-label { font-size:.62rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); margin-bottom:4px; }
+.nw-card .nw-val { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; }
+.nw-card.total .nw-val { color:var(--savings); }
+.nw-card.total.negative .nw-val { color:var(--danger); }
+.nw-form { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:8px; }
+.nw-form label { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); display:block; margin-bottom:4px; }
+.nw-history { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.nw-hist-item { background:var(--surface2); border:1px solid var(--border2); border-radius:6px; padding:4px 9px; font-size:.7rem; color:var(--ink2); }
+.nw-hist-item span { color:var(--savings); font-weight:600; margin-left:4px; }
+.nw-hist-item span.neg { color:var(--danger); }
+
+/* ── SAVINGS GOALS ── */
+.goals-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
+.goals-section h3 { font-family:'Playfair Display',serif; font-size:.92rem; color:var(--ink2); margin-bottom:14px; }
+.goal-list { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.goal-item { background:var(--surface2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:12px 13px; }
+.goal-item.complete { border-color:rgba(58,170,102,.4); background:rgba(58,170,102,.06); }
+.goal-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.goal-emoji { font-size:1.3rem; flex-shrink:0; }
+.goal-name { font-weight:600; font-size:.88rem; flex:1; }
+.goal-pct { font-size:.72rem; font-weight:700; color:var(--savings); }
+.goal-item.complete .goal-pct { color:var(--ok); }
+.goal-bar-track { height:6px; background:var(--border2); border-radius:3px; margin-bottom:8px; overflow:hidden; }
+.goal-bar-fill { height:100%; border-radius:3px; background:var(--savings); transition:width .5s cubic-bezier(.4,0,.2,1); }
+.goal-item.complete .goal-bar-fill { background:var(--ok); }
+.goal-amounts { display:flex; justify-content:space-between; font-size:.72rem; color:var(--ink3); margin-bottom:8px; }
+.goal-amounts strong { color:var(--ink2); }
+.goal-contribute { display:flex; gap:6px; align-items:center; }
+.goal-contribute input { flex:1; padding:6px 9px; font-size:.8rem; }
+.goal-contribute button { padding:6px 12px; border:none; border-radius:var(--radius-sm); background:var(--savings-soft); color:var(--savings); font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:600; cursor:pointer; border:1px solid rgba(58,170,102,.3)!important; white-space:nowrap; }
+.goal-contribute button:hover { background:rgba(58,170,102,.2); }
+.goal-del { background:none; border:none; cursor:pointer; color:var(--ink3); font-size:.82rem; padding:2px 5px; border-radius:4px; transition:all .15s; opacity:.4; }
+.goal-del:hover { background:var(--needs-soft); color:var(--needs); opacity:1; }
+.goal-add-form { border-top:1px solid var(--border); padding-top:13px; }
+.goal-add-form h4 { font-size:.8rem; color:var(--ink3); letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px; }
+.emoji-picker { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:9px; }
+.emoji-opt { font-size:1.3rem; padding:4px 6px; border-radius:7px; border:1px solid var(--border2); background:var(--surface2); cursor:pointer; transition:all .15s; line-height:1; }
+.emoji-opt.selected { border-color:var(--savings); background:var(--savings-soft); }
+.no-goals { text-align:center; padding:18px; color:var(--ink3); font-size:.8rem; }
+
+/* ── CHANGE PIN MODAL ── */
+.pin-change-step { display:none; flex-direction:column; align-items:center; }
+.pin-change-step.active { display:flex; }
+.pin-change-title { font-size:.78rem; color:var(--ink2); letter-spacing:.08em; text-transform:uppercase; margin-bottom:18px; text-align:center; }
+
+/* ── MODAL ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:500; display:none; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
+.modal-overlay.open { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius); padding:22px; width:100%; max-width:400px; max-height:90vh; overflow-y:auto; }
+.modal h2 { font-family:'Playfair Display',serif; font-size:1.1rem; margin-bottom:16px; }
+.split-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px; }
+.split-field label { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); display:block; margin-bottom:5px; }
+.split-field input { text-align:center; font-weight:700; font-size:1rem; }
+.split-total { font-size:.8rem; color:var(--ink2); text-align:center; margin-bottom:14px; }
+.split-total.invalid { color:var(--danger); }
+.modal-btns { display:flex; gap:8px; }
+.modal-btns button { flex:1; padding:10px; border-radius:var(--radius-sm); border:none; font-family:'DM Sans',sans-serif; font-size:.84rem; font-weight:600; cursor:pointer; }
+.btn-cancel { background:var(--surface2); color:var(--ink2); border:1px solid var(--border2)!important; }
+.btn-save { background:var(--income-soft); color:var(--income-c); border:1px solid rgba(107,159,255,.25)!important; }
+.btn-save:hover { background:rgba(107,159,255,.2); }
+
+/* ── SETTINGS SECTIONS ── */
+.settings-group { margin-bottom:18px; }
+.settings-group-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:var(--ink3); margin-bottom:10px; display:block; }
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:6px 0; }
+.toggle-row .toggle-label { font-size:.84rem; }
+.toggle-row .toggle-sub { font-size:.7rem; color:var(--ink3); }
+.toggle-switch { position:relative; width:38px; height:22px; flex-shrink:0; }
+.toggle-switch input { opacity:0; width:0; height:0; }
+.toggle-slider { position:absolute; inset:0; background:var(--border2); border-radius:100px; cursor:pointer; transition:.3s; }
+.toggle-slider:before { content:''; position:absolute; width:16px; height:16px; left:3px; bottom:3px; background:white; border-radius:50%; transition:.3s; }
+.toggle-switch input:checked + .toggle-slider { background:var(--savings); }
+.toggle-switch input:checked + .toggle-slider:before { transform:translateX(16px); }
+.lang-select { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.lang-btn { padding:8px; border:1px solid var(--border2); border-radius:var(--radius-sm); background:var(--surface2); color:var(--ink2); font-family:'DM Sans',sans-serif; font-size:.82rem; font-weight:500; cursor:pointer; text-align:center; transition:all .15s; }
+.lang-btn.active { border-color:var(--income-c); color:var(--income-c); background:var(--income-soft); }
+.theme-select { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.theme-btn { padding:8px; border:1px solid var(--border2); border-radius:var(--radius-sm); background:var(--surface2); color:var(--ink2); font-family:'DM Sans',sans-serif; font-size:.82rem; font-weight:500; cursor:pointer; text-align:center; transition:all .15s; }
+.theme-btn.active { border-color:var(--income-c); color:var(--income-c); background:var(--income-soft); }
+
+/* ── SYNC ── */
+.sync-dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-left:4px; vertical-align:middle; transition:background .3s; }
+.sync-dot.ok{background:var(--savings)} .sync-dot.busy{background:var(--warn);animation:pulse .8s infinite} .sync-dot.err{background:var(--danger)} .sync-dot.off{background:var(--ink3)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.sync-hint { font-size:.72rem; color:var(--ink3); line-height:1.6; margin-bottom:14px; }
+.sync-hint a { color:var(--income-c); }
+.sync-modal-body { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.sync-modal-body label { font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); display:block; margin-bottom:4px; }
+.sync-modal-body input { font-size:.8rem; font-family:monospace; }
+.sync-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.sync-actions button { flex:1; min-width:100px; padding:9px; border-radius:var(--radius-sm); background:var(--surface2); color:var(--ink2); border:1px solid var(--border2); font-family:'DM Sans',sans-serif; font-size:.8rem; font-weight:600; cursor:pointer; }
+.btn-import-label { flex:1; min-width:100px; padding:9px; border-radius:var(--radius-sm); background:var(--surface2); color:var(--ink2); border:1px solid var(--border2); font-family:'DM Sans',sans-serif; font-size:.8rem; font-weight:600; cursor:pointer; text-align:center; }
+.sync-status-line { font-size:.72rem; color:var(--ink3); margin-top:10px; min-height:18px; text-align:center; }
+
+/* ── TOAST ── */
+.toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--surface3); border:1px solid var(--border2); color:var(--ink); padding:8px 18px; border-radius:100px; font-size:.78rem; font-weight:500; transition:transform .3s ease; z-index:9000; white-space:nowrap; box-shadow:0 4px 24px rgba(0,0,0,.4); }
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ── SETUP WIZARD ── */
+#setupWizard { position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:28px 24px; }
+.wizard-logo { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; margin-bottom:6px; }
+.wizard-sub { font-size:.7rem; color:var(--ink3); letter-spacing:.12em; text-transform:uppercase; margin-bottom:36px; }
+.wizard-step { width:100%; max-width:320px; display:none; flex-direction:column; align-items:center; }
+.wizard-step.active { display:flex; }
+.wizard-step-title { font-size:.8rem; color:var(--ink2); letter-spacing:.1em; text-transform:uppercase; margin-bottom:20px; text-align:center; }
+.wizard-btns { display:flex; gap:8px; width:100%; margin-top:18px; }
+.wizard-btn { flex:1; padding:12px; border-radius:var(--radius-sm); border:none; font-family:'DM Sans',sans-serif; font-size:.86rem; font-weight:600; cursor:pointer; }
+.wizard-btn-primary { background:var(--income-soft); color:var(--income-c); border:1px solid rgba(107,159,255,.3)!important; }
+.wizard-btn-secondary { background:var(--surface2); color:var(--ink2); border:1px solid var(--border2)!important; }
+.wizard-error { font-size:.76rem; color:var(--danger); min-height:20px; text-align:center; margin-top:10px; }
+.wizard-input-wide { width:100%; max-width:280px; text-align:center; font-size:1rem; font-weight:600; letter-spacing:.2em; margin-bottom:4px; }
+.wizard-hint { font-size:.72rem; color:var(--ink3); line-height:1.6; text-align:center; margin-bottom:12px; }
+.wizard-hint a { color:var(--income-c); }
+.wizard-progress { display:flex; gap:8px; margin-bottom:30px; }
+.wiz-dot { width:8px; height:8px; border-radius:50%; background:var(--border2); transition:background .3s; }
+.wiz-dot.active { background:var(--income-c); }
+.wizard-field { width:100%; margin-bottom:8px; }
+.wizard-field label { font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); display:block; margin-bottom:5px; }
+.lang-theme-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; width:100%; margin-bottom:8px; }
+
+/* ── LOCK SCREEN ── */
+#lockScreen { position:fixed; inset:0; background:var(--bg); z-index:9998; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px 24px; }
+#lockScreen h2 { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--ink); margin-bottom:6px; letter-spacing:-.02em; }
+#lockScreen p { font-size:.75rem; color:var(--ink3); letter-spacing:.1em; text-transform:uppercase; margin-bottom:36px; }
+.pin-dots { display:flex; gap:14px; margin-bottom:32px; }
+.pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--ink3); background:none; transition:all .15s; }
+.pin-dot.filled { background:var(--ink); border-color:var(--ink); }
+.pin-dot.error { background:var(--danger); border-color:var(--danger); }
+.pin-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; width:100%; max-width:280px; }
+.pin-key { background:var(--surface); border:1px solid var(--border2); border-radius:14px; padding:18px 10px; font-family:'DM Sans',sans-serif; font-size:1.3rem; font-weight:600; color:var(--ink); cursor:pointer; text-align:center; transition:all .1s; user-select:none; }
+.pin-key:active { background:var(--surface3); transform:scale(.94); }
+.pin-key.del { font-size:1rem; color:var(--ink2); }
+.pin-key.empty { background:none; border:none; cursor:default; }
+.pin-error-msg { font-size:.78rem; color:var(--danger); margin-top:16px; min-height:20px; text-align:center; }
+
+#appContent { display:none; }
+
+@media(max-width:380px) {
+  .buckets { grid-template-columns:1fr 1fr; }
+  .income-row { grid-template-columns:1fr; }
+  .nw-display { grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── SETUP WIZARD ── -->
+<div id="setupWizard" style="display:none">
+  <div class="wizard-logo">Budget</div>
+  <div class="wizard-sub" id="wiz-sub">Your 50 · 30 · 20 tracker</div>
+  <div class="wizard-progress">
+    <div class="wiz-dot active" id="wdot-0"></div>
+    <div class="wiz-dot" id="wdot-1"></div>
+    <div class="wiz-dot" id="wdot-2"></div>
+  </div>
+
+  <!-- Step 0: Choose PIN -->
+  <div class="wizard-step active" id="wstep-0">
+    <div class="wizard-step-title" id="wt-choosePIN">Choose your PIN</div>
+    <div class="pin-dots" id="wPinDots">
+      <div class="pin-dot" id="wdot-p0"></div>
+      <div class="pin-dot" id="wdot-p1"></div>
+      <div class="pin-dot" id="wdot-p2"></div>
+      <div class="pin-dot" id="wdot-p3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="wizPinKey('1')">1</button>
+      <button class="pin-key" onclick="wizPinKey('2')">2</button>
+      <button class="pin-key" onclick="wizPinKey('3')">3</button>
+      <button class="pin-key" onclick="wizPinKey('4')">4</button>
+      <button class="pin-key" onclick="wizPinKey('5')">5</button>
+      <button class="pin-key" onclick="wizPinKey('6')">6</button>
+      <button class="pin-key" onclick="wizPinKey('7')">7</button>
+      <button class="pin-key" onclick="wizPinKey('8')">8</button>
+      <button class="pin-key" onclick="wizPinKey('9')">9</button>
+      <button class="pin-key empty" disabled></button>
+      <button class="pin-key" onclick="wizPinKey('0')">0</button>
+      <button class="pin-key del" onclick="wizPinDel()">⌫</button>
+    </div>
+    <div class="wizard-error" id="wPinError"></div>
+  </div>
+
+  <!-- Step 1: Gist (optional) -->
+  <div class="wizard-step" id="wstep-1">
+    <div class="wizard-step-title" id="wt-sync">Sync across devices <span style="color:var(--ink3);font-size:.7rem">(optional)</span></div>
+    <p class="wizard-hint" id="wt-syncHint">
+      Use a free GitHub Gist to keep your data synced across all your devices.<br><br>
+      1. <a href="https://github.com/settings/tokens/new" target="_blank">Create a token</a> with <strong>gist</strong> scope.<br>
+      2. <a href="https://gist.github.com" target="_blank">Create a secret gist</a> → copy the ID from the URL.
+    </p>
+    <div class="wizard-field">
+      <label id="wt-tokenLabel">GitHub Token</label>
+      <input type="password" id="wGistToken" placeholder="ghp_xxxx…" autocomplete="off">
+    </div>
+    <div class="wizard-field">
+      <label id="wt-gistIdLabel">Gist ID</label>
+      <input type="text" id="wGistId" placeholder="e.g. 4a3bc8d2e1f09c7b5a2d" autocomplete="off">
+    </div>
+    <div class="wizard-error" id="wGistError"></div>
+    <div class="wizard-btns">
+      <button class="wizard-btn wizard-btn-secondary" onclick="wizSkipGist()" id="wt-skip">Skip</button>
+      <button class="wizard-btn wizard-btn-primary" onclick="wizSaveGist()" id="wt-connect">Connect</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Language + Theme -->
+  <div class="wizard-step" id="wstep-2">
+    <div class="wizard-step-title" id="wt-prefs">Preferences</div>
+    <div style="width:100%;max-width:280px">
+      <div style="margin-bottom:14px">
+        <div class="settings-group-label" id="wt-langLabel">Language</div>
+        <div class="lang-select">
+          <button class="lang-btn active" id="wlang-en" onclick="wizSetLang('en')">🇬🇧 English</button>
+          <button class="lang-btn" id="wlang-it" onclick="wizSetLang('it')">🇮🇹 Italiano</button>
+        </div>
+      </div>
+      <div>
+        <div class="settings-group-label" id="wt-themeLabel">Theme</div>
+        <div class="theme-select">
+          <button class="theme-btn active" id="wtheme-dark" onclick="wizSetTheme('dark')">🌙 Dark</button>
+          <button class="theme-btn" id="wtheme-light" onclick="wizSetTheme('light')">☀️ Light</button>
+        </div>
+      </div>
+    </div>
+    <div class="wizard-btns" style="max-width:280px;margin-top:24px">
+      <button class="wizard-btn wizard-btn-primary" onclick="wizFinish()" id="wt-finish">Get started</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LOCK SCREEN ── -->
+<div id="lockScreen" style="display:none">
+  <h2>Budget</h2>
+  <p id="lockPrompt">Enter your PIN</p>
+  <div class="pin-dots">
+    <div class="pin-dot" id="dot-0"></div>
+    <div class="pin-dot" id="dot-1"></div>
+    <div class="pin-dot" id="dot-2"></div>
+    <div class="pin-dot" id="dot-3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <button class="pin-key empty" disabled></button>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key del" onclick="pinDel()">⌫</button>
+  </div>
+  <div class="pin-error-msg" id="pinError"></div>
+</div>
+
+<!-- ── APP ── -->
+<div id="appContent">
+
+<header>
+  <h1>Budget</h1>
+  <p id="splitLabel">50 · 30 · 20</p>
+  <div class="header-actions">
+    <button class="icon-btn" onclick="openSyncModal()" title="Sync">☁<span class="sync-dot off" id="syncDot"></span></button>
+    <button class="icon-btn" onclick="openSettings()">⚙</button>
+  </div>
+</header>
+
+<div class="month-bar">
+  <button id="prevMonth">&#8592;</button>
+  <div class="month-label" id="monthLabel">—</div>
+  <button id="nextMonth">&#8594;</button>
+</div>
+
+<div class="container">
+
+  <!-- INCOME + BALANCE -->
+  <div class="income-row">
+    <div class="stat-card">
+      <div class="label" id="lbl-totalIncome">Total Income</div>
+      <div class="value income-val" id="totalIncomeDisplay">€0</div>
+      <div class="sub" id="incomeCount">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label" id="lbl-balance">Balance</div>
+      <div class="value balance-neutral" id="balanceDisplay">€—</div>
+      <div class="sub" id="balanceSub">—</div>
+    </div>
+  </div>
+
+  <!-- SAFE BANNER -->
+  <div class="safe-banner empty" id="safeBanner">
+    <div>
+      <div class="safe-label" id="safeBannerLabel">Safe to spend (Wants)</div>
+      <div class="safe-val" id="safeVal">€0</div>
+    </div>
+    <div class="safe-desc" id="safeDesc">—</div>
+  </div>
+
+  <!-- RING BUCKETS -->
+  <div class="buckets">
+    <div class="bucket" id="bucket-needs">
+      <div class="bucket-ring">
+        <svg width="72" height="72" viewBox="0 0 72 72"><circle class="ring-bg" cx="36" cy="36" r="30"/><circle class="ring-fill ring-ok" id="ring-needs" cx="36" cy="36" r="30" stroke-dasharray="188.5" stroke-dashoffset="188.5"/></svg>
+        <div class="ring-label"><span class="ring-pct ok" id="ringpct-needs">0%</span><span class="ring-sub">USED</span></div>
+      </div>
+      <div class="bucket-name" id="bname-needs">Needs</div>
+      <div class="bucket-alloc" id="alloc-needs">—</div>
+      <div class="bucket-spent ok" id="spent-needs">€0</div>
+      <div class="bucket-of" id="of-needs">—</div>
+      <div class="bucket-over danger" id="over-needs"></div>
+      <div class="bucket-rollover" id="roll-needs"></div>
+    </div>
+    <div class="bucket" id="bucket-wants">
+      <div class="bucket-ring">
+        <svg width="72" height="72" viewBox="0 0 72 72"><circle class="ring-bg" cx="36" cy="36" r="30"/><circle class="ring-fill ring-ok" id="ring-wants" cx="36" cy="36" r="30" stroke-dasharray="188.5" stroke-dashoffset="188.5"/></svg>
+        <div class="ring-label"><span class="ring-pct ok" id="ringpct-wants">0%</span><span class="ring-sub">USED</span></div>
+      </div>
+      <div class="bucket-name" id="bname-wants">Wants</div>
+      <div class="bucket-alloc" id="alloc-wants">—</div>
+      <div class="bucket-spent ok" id="spent-wants">€0</div>
+      <div class="bucket-of" id="of-wants">—</div>
+      <div class="bucket-over danger" id="over-wants"></div>
+      <div class="bucket-rollover" id="roll-wants"></div>
+    </div>
+    <div class="bucket" id="bucket-savings">
+      <div class="bucket-ring">
+        <svg width="72" height="72" viewBox="0 0 72 72"><circle class="ring-bg" cx="36" cy="36" r="30"/><circle class="ring-fill ring-ok" id="ring-savings" cx="36" cy="36" r="30" stroke-dasharray="188.5" stroke-dashoffset="188.5"/></svg>
+        <div class="ring-label"><span class="ring-pct ok" id="ringpct-savings">0%</span><span class="ring-sub">USED</span></div>
+      </div>
+      <div class="bucket-name" id="bname-savings">Savings</div>
+      <div class="bucket-alloc" id="alloc-savings">—</div>
+      <div class="bucket-spent ok" id="spent-savings">€0</div>
+      <div class="bucket-of" id="of-savings">—</div>
+      <div class="bucket-over danger" id="over-savings"></div>
+      <div class="bucket-rollover" id="roll-savings"></div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-expense" onclick="switchTab('expense')" id-t="tabExpense">− Expense</button>
+    <button class="tab-btn" id="tab-income" onclick="switchTab('income')" id-t="tabIncome">+ Income</button>
+    <button class="tab-btn" id="tab-recurring" onclick="switchTab('recurring')" id-t="tabRecurring">↺ Recurring</button>
+    <button class="tab-btn" id="tab-trends" onclick="switchTab('trends')" id-t="tabTrends">📊 Trends</button>
+  </div>
+
+  <!-- EXPENSE PANEL -->
+  <div class="add-panel visible" id="panel-expense">
+    <h3 id="lbl-addExpense">Add expense</h3>
+    <div class="input-row">
+      <input type="text" id="expDesc" placeholder="Description">
+      <input type="number" id="expAmount" placeholder="€" min="0.01" step="0.01">
+    </div>
+    <div class="category-row">
+      <button class="cat-btn" id="btn-needs" onclick="selectCat('needs')">🏠 <span id="catlbl-needs">Needs</span></button>
+      <button class="cat-btn" id="btn-wants" onclick="selectCat('wants')">☕ <span id="catlbl-wants">Wants</span></button>
+      <button class="cat-btn" id="btn-savings" onclick="selectCat('savings')">💰 <span id="catlbl-savings">Savings</span></button>
+    </div>
+    <button class="action-btn expense" onclick="addExpense()" id="btn-addExpense">Add Expense</button>
+  </div>
+
+  <!-- INCOME PANEL -->
+  <div class="add-panel" id="panel-income">
+    <h3 id="lbl-addIncome">Add income entry</h3>
+    <div class="input-row">
+      <input type="text" id="incDesc" placeholder="Source (e.g. Teaching, Freelance)">
+      <input type="number" id="incAmount" placeholder="€" min="0.01" step="0.01">
+    </div>
+    <button class="action-btn income" onclick="addIncome()" id="btn-addIncome">Add Income</button>
+  </div>
+
+  <!-- RECURRING PANEL -->
+  <div class="add-panel" id="panel-recurring">
+    <h3 id="lbl-recurringExpenses">Recurring expenses</h3>
+    <div class="recurring-list" id="recurringList"></div>
+    <div class="sep"></div>
+    <h3 style="margin-bottom:10px" id="lbl-addRecExp">Add new recurring expense</h3>
+    <div class="input-row" style="margin-bottom:7px">
+      <input type="text" id="recDesc" placeholder="Description">
+      <input type="number" id="recAmount" placeholder="€" min="0.01" step="0.01">
+    </div>
+    <div class="category-row">
+      <button class="cat-btn" id="rbtn-needs" onclick="selectRecCat('needs')">🏠 <span id="rcatlbl-needs">Needs</span></button>
+      <button class="cat-btn" id="rbtn-wants" onclick="selectRecCat('wants')">☕ <span id="rcatlbl-wants">Wants</span></button>
+      <button class="cat-btn" id="rbtn-savings" onclick="selectRecCat('savings')">💰 <span id="rcatlbl-savings">Savings</span></button>
+    </div>
+    <button class="action-btn expense" onclick="addRecurring()" id="btn-saveRecExp">Save Recurring Expense</button>
+    <button class="apply-btn" onclick="applyRecurring()" id="btn-importRecExp">↺ Import all recurring expenses</button>
+    <div style="height:1px;background:var(--border);margin:18px 0"></div>
+    <h3 id="lbl-recurringIncome">Recurring income</h3>
+    <div class="recurring-list" id="recurringIncomeList"></div>
+    <div class="sep"></div>
+    <h3 style="margin-bottom:10px" id="lbl-addRecInc">Add new recurring income</h3>
+    <div class="input-row" style="margin-bottom:10px">
+      <input type="text" id="recIncDesc" placeholder="Source (e.g. Salary, Freelance)">
+      <input type="number" id="recIncAmount" placeholder="€" min="0.01" step="0.01">
+    </div>
+    <button class="action-btn income" onclick="addRecurringIncome()" id="btn-saveRecInc">Save Recurring Income</button>
+    <button class="apply-btn income-style" onclick="applyRecurringIncome()" id="btn-importRecInc">↺ Import all recurring income</button>
+  </div>
+
+  <!-- TRENDS PANEL -->
+  <div class="add-panel" id="panel-trends">
+    <h3 id="lbl-trends">Monthly Trends</h3>
+    <div id="trendsContent"></div>
+  </div>
+
+  <!-- TRANSACTION LIST -->
+  <div>
+    <div class="txn-header-row">
+      <h3 id="txnHeader">Transactions</h3>
+      <div class="filter-chips">
+        <button class="chip active" id="chip-all" onclick="setFilter('all')" id-t="chipAll">All</button>
+        <button class="chip" id="chip-income" onclick="setFilter('income')" id-t="chipIncome">Income</button>
+        <button class="chip" id="chip-needs" onclick="setFilter('needs')" id-t="chipNeeds">Needs</button>
+        <button class="chip" id="chip-wants" onclick="setFilter('wants')" id-t="chipWants">Wants</button>
+        <button class="chip" id="chip-savings" onclick="setFilter('savings')" id-t="chipSavings">Savings</button>
+      </div>
+    </div>
+    <div class="txn-list" id="txnList"></div>
+  </div>
+
+  <!-- NET WORTH -->
+  <div class="nw-section" style="margin-top:16px">
+    <h3 id="lbl-netWorth">Net Worth</h3>
+    <div class="nw-display">
+      <div class="nw-card">
+        <div class="nw-label" id="lbl-assets">Assets</div>
+        <div class="nw-val income-val" id="nwAssetsDisplay">€—</div>
+      </div>
+      <div class="nw-card">
+        <div class="nw-label" id="lbl-liabilities">Liabilities</div>
+        <div class="nw-val" style="color:var(--danger)" id="nwLiabDisplay">€—</div>
+      </div>
+      <div class="nw-card total" id="nwTotalCard">
+        <div class="nw-label">Net Worth</div>
+        <div class="nw-val" id="nwTotalDisplay">€—</div>
+      </div>
+    </div>
+    <div class="nw-form">
+      <div>
+        <label id="lbl-nwAssets">Total assets (€)</label>
+        <input type="number" id="nwAssets" placeholder="e.g. 5000" min="0" step="1">
+      </div>
+      <div>
+        <label id="lbl-nwLiab">Liabilities (€)</label>
+        <input type="number" id="nwLiab" placeholder="e.g. 200" min="0" step="1">
+      </div>
+    </div>
+    <button class="action-btn income" onclick="saveNetWorth()" id="btn-updateNW">Update this month</button>
+    <div class="nw-history" id="nwHistory"></div>
+  </div>
+
+  <!-- SAVINGS GOALS -->
+  <div class="goals-section" style="margin-top:16px">
+    <h3 id="lbl-goalsTitle">Savings Goals</h3>
+    <div class="goal-list" id="goalList"></div>
+
+    <div class="goal-add-form">
+      <h4 id="lbl-addGoalSection">New goal</h4>
+      <div class="emoji-picker" id="emojiPicker">
+        <span class="emoji-opt" onclick="selectGoalEmoji('🏖')">🏖</span>
+        <span class="emoji-opt" onclick="selectGoalEmoji('✈️')">✈️</span>
+        <span class="emoji-opt" onclick="selectGoalEmoji('🚗')">🚗</span>
+        <span class="emoji-opt" onclick="selectGoalEmoji('🏠')">🏠</span>
+        <span class="emoji-opt" onclick="selectGoalEmoji('🎓')">🎓</span>
+        <span class="emoji-opt" onclick="selectGoalEmoji('💻')">💻</span>
+        <span class="emoji-opt" onclick="selectGoalEmoji('🎸')">🎸</span>
+        <span class="emoji-opt" onclick="selectGoalEmoji('🌟')">🌟</span>
+        <span class="emoji-opt" onclick="selectGoalEmoji('🏋')">🏋</span>
+        <span class="emoji-opt" onclick="selectGoalEmoji('💍')">💍</span>
+      </div>
+      <div class="input-row" style="margin-bottom:8px">
+        <input type="text" id="goalName" placeholder="Goal name (e.g. Holiday)">
+        <input type="number" id="goalTarget" placeholder="€" min="1" step="1">
+      </div>
+      <button class="action-btn income" onclick="addGoal()" id="btn-addGoal">Add Goal</button>
+    </div>
+  </div>
+
+</div><!-- end .container -->
+
+<!-- QUICK LOG MODAL -->
+<div class="modal-overlay" id="quickModal">
+  <div class="modal" style="text-align:center;padding:28px 22px">
+    <div id="qm-icon" style="font-size:2.4rem;margin-bottom:10px">☕</div>
+    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--ink3);margin-bottom:6px" id="qm-cat-label">Want</div>
+    <div style="font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:700;margin-bottom:6px;letter-spacing:-.02em" id="qm-amount">€0</div>
+    <div style="font-size:.9rem;color:var(--ink2);margin-bottom:22px" id="qm-desc">Trade Republic</div>
+    <div style="display:flex;gap:7px;margin-bottom:20px">
+      <button onclick="qmSetCat('wants')" id="qmbtn-wants" class="cat-btn" style="flex:1;padding:9px 4px">☕</button>
+      <button onclick="qmSetCat('savings')" id="qmbtn-savings" class="cat-btn" style="flex:1;padding:9px 4px">💰</button>
+      <button onclick="qmSetCat('needs')" id="qmbtn-needs" class="cat-btn" style="flex:1;padding:9px 4px">🏠</button>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="closeQuickModal()" style="flex:1;padding:13px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--ink2);cursor:pointer" id="btn-qmSkip">Skip</button>
+      <button onclick="confirmQuickLog()" id="qm-confirm-btn" style="flex:2;padding:13px;background:var(--savings-soft);border:1px solid rgba(58,170,102,.3);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:.9rem;font-weight:700;color:var(--savings);cursor:pointer">✓ Log it</button>
+    </div>
+    <div style="font-size:.68rem;color:var(--ink3);margin-top:12px" id="qm-timer"></div>
+  </div>
+</div>
+
+<!-- SYNC MODAL -->
+<div class="modal-overlay" id="syncModal">
+  <div class="modal">
+    <h2>☁ <span id="lbl-syncBackup">Sync &amp; Backup</span></h2>
+    <p class="sync-hint" id="syncHintText">
+      Sync across devices using a private GitHub Gist — free, your data stays in your GitHub account.<br><br>
+      1. <a href="https://github.com/settings/tokens/new" target="_blank">Create a token</a> with <strong>gist</strong> scope.<br>
+      2. <a href="https://gist.github.com" target="_blank">Create a secret gist</a> → copy the ID from the URL.<br>
+      3. Paste both below and tap Save.
+    </p>
+    <div class="sync-modal-body">
+      <div>
+        <label>GitHub Personal Access Token</label>
+        <input type="password" id="gistToken" placeholder="ghp_xxxx…" autocomplete="off">
+      </div>
+      <div>
+        <label>Gist ID</label>
+        <input type="text" id="gistId" placeholder="e.g. 4a3bc8d2e1f09c7b5a2d" autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-btns" style="margin-bottom:12px">
+      <button class="btn-cancel" onclick="closeSyncModal()" id="btn-syncCancel">Cancel</button>
+      <button class="btn-save" onclick="saveGistConfig()" id="btn-syncSave">Save &amp; Sync Now</button>
+    </div>
+    <div style="height:1px;background:var(--border);margin-bottom:12px"></div>
+    <p style="font-size:.72rem;color:var(--ink3);margin-bottom:8px" id="lbl-manualBackup">Manual backup</p>
+    <div class="sync-actions">
+      <button onclick="exportJSON()" id="btn-export">⬇ Export JSON</button>
+      <label class="btn-import-label">⬆ Import JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
+    </div>
+    <div class="sync-status-line" id="syncStatusLine"></div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h2 id="lbl-settings">Settings</h2>
+
+    <!-- Splits -->
+    <div class="settings-group">
+      <span class="settings-group-label" id="lbl-adjustSplits">Budget splits</span>
+      <div class="split-row">
+        <div class="split-field">
+          <label>🏠 <span id="slbl-needs">Needs</span> %</label>
+          <input type="number" id="splitNeeds" min="1" max="98" step="1" oninput="updateSplitTotal()">
+        </div>
+        <div class="split-field">
+          <label>☕ <span id="slbl-wants">Wants</span> %</label>
+          <input type="number" id="splitWants" min="1" max="98" step="1" oninput="updateSplitTotal()">
+        </div>
+        <div class="split-field">
+          <label>💰 <span id="slbl-savings">Savings</span> %</label>
+          <input type="number" id="splitSavings" min="1" max="98" step="1" oninput="updateSplitTotal()">
+        </div>
+      </div>
+      <div class="split-total" id="splitTotal">Total: 100%</div>
+    </div>
+
+    <!-- Rollover -->
+    <div class="settings-group">
+      <span class="settings-group-label" id="lbl-rolloverSection">Rollover unused budget</span>
+      <div class="toggle-row">
+        <div><div class="toggle-label" id="lbl-rollNeeds">Needs rollover</div></div>
+        <label class="toggle-switch"><input type="checkbox" id="roll-needs-toggle" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label" id="lbl-rollWants">Wants rollover</div></div>
+        <label class="toggle-switch"><input type="checkbox" id="roll-wants-toggle" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label" id="lbl-rollSavings">Savings rollover</div></div>
+        <label class="toggle-switch"><input type="checkbox" id="roll-savings-toggle" onchange="saveSettings()"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <!-- Language -->
+    <div class="settings-group">
+      <span class="settings-group-label" id="lbl-language">Language</span>
+      <div class="lang-select">
+        <button class="lang-btn" id="lang-en" onclick="setLang('en')">🇬🇧 English</button>
+        <button class="lang-btn" id="lang-it" onclick="setLang('it')">🇮🇹 Italiano</button>
+      </div>
+    </div>
+
+    <!-- Theme -->
+    <div class="settings-group">
+      <span class="settings-group-label" id="lbl-theme">Theme</span>
+      <div class="theme-select">
+        <button class="theme-btn" id="theme-dark" onclick="setTheme('dark')">🌙 Dark</button>
+        <button class="theme-btn" id="theme-light" onclick="setTheme('light')">☀️ Light</button>
+      </div>
+    </div>
+
+    <!-- Change PIN -->
+    <div class="settings-group">
+      <span class="settings-group-label" id="lbl-changePIN">PIN</span>
+      <button class="action-btn expense" onclick="openChangePinModal()" id="btn-changePIN" style="margin-top:2px">🔑 Change PIN</button>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeSettings()" id="btn-settingsCancel">Cancel</button>
+      <button class="btn-save" onclick="saveSplits()" id="btn-settingsSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- CHANGE PIN MODAL -->
+<div class="modal-overlay" id="changePinModal">
+  <div class="modal" style="text-align:center;padding:28px 22px;max-width:340px">
+    <h2 id="changePinTitle">Change PIN</h2>
+
+    <!-- Step: verify current PIN -->
+    <div class="pin-change-step active" id="cpStep-verify">
+      <div class="pin-change-title" id="cpLabel-verify">Enter current PIN</div>
+      <div class="pin-dots" id="cpDots-verify">
+        <div class="pin-dot" id="cpd-v0"></div><div class="pin-dot" id="cpd-v1"></div>
+        <div class="pin-dot" id="cpd-v2"></div><div class="pin-dot" id="cpd-v3"></div>
+      </div>
+      <div class="pin-pad" style="max-width:260px">
+        <button class="pin-key" onclick="cpKey('verify','1')">1</button><button class="pin-key" onclick="cpKey('verify','2')">2</button><button class="pin-key" onclick="cpKey('verify','3')">3</button>
+        <button class="pin-key" onclick="cpKey('verify','4')">4</button><button class="pin-key" onclick="cpKey('verify','5')">5</button><button class="pin-key" onclick="cpKey('verify','6')">6</button>
+        <button class="pin-key" onclick="cpKey('verify','7')">7</button><button class="pin-key" onclick="cpKey('verify','8')">8</button><button class="pin-key" onclick="cpKey('verify','9')">9</button>
+        <button class="pin-key empty" disabled></button><button class="pin-key" onclick="cpKey('verify','0')">0</button><button class="pin-key del" onclick="cpDel('verify')">⌫</button>
+      </div>
+      <div class="pin-error-msg" id="cpError-verify"></div>
+    </div>
+
+    <!-- Step: enter new PIN -->
+    <div class="pin-change-step" id="cpStep-new">
+      <div class="pin-change-title" id="cpLabel-new">Enter new PIN</div>
+      <div class="pin-dots" id="cpDots-new">
+        <div class="pin-dot" id="cpd-n0"></div><div class="pin-dot" id="cpd-n1"></div>
+        <div class="pin-dot" id="cpd-n2"></div><div class="pin-dot" id="cpd-n3"></div>
+      </div>
+      <div class="pin-pad" style="max-width:260px">
+        <button class="pin-key" onclick="cpKey('new','1')">1</button><button class="pin-key" onclick="cpKey('new','2')">2</button><button class="pin-key" onclick="cpKey('new','3')">3</button>
+        <button class="pin-key" onclick="cpKey('new','4')">4</button><button class="pin-key" onclick="cpKey('new','5')">5</button><button class="pin-key" onclick="cpKey('new','6')">6</button>
+        <button class="pin-key" onclick="cpKey('new','7')">7</button><button class="pin-key" onclick="cpKey('new','8')">8</button><button class="pin-key" onclick="cpKey('new','9')">9</button>
+        <button class="pin-key empty" disabled></button><button class="pin-key" onclick="cpKey('new','0')">0</button><button class="pin-key del" onclick="cpDel('new')">⌫</button>
+      </div>
+      <div class="pin-error-msg" id="cpError-new"></div>
+    </div>
+
+    <!-- Step: confirm new PIN -->
+    <div class="pin-change-step" id="cpStep-confirm">
+      <div class="pin-change-title" id="cpLabel-confirm">Confirm new PIN</div>
+      <div class="pin-dots" id="cpDots-confirm">
+        <div class="pin-dot" id="cpd-c0"></div><div class="pin-dot" id="cpd-c1"></div>
+        <div class="pin-dot" id="cpd-c2"></div><div class="pin-dot" id="cpd-c3"></div>
+      </div>
+      <div class="pin-pad" style="max-width:260px">
+        <button class="pin-key" onclick="cpKey('confirm','1')">1</button><button class="pin-key" onclick="cpKey('confirm','2')">2</button><button class="pin-key" onclick="cpKey('confirm','3')">3</button>
+        <button class="pin-key" onclick="cpKey('confirm','4')">4</button><button class="pin-key" onclick="cpKey('confirm','5')">5</button><button class="pin-key" onclick="cpKey('confirm','6')">6</button>
+        <button class="pin-key" onclick="cpKey('confirm','7')">7</button><button class="pin-key" onclick="cpKey('confirm','8')">8</button><button class="pin-key" onclick="cpKey('confirm','9')">9</button>
+        <button class="pin-key empty" disabled></button><button class="pin-key" onclick="cpKey('confirm','0')">0</button><button class="pin-key del" onclick="cpDel('confirm')">⌫</button>
+      </div>
+      <div class="pin-error-msg" id="cpError-confirm"></div>
+    </div>
+
+    <button class="btn-cancel" onclick="closeChangePinModal()" id="btn-cpCancel" style="width:100%;padding:10px;border-radius:var(--radius-sm);margin-top:16px;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer">Cancel</button>
+  </div>
+</div>
+</div><!-- end #appContent -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// I18N
+// ═══════════════════════════════════════════════════════════════
+const I18N = {
+  en: {
+    title:'Budget', totalIncome:'Total Income', balance:'Balance',
+    safeToSpend:'Safe to spend', overBudget:'Over budget',
+    needs:'Needs', wants:'Wants', savings:'Savings', income:'Income',
+    tabExpense:'− Expense', tabIncome:'+ Income', tabRecurring:'↺ Recurring', tabTrends:'📊 Trends',
+    addExpense:'Add expense', addIncome:'Add income entry',
+    descPlaceholder:'Description', sourcePlaceholder:'Source (e.g. Teaching, Freelance)',
+    noEntries:'No entries this month yet', transactions:'Transactions',
+    recurringExpenses:'Recurring expenses', recurringIncome:'Recurring income',
+    addRecExp:'Add new recurring expense', addRecInc:'Add new recurring income',
+    saveRecExp:'Save Recurring Expense', saveRecInc:'Save Recurring Income',
+    importRecExp:'↺ Import all recurring expenses', importRecInc:'↺ Import all recurring income',
+    settings:'Settings', adjustSplits:'Budget splits', language:'Language', theme:'Theme',
+    dark:'Dark', light:'Light',
+    rolloverSection:'Rollover unused budget',
+    rollNeeds:'Needs rollover', rollWants:'Wants rollover', rollSavings:'Savings rollover',
+    save:'Save', cancel:'Cancel',
+    netWorth:'Net Worth', assets:'Assets', liabilities:'Liabilities',
+    updateNW:'Update this month', nwAssets:'Total assets (€)', nwLiab:'Liabilities (€)',
+    trends:'Monthly Trends', syncBackup:'Sync & Backup',
+    choosePIN:'Choose your PIN', confirmPIN:'Confirm your PIN',
+    enterPIN:'Enter your PIN', pinsNoMatch:"PINs don't match — try again.",
+    syncHint:'Sync across devices using a private GitHub Gist — free, your data stays in your GitHub account.',
+    manualBackup:'Manual backup — works without Gist',
+    skip:'Skip', connect:'Connect', finish:'Get started',
+    // toasts
+    expenseAdded:'Expense added ✓', incomeAdded:'Income added ✓',
+    addDesc:'Add a description', validAmount:'Enter a valid amount', selectCat:'Select a category',
+    splitsUpdated:'Splits updated ✓', splitsSum:'Splits must add up to 100%', splitsMin:'Each split must be at least 1%',
+    removed:'Removed', recSaved:'Recurring saved ✓', recRemoved:'Recurring removed',
+    recIncSaved:'Recurring income saved ✓', recIncRemoved:'Recurring income removed',
+    noRecExp:'No recurring expenses saved', noRecInc:'No recurring income saved',
+    importedExp: n => `${n} recurring expenses imported ✓`,
+    importedInc: n => `${n} recurring income imported ✓`,
+    noRecExpYet:'No recurring expenses saved yet.',
+    noRecIncYet:'No recurring income saved yet.',
+    backupDL:'Backup downloaded ✓', importOK:'Import successful ✓', importFail:'Import failed — invalid file.',
+    gistOK:'Gist sync enabled ✓', nwSaved:'Net worth updated ✓',
+    surplus:'surplus this month', deficit:'deficit this month',
+    noEntriesYetSub:'no entries yet',
+    sources: n => n===1?'1 source':`${n} sources`,
+    rolloverCarried: n => `+${n} carried over`,
+    noTrendsData:'Add data for at least 2 months to see trends.',
+    // savings goals
+    goalsTitle:'Savings Goals', addGoalSection:'New goal',
+    goalNamePlaceholder:'Goal name (e.g. Holiday)', goalTargetPlaceholder:'Target €',
+    addGoal:'Add Goal', deleteGoal:'Delete', contributeBtn:'+ Add',
+    noGoals:'No goals yet. Add one below.',
+    goalComplete:'Goal reached! 🎉',
+    goalContributed: a => `${a} added to goal ✓`,
+    goalAdded:'Goal added ✓', goalDeleted:'Goal removed',
+    goalAddDesc:'Enter a goal name', goalAddTarget:'Enter a target amount',
+    goalSelectEmoji:'Pick an emoji',
+    // PIN change
+    changePIN:'Change PIN', currentPINLabel:'Enter current PIN',
+    newPINLabel:'Enter new PIN', confirmNewPINLabel:'Confirm new PIN',
+    pinChanged:'PIN changed ✓', wrongCurrentPIN:'Wrong PIN — try again.',
+  },
+  it: {
+    title:'Budget', totalIncome:'Entrate Totali', balance:'Saldo',
+    safeToSpend:'Disponibile', overBudget:'Fuori budget',
+    needs:'Necessità', wants:'Desideri', savings:'Risparmi', income:'Entrate',
+    tabExpense:'− Spesa', tabIncome:'+ Entrata', tabRecurring:'↺ Ricorrenti', tabTrends:'📊 Tendenze',
+    addExpense:'Aggiungi spesa', addIncome:'Aggiungi entrata',
+    descPlaceholder:'Descrizione', sourcePlaceholder:'Fonte (es. Insegnamento)',
+    noEntries:'Nessuna voce questo mese', transactions:'Transazioni',
+    recurringExpenses:'Spese ricorrenti', recurringIncome:'Entrate ricorrenti',
+    addRecExp:'Aggiungi spesa ricorrente', addRecInc:'Aggiungi entrata ricorrente',
+    saveRecExp:'Salva spesa ricorrente', saveRecInc:'Salva entrata ricorrente',
+    importRecExp:'↺ Importa tutte le spese ricorrenti', importRecInc:'↺ Importa tutte le entrate ricorrenti',
+    settings:'Impostazioni', adjustSplits:'Suddivisione budget', language:'Lingua', theme:'Tema',
+    dark:'Scuro', light:'Chiaro',
+    rolloverSection:'Riporta budget non usato',
+    rollNeeds:'Riporta Necessità', rollWants:'Riporta Desideri', rollSavings:'Riporta Risparmi',
+    save:'Salva', cancel:'Annulla',
+    netWorth:'Patrimonio Netto', assets:'Attività', liabilities:'Passività',
+    updateNW:'Aggiorna questo mese', nwAssets:'Attività totali (€)', nwLiab:'Passività (€)',
+    trends:'Andamento Mensile', syncBackup:'Sincronizzazione',
+    choosePIN:'Scegli il tuo PIN', confirmPIN:'Conferma il PIN',
+    enterPIN:'Inserisci il PIN', pinsNoMatch:'I PIN non corrispondono — riprova.',
+    syncHint:'Sincronizza i dispositivi tramite un GitHub Gist privato — gratuito.',
+    manualBackup:'Backup manuale',
+    skip:'Salta', connect:'Connetti', finish:'Inizia',
+    expenseAdded:'Spesa aggiunta ✓', incomeAdded:'Entrata aggiunta ✓',
+    addDesc:'Aggiungi una descrizione', validAmount:'Inserisci un importo valido', selectCat:'Seleziona una categoria',
+    splitsUpdated:'Suddivisione aggiornata ✓', splitsSum:'La somma deve essere 100%', splitsMin:'Ogni categoria almeno 1%',
+    removed:'Rimosso', recSaved:'Ricorrente salvato ✓', recRemoved:'Ricorrente rimosso',
+    recIncSaved:'Entrata ricorrente salvata ✓', recIncRemoved:'Entrata ricorrente rimossa',
+    noRecExp:'Nessuna spesa ricorrente', noRecInc:'Nessuna entrata ricorrente',
+    importedExp: n => `${n} spese ricorrenti importate ✓`,
+    importedInc: n => `${n} entrate ricorrenti importate ✓`,
+    noRecExpYet:'Nessuna spesa ricorrente ancora.',
+    noRecIncYet:'Nessuna entrata ricorrente ancora.',
+    backupDL:'Backup scaricato ✓', importOK:'Importazione riuscita ✓', importFail:'Importazione fallita.',
+    gistOK:'Sincronizzazione Gist attiva ✓', nwSaved:'Patrimonio netto aggiornato ✓',
+    surplus:'avanzo questo mese', deficit:'deficit questo mese',
+    noEntriesYetSub:'nessuna voce ancora',
+    sources: n => n===1?'1 fonte':`${n} fonti`,
+    rolloverCarried: n => `+${n} riportato`,
+    noTrendsData:'Aggiungi dati per almeno 2 mesi per vedere i trend.',
+    // savings goals
+    goalsTitle:'Obiettivi di Risparmio', addGoalSection:'Nuovo obiettivo',
+    goalNamePlaceholder:'Nome (es. Vacanza)', goalTargetPlaceholder:'Obiettivo €',
+    addGoal:'Aggiungi Obiettivo', deleteGoal:'Elimina', contributeBtn:'+ Aggiungi',
+    noGoals:'Nessun obiettivo. Aggiungine uno.',
+    goalComplete:'Obiettivo raggiunto! 🎉',
+    goalContributed: a => `${a} aggiunto all\'obiettivo ✓`,
+    goalAdded:'Obiettivo aggiunto ✓', goalDeleted:'Obiettivo rimosso',
+    goalAddDesc:'Inserisci un nome', goalAddTarget:'Inserisci un importo',
+    goalSelectEmoji:'Scegli un\'emoji',
+    // PIN change
+    changePIN:'Cambia PIN', currentPINLabel:'Inserisci il PIN attuale',
+    newPINLabel:'Inserisci il nuovo PIN', confirmNewPINLabel:'Conferma il nuovo PIN',
+    pinChanged:'PIN cambiato ✓', wrongCurrentPIN:'PIN errato — riprova.',
+  }
+};
+
+const MONTHS_EN = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+
+let lang = 'en';
+let T = I18N.en;
+
+function t(key, ...args) {
+  const val = T[key];
+  if (typeof val === 'function') return val(...args);
+  return val || key;
+}
+
+function setLang(l, save=true) {
+  lang = l;
+  T = I18N[l];
+  document.documentElement.lang = l;
+  if (save) {
+    prefs.lang = l;
+    saveData();
+    applyI18N();
+    renderLangThemeButtons();
+    toast(l === 'it' ? 'Lingua aggiornata ✓' : 'Language updated ✓');
+  } else {
+    applyI18N();
+    renderLangThemeButtons();
+  }
+}
+
+function applyI18N() {
+  // static labels
+  const map = {
+    'lbl-totalIncome':'totalIncome', 'lbl-balance':'balance',
+    'lbl-addExpense':'addExpense', 'lbl-addIncome':'addIncome',
+    'lbl-recurringExpenses':'recurringExpenses', 'lbl-recurringIncome':'recurringIncome',
+    'lbl-addRecExp':'addRecExp', 'lbl-addRecInc':'addRecInc',
+    'btn-saveRecExp':'saveRecExp', 'btn-saveRecInc':'saveRecInc',
+    'btn-importRecExp':'importRecExp', 'btn-importRecInc':'importRecInc',
+    'btn-addExpense':'addExpense', 'btn-addIncome':'addIncome',
+    'lbl-settings':'settings', 'lbl-adjustSplits':'adjustSplits',
+    'lbl-language':'language', 'lbl-theme':'theme',
+    'lbl-rolloverSection':'rolloverSection',
+    'lbl-rollNeeds':'rollNeeds', 'lbl-rollWants':'rollWants', 'lbl-rollSavings':'rollSavings',
+    'btn-settingsCancel':'cancel', 'btn-settingsSave':'save',
+    'btn-syncCancel':'cancel',
+    'lbl-netWorth':'netWorth', 'lbl-assets':'assets', 'lbl-liabilities':'liabilities',
+    'btn-updateNW':'updateNW', 'lbl-nwAssets':'nwAssets', 'lbl-nwLiab':'nwLiab',
+    'lbl-trends':'trends', 'lbl-syncBackup':'syncBackup',
+    'lbl-manualBackup':'manualBackup',
+    'lbl-goalsTitle':'goalsTitle', 'lbl-addGoalSection':'addGoalSection',
+    'btn-addGoal':'addGoal',
+    'lbl-changePIN':'changePIN', 'btn-changePIN':'changePIN',
+  };
+  for (const [id, key] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t(key);
+  }
+  // tabs
+  ['expense','income','recurring','trends'].forEach(tab => {
+    const keyMap = {expense:'tabExpense',income:'tabIncome',recurring:'tabRecurring',trends:'tabTrends'};
+    const el = document.getElementById('tab-'+tab);
+    if (el) el.textContent = t(keyMap[tab]);
+  });
+  // category labels
+  ['needs','wants','savings'].forEach(c => {
+    const keyMap = {needs:'needs',wants:'wants',savings:'savings'};
+    ['catlbl-','rcatlbl-','bname-','slbl-'].forEach(prefix => {
+      const el = document.getElementById(prefix+c);
+      if (el) el.textContent = t(keyMap[c]);
+    });
+  });
+  // lock screen
+  const lockPrompt = document.getElementById('lockPrompt');
+  if (lockPrompt) lockPrompt.textContent = t('enterPIN');
+  // placeholders
+  const expDesc = document.getElementById('expDesc');
+  if (expDesc) expDesc.placeholder = t('descPlaceholder');
+  const incDesc = document.getElementById('incDesc');
+  if (incDesc) incDesc.placeholder = t('sourcePlaceholder');
+  const goalName = document.getElementById('goalName');
+  if (goalName) goalName.placeholder = t('goalNamePlaceholder');
+  const goalTarget = document.getElementById('goalTarget');
+  if (goalTarget) goalTarget.placeholder = t('goalTargetPlaceholder');
+  // chips
+  const chipMap = {all:'All/Tutti',income:'income',needs:'needs',wants:'wants',savings:'savings'};
+  const chipLabels = { en:{all:'All',income:'Income',needs:'Needs',wants:'Wants',savings:'Savings'}, it:{all:'Tutti',income:'Entrate',needs:'Necessità',wants:'Desideri',savings:'Risparmi'} };
+  ['all','income','needs','wants','savings'].forEach(c => {
+    const el = document.getElementById('chip-'+c);
+    if (el) el.textContent = chipLabels[lang][c];
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════════
+let theme = 'dark';
+
+function setTheme(t, save=true) {
+  theme = t;
+  document.documentElement.setAttribute('data-theme', t);
+  if (save) { prefs.theme = t; saveData(); renderLangThemeButtons(); }
+  else renderLangThemeButtons();
+  if (trendsChart) { trendsChart.destroy(); trendsChart = null; renderTrends(); }
+}
+
+function renderLangThemeButtons() {
+  ['en','it'].forEach(l => {
+    const el = document.getElementById('lang-'+l);
+    if (el) el.className = 'lang-btn' + (l===lang?' active':'');
+  });
+  ['dark','light'].forEach(th => {
+    const el = document.getElementById('theme-'+th);
+    if (el) el.className = 'theme-btn' + (th===theme?' active':'');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SETUP WIZARD
+// ═══════════════════════════════════════════════════════════════
+const LS_SETUP = 'budget-share-setup';
+const LS_PIN   = 'budget-share-pin';
+const LS_KEY   = 'budget-share-v1';
+const LS_GIST  = 'budget-share-gist';
+
+let wizPinEntry = '';
+let wizPinFirst = '';
+let wizPinStep  = 0; // 0=choose, 1=confirm
+let wizPendingLang = 'en';
+let wizPendingTheme = 'dark';
+
+function showSetupWizard() {
+  document.getElementById('setupWizard').style.display = 'flex';
+  document.getElementById('lockScreen').style.display = 'none';
+  document.getElementById('appContent').style.display = 'none';
+}
+
+function wizGoStep(n) {
+  [0,1,2].forEach(i => {
+    document.getElementById('wstep-'+i).classList.toggle('active', i===n);
+    document.getElementById('wdot-'+i).classList.toggle('active', i===n);
+  });
+}
+
+function wizPinKey(d) {
+  if (wizPinEntry.length >= 4) return;
+  wizPinEntry += d;
+  wizUpdateDots();
+  if (wizPinEntry.length === 4) setTimeout(wizCheckPin, 120);
+}
+function wizPinDel() {
+  wizPinEntry = wizPinEntry.slice(0,-1);
+  wizUpdateDots();
+}
+function wizUpdateDots(cls='filled') {
+  for (let i=0;i<4;i++) {
+    const d = document.getElementById('wdot-p'+i);
+    d.className = 'pin-dot' + (i<wizPinEntry.length?' '+cls:'');
+  }
+}
+function wizCheckPin() {
+  if (wizPinStep === 0) {
+    wizPinFirst = wizPinEntry;
+    wizPinEntry = '';
+    wizUpdateDots();
+    document.getElementById('wt-choosePIN').textContent = t('confirmPIN');
+    wizPinStep = 1;
+  } else {
+    if (wizPinEntry === wizPinFirst) {
+      localStorage.setItem(LS_PIN, wizPinEntry);
+      wizPinEntry = ''; wizPinFirst = ''; wizPinStep = 0;
+      document.getElementById('wPinError').textContent = '';
+      wizGoStep(1);
+    } else {
+      wizUpdateDots('error');
+      document.getElementById('wPinError').textContent = t('pinsNoMatch');
+      setTimeout(() => {
+        wizPinEntry = ''; wizPinFirst = ''; wizPinStep = 0;
+        wizUpdateDots();
+        document.getElementById('wt-choosePIN').textContent = t('choosePIN');
+        document.getElementById('wPinError').textContent = '';
+      }, 900);
+    }
+  }
+}
+
+async function wizSaveGist() {
+  const token = document.getElementById('wGistToken').value.trim();
+  const gistId = document.getElementById('wGistId').value.trim();
+  if (!token || !gistId) { document.getElementById('wGistError').textContent = 'Please fill in both fields.'; return; }
+  gistCfg = { token, gistId };
+  localStorage.setItem(LS_GIST, JSON.stringify(gistCfg));
+  document.getElementById('wGistError').textContent = 'Testing…';
+  try {
+    await gistWrite(JSON.stringify({ version:1, months:{}, recurring:[], recurringIncome:[], splits:{needs:50,wants:30,savings:20}, rolloverEnabled:{needs:false,wants:false,savings:false}, netWorth:{}, goals:[], prefs:{lang:'en',theme:'dark'} }));
+    wizGoStep(2);
+  } catch(e) {
+    document.getElementById('wGistError').textContent = 'Connection failed: '+e.message;
+  }
+}
+
+function wizSkipGist() { wizGoStep(2); }
+
+function wizSetLang(l) {
+  wizPendingLang = l;
+  ['en','it'].forEach(x => document.getElementById('wlang-'+x).className='lang-btn'+(x===l?' active':''));
+  document.documentElement.lang = l;
+  T = I18N[l];
+}
+function wizSetTheme(t) {
+  wizPendingTheme = t;
+  ['dark','light'].forEach(x => document.getElementById('wtheme-'+x).className='theme-btn'+(x===t?' active':''));
+  document.documentElement.setAttribute('data-theme', t);
+}
+
+function wizFinish() {
+  lang = wizPendingLang; theme = wizPendingTheme;
+  T = I18N[lang];
+  prefs = { lang, theme };
+  localStorage.setItem(LS_SETUP, '1');
+  document.getElementById('setupWizard').style.display = 'none';
+  // show lock screen with new PIN
+  showLockScreen();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PIN LOCK
+// ═══════════════════════════════════════════════════════════════
+const SESSION_KEY = 'budget-share-session';
+let pinEntry = '';
+
+function showLockScreen() {
+  document.getElementById('lockScreen').style.display = 'flex';
+  document.getElementById('appContent').style.display = 'none';
+  applyI18N();
+}
+
+function unlock() {
+  document.getElementById('lockScreen').style.display = 'none';
+  document.getElementById('appContent').style.display = 'block';
+  sessionStorage.setItem(SESSION_KEY, '1');
+  render();
+  checkURLParams();
+}
+
+function pinKey(d) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += d;
+  updateDots('filled');
+  if (pinEntry.length === 4) setTimeout(checkPin, 120);
+}
+function pinDel() { if(pinEntry.length>0){pinEntry=pinEntry.slice(0,-1);updateDots('filled');} }
+function updateDots(cls) {
+  for(let i=0;i<4;i++) document.getElementById('dot-'+i).className='pin-dot'+(i<pinEntry.length?' '+cls:'');
+}
+function checkPin() {
+  const stored = localStorage.getItem(LS_PIN)||'';
+  if (pinEntry === stored) { updateDots('filled'); setTimeout(unlock,150); }
+  else {
+    updateDots('error');
+    document.getElementById('pinError').textContent = lang==='it'?'PIN errato. Riprova.':'Incorrect PIN. Try again.';
+    setTimeout(()=>{ pinEntry=''; updateDots(''); document.getElementById('pinError').textContent=''; }, 900);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const DATA_VERSION = 1;
+let currentDate = new Date();
+let currentMonth = currentDate.getMonth();
+let currentYear  = currentDate.getFullYear();
+let selectedCat  = null;
+let selectedRecCat = null;
+let activeFilter = 'all';
+let data = {};
+let recurring = [];
+let recurringIncome = [];
+let splits = { needs:50, wants:30, savings:20 };
+let rolloverEnabled = { needs:false, wants:false, savings:false };
+let netWorthData = {};
+let goals = [];
+let prefs = { lang:'en', theme:'dark' };
+
+// ═══════════════════════════════════════════════════════════════
+// STORAGE & GIST
+// ═══════════════════════════════════════════════════════════════
+const GIST_FILE = 'budget-share-data.json';
+let gistCfg = null;
+
+function setSyncDot(s) { const d=document.getElementById('syncDot'); if(d) d.className='sync-dot '+s; }
+
+function loadGistCfg() {
+  try { gistCfg = JSON.parse(localStorage.getItem(LS_GIST)); } catch(e){ gistCfg=null; }
+}
+
+async function gistRead() {
+  const r = await fetch(`https://api.github.com/gists/${gistCfg.gistId}`,{headers:{Authorization:`token ${gistCfg.token}`,Accept:'application/vnd.github.v3+json'}});
+  if (!r.ok) throw new Error('Gist read failed: '+r.status);
+  const g = await r.json();
+  const file = g.files[GIST_FILE];
+  if (!file) return null;
+  return JSON.parse(file.content);
+}
+
+async function gistWrite(payload) {
+  if (!gistCfg) return;
+  const r = await fetch(`https://api.github.com/gists/${gistCfg.gistId}`,{method:'PATCH',headers:{Authorization:`token ${gistCfg.token}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify({files:{[GIST_FILE]:{content:payload}}})});
+  if (!r.ok) throw new Error('Gist write failed: '+r.status);
+}
+
+function migrate(d) {
+  if (!d.version || d.version < DATA_VERSION) {
+    d.version = DATA_VERSION;
+    d.rolloverEnabled = d.rolloverEnabled || { needs:false, wants:false, savings:false };
+    d.netWorth = d.netWorth || {};
+    d.goals = d.goals || [];
+    d.prefs = d.prefs || { lang:'en', theme:'dark' };
+  }
+  return d;
+}
+
+async function loadData() {
+  loadGistCfg();
+  let localRaw = null;
+  try { localRaw = localStorage.getItem(LS_KEY); } catch(e){}
+
+  if (gistCfg) {
+    setSyncDot('busy');
+    try {
+      const remote = await gistRead();
+      if (remote) {
+        applyLoaded(migrate(remote));
+        localStorage.setItem(LS_KEY, JSON.stringify(remote));
+        setSyncDot('ok');
+        return;
+      }
+    } catch(e) { setSyncDot('err'); }
+  } else { setSyncDot('off'); }
+
+  if (localRaw) {
+    try { applyLoaded(migrate(JSON.parse(localRaw))); }
+    catch(e) { resetState(); }
+  }
+}
+
+function applyLoaded(d) {
+  data = d.months || {};
+  recurring = d.recurring || [];
+  recurringIncome = d.recurringIncome || [];
+  splits = d.splits || { needs:50, wants:30, savings:20 };
+  rolloverEnabled = d.rolloverEnabled || { needs:false, wants:false, savings:false };
+  netWorthData = d.netWorth || {};
+  goals = d.goals || [];
+  prefs = d.prefs || { lang:'en', theme:'dark' };
+}
+
+function resetState() {
+  data={}; recurring=[]; recurringIncome=[]; splits={needs:50,wants:30,savings:20};
+  rolloverEnabled={needs:false,wants:false,savings:false}; netWorthData={}; goals=[]; prefs={lang:'en',theme:'dark'};
+}
+
+function buildPayload() {
+  return JSON.stringify({ version:DATA_VERSION, months:data, recurring, recurringIncome, splits, rolloverEnabled, netWorth:netWorthData, goals, prefs });
+}
+
+async function saveData() {
+  const payload = buildPayload();
+  try { localStorage.setItem(LS_KEY, payload); } catch(e){}
+  if (gistCfg) {
+    setSyncDot('busy');
+    try { await gistWrite(payload); setSyncDot('ok'); }
+    catch(e) { setSyncDot('err'); }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ═══════════════════════════════════════════════════════════════
+function exportJSON() {
+  const blob = new Blob([buildPayload()],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `budget-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  document.getElementById('syncStatusLine').textContent = t('backupDL');
+}
+
+function importJSON(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    try {
+      applyLoaded(migrate(JSON.parse(ev.target.result)));
+      await saveData();
+      applyPrefs(); render();
+      document.getElementById('syncStatusLine').textContent = t('importOK');
+      toast(t('importOK'));
+    } catch(err) { document.getElementById('syncStatusLine').textContent = t('importFail'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SYNC MODAL
+// ═══════════════════════════════════════════════════════════════
+function openSyncModal() {
+  if (gistCfg) { document.getElementById('gistToken').value=gistCfg.token||''; document.getElementById('gistId').value=gistCfg.gistId||''; }
+  document.getElementById('syncStatusLine').textContent = gistCfg ? '✓ Gist sync active' : 'No Gist — local only';
+  document.getElementById('syncModal').classList.add('open');
+}
+function closeSyncModal() { document.getElementById('syncModal').classList.remove('open'); }
+
+async function saveGistConfig() {
+  const token=document.getElementById('gistToken').value.trim();
+  const gistId=document.getElementById('gistId').value.trim();
+  if(!token||!gistId){document.getElementById('syncStatusLine').textContent='Please fill both fields.';return;}
+  gistCfg={token,gistId};
+  localStorage.setItem(LS_GIST,JSON.stringify(gistCfg));
+  document.getElementById('syncStatusLine').textContent='Testing…';
+  setSyncDot('busy');
+  try {
+    await gistWrite(buildPayload());
+    setSyncDot('ok');
+    document.getElementById('syncStatusLine').textContent='✓ Connected and synced!';
+    toast(t('gistOK'));
+    setTimeout(closeSyncModal,1200);
+  } catch(e) { setSyncDot('err'); document.getElementById('syncStatusLine').textContent='Failed: '+e.message; }
+}
+
+document.getElementById('syncModal').addEventListener('click',e=>{ if(e.target===document.getElementById('syncModal'))closeSyncModal(); });
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+function fmt(n) { return '€'+n.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function todayStr() { return new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short'}); }
+function monthKey(y,m) { return `${y}-${String(m+1).padStart(2,'0')}`; }
+function getMonthKey() { return monthKey(currentYear,currentMonth); }
+function getMonthData() { const k=getMonthKey(); if(!data[k]) data[k]={transactions:[]}; return data[k]; }
+const CIRC = 2*Math.PI*30;
+
+// ═══════════════════════════════════════════════════════════════
+// MONTH NAV
+// ═══════════════════════════════════════════════════════════════
+function getMonthNames() { return lang==='it'?MONTHS_IT:MONTHS_EN; }
+function updateMonthLabel() {
+  document.getElementById('monthLabel').textContent = `${getMonthNames()[currentMonth]} ${currentYear}`;
+}
+document.getElementById('prevMonth').onclick = () => { if(--currentMonth<0){currentMonth=11;currentYear--;} updateMonthLabel();render(); };
+document.getElementById('nextMonth').onclick = () => { if(++currentMonth>11){currentMonth=0;currentYear++;} updateMonthLabel();render(); };
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  ['expense','income','recurring','trends'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active',t===tab);
+    document.getElementById('panel-'+t).classList.toggle('visible',t===tab);
+  });
+  if (tab==='trends') renderTrends();
+  if (tab==='recurring') { renderRecurring(); renderRecurringIncome(); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CATEGORY BUTTONS
+// ═══════════════════════════════════════════════════════════════
+function selectCat(cat) {
+  selectedCat=cat;
+  ['needs','wants','savings'].forEach(c=>{ document.getElementById('btn-'+c).className='cat-btn'+(c===cat?' selected-'+c:''); });
+}
+function selectRecCat(cat) {
+  selectedRecCat=cat;
+  ['needs','wants','savings'].forEach(c=>{ document.getElementById('rbtn-'+c).className='cat-btn'+(c===cat?' selected-'+c:''); });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TRANSACTIONS
+// ═══════════════════════════════════════════════════════════════
+function addExpense() {
+  const desc=document.getElementById('expDesc').value.trim();
+  const amount=parseFloat(document.getElementById('expAmount').value);
+  if(!desc){toast(t('addDesc'));return;}
+  if(!amount||amount<=0){toast(t('validAmount'));return;}
+  if(!selectedCat){toast(t('selectCat'));return;}
+  getMonthData().transactions.unshift({id:Date.now(),desc,amount,type:'expense',cat:selectedCat,date:todayStr()});
+  saveData();render();toast(t('expenseAdded'));
+  document.getElementById('expDesc').value='';
+  document.getElementById('expAmount').value='';
+}
+
+function addIncome() {
+  const desc=document.getElementById('incDesc').value.trim();
+  const amount=parseFloat(document.getElementById('incAmount').value);
+  if(!desc){toast(t('addDesc'));return;}
+  if(!amount||amount<=0){toast(t('validAmount'));return;}
+  getMonthData().transactions.unshift({id:Date.now(),desc,amount,type:'income',cat:'income',date:todayStr()});
+  saveData();render();toast(t('incomeAdded'));
+  document.getElementById('incDesc').value='';
+  document.getElementById('incAmount').value='';
+}
+
+function deleteTransaction(id) {
+  const md=getMonthData();
+  md.transactions=md.transactions.filter(tx=>tx.id!==id);
+  saveData();render();toast(t('removed'));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RECURRING
+// ═══════════════════════════════════════════════════════════════
+function addRecurring() {
+  const desc=document.getElementById('recDesc').value.trim();
+  const amount=parseFloat(document.getElementById('recAmount').value);
+  if(!desc){toast(t('addDesc'));return;}
+  if(!amount||amount<=0){toast(t('validAmount'));return;}
+  if(!selectedRecCat){toast(t('selectCat'));return;}
+  recurring.push({id:Date.now(),desc,amount,cat:selectedRecCat});
+  saveData();renderRecurring();toast(t('recSaved'));
+  document.getElementById('recDesc').value='';
+  document.getElementById('recAmount').value='';
+  selectedRecCat=null;
+  ['needs','wants','savings'].forEach(c=>{ document.getElementById('rbtn-'+c).className='cat-btn'; });
+}
+function deleteRecurring(id) { recurring=recurring.filter(r=>r.id!==id); saveData();renderRecurring();toast(t('recRemoved')); }
+function applyRecurring() {
+  if(!recurring.length){toast(t('noRecExp'));return;}
+  const md=getMonthData();
+  recurring.forEach(r=>{ md.transactions.push({id:Date.now()+Math.random(),desc:r.desc,amount:r.amount,type:'expense',cat:r.cat,date:todayStr()}); });
+  saveData();render();toast(t('importedExp',recurring.length));
+}
+function renderRecurring() {
+  const list=document.getElementById('recurringList');
+  if(!recurring.length){list.innerHTML=`<div style="color:var(--ink3);font-size:.78rem;padding:4px 0">${t('noRecExpYet')}</div>`;return;}
+  const emojis={needs:'🏠',wants:'☕',savings:'💰'};
+  list.innerHTML=recurring.map(r=>`
+    <div class="rec-item">
+      <div class="rec-dot dot-${r.cat}"></div>
+      <div class="rec-info">${esc(r.desc)}<small>${emojis[r.cat]} ${t(r.cat)}</small></div>
+      <div class="rec-amount" style="color:var(--${r.cat})">${fmt(r.amount)}</div>
+      <button class="rec-del" onclick="deleteRecurring(${r.id})">✕</button>
+    </div>`).join('');
+}
+function addRecurringIncome() {
+  const desc=document.getElementById('recIncDesc').value.trim();
+  const amount=parseFloat(document.getElementById('recIncAmount').value);
+  if(!desc){toast(t('addDesc'));return;}
+  if(!amount||amount<=0){toast(t('validAmount'));return;}
+  recurringIncome.push({id:Date.now(),desc,amount});
+  saveData();renderRecurringIncome();toast(t('recIncSaved'));
+  document.getElementById('recIncDesc').value='';
+  document.getElementById('recIncAmount').value='';
+}
+function deleteRecurringIncome(id) { recurringIncome=recurringIncome.filter(r=>r.id!==id); saveData();renderRecurringIncome();toast(t('recIncRemoved')); }
+function applyRecurringIncome() {
+  if(!recurringIncome.length){toast(t('noRecInc'));return;}
+  const md=getMonthData();
+  recurringIncome.forEach(r=>{ md.transactions.push({id:Date.now()+Math.random(),desc:r.desc,amount:r.amount,type:'income',cat:'income',date:todayStr()}); });
+  saveData();render();toast(t('importedInc',recurringIncome.length));
+}
+function renderRecurringIncome() {
+  const list=document.getElementById('recurringIncomeList');
+  if(!recurringIncome.length){list.innerHTML=`<div style="color:var(--ink3);font-size:.78rem;padding:4px 0">${t('noRecIncYet')}</div>`;return;}
+  list.innerHTML=recurringIncome.map(r=>`
+    <div class="rec-item">
+      <div class="rec-dot dot-income"></div>
+      <div class="rec-info">${esc(r.desc)}<small>💵 ${t('income')}</small></div>
+      <div class="rec-amount" style="color:var(--income-c)">+${fmt(r.amount)}</div>
+      <button class="rec-del" onclick="deleteRecurringIncome(${r.id})">✕</button>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ROLLOVER
+// ═══════════════════════════════════════════════════════════════
+function getRollover(cat) {
+  if (!rolloverEnabled[cat]) return 0;
+  // get previous month
+  let pm = currentMonth - 1, py = currentYear;
+  if (pm < 0) { pm = 11; py--; }
+  const prevKey = monthKey(py, pm);
+  const prevMd = data[prevKey];
+  if (!prevMd) return 0;
+  const prevTxns = prevMd.transactions || [];
+  const prevIncome = prevTxns.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0);
+  const prevBudget = prevIncome * splits[cat] / 100;
+  const prevSpent = prevTxns.filter(t=>t.cat===cat&&t.type==='expense').reduce((a,b)=>a+b.amount,0);
+  return Math.max(0, prevBudget - prevSpent);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NET WORTH
+// ═══════════════════════════════════════════════════════════════
+function saveNetWorth() {
+  const assets = parseFloat(document.getElementById('nwAssets').value)||0;
+  const liab   = parseFloat(document.getElementById('nwLiab').value)||0;
+  netWorthData[getMonthKey()] = { assets, liabilities: liab };
+  saveData();
+  renderNetWorth();
+  toast(t('nwSaved'));
+}
+
+function renderNetWorth() {
+  const k = getMonthKey();
+  const entry = netWorthData[k];
+  if (entry) {
+    document.getElementById('nwAssetsDisplay').textContent = fmt(entry.assets);
+    document.getElementById('nwLiabDisplay').textContent  = fmt(entry.liabilities);
+    const nw = entry.assets - entry.liabilities;
+    document.getElementById('nwTotalDisplay').textContent = fmt(nw);
+    document.getElementById('nwTotalCard').className = 'nw-card total' + (nw<0?' negative':'');
+    document.getElementById('nwAssets').value = entry.assets;
+    document.getElementById('nwLiab').value   = entry.liabilities;
+  } else {
+    ['nwAssetsDisplay','nwLiabDisplay','nwTotalDisplay'].forEach(id=>{ document.getElementById(id).textContent='€—'; });
+    document.getElementById('nwTotalCard').className='nw-card total';
+  }
+  // history: last 4 months with data
+  const sorted = Object.entries(netWorthData)
+    .sort((a,b)=>b[0].localeCompare(a[0])).slice(0,4);
+  const hist = document.getElementById('nwHistory');
+  if (sorted.length === 0) { hist.innerHTML=''; return; }
+  hist.innerHTML = sorted.map(([mk, e]) => {
+    const [y,m] = mk.split('-');
+    const mn = getMonthNames()[parseInt(m)-1];
+    const nw = e.assets - e.liabilities;
+    return `<div class="nw-hist-item">${mn.slice(0,3)} ${y}<span class="${nw<0?'neg':''}">${fmt(nw)}</span></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TRENDS CHART
+// ═══════════════════════════════════════════════════════════════
+let trendsChart = null;
+
+function renderTrends() {
+  const container = document.getElementById('trendsContent');
+  // build last 6 months with data
+  const months = [];
+  for (let i=5; i>=0; i--) {
+    let m = currentMonth - i, y = currentYear;
+    while (m < 0) { m+=12; y--; }
+    months.push({ key: monthKey(y,m), label: getMonthNames()[m].slice(0,3)+' '+String(y).slice(2) });
+  }
+  const withData = months.filter(({key}) => data[key] && data[key].transactions && data[key].transactions.length > 0);
+  if (withData.length < 1) {
+    container.innerHTML = `<div class="no-trends">${t('noTrendsData')}</div>`;
+    if (trendsChart) { trendsChart.destroy(); trendsChart=null; }
+    return;
+  }
+  const labels   = months.map(m=>m.label);
+  const incomes  = months.map(({key}) => { const md=data[key]; if(!md) return 0; return md.transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0); });
+  const needsArr = months.map(({key}) => { const md=data[key]; if(!md) return 0; return md.transactions.filter(t=>t.cat==='needs'&&t.type==='expense').reduce((a,b)=>a+b.amount,0); });
+  const wantsArr = months.map(({key}) => { const md=data[key]; if(!md) return 0; return md.transactions.filter(t=>t.cat==='wants'&&t.type==='expense').reduce((a,b)=>a+b.amount,0); });
+  const savArr   = months.map(({key}) => { const md=data[key]; if(!md) return 0; return md.transactions.filter(t=>t.cat==='savings'&&t.type==='expense').reduce((a,b)=>a+b.amount,0); });
+
+  if (!container.querySelector('canvas')) {
+    container.innerHTML = `<div class="chart-wrap"><canvas id="trendsChart"></canvas></div>
+      <div class="trends-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--income-c)"></div>${t('income')}</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--needs)"></div>${t('needs')}</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--wants)"></div>${t('wants')}</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--savings)"></div>${t('savings')}</div>
+      </div>`;
+  }
+
+  if (trendsChart) { trendsChart.destroy(); trendsChart=null; }
+  const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+  const gridColor = isDark ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.06)';
+  const tickColor = isDark ? '#5a5448' : '#a09880';
+
+  trendsChart = new Chart(document.getElementById('trendsChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: t('income'),  data: incomes,  backgroundColor: 'rgba(107,159,255,.7)', borderRadius:4, borderSkipped:false },
+        { label: t('needs'),   data: needsArr, backgroundColor: 'rgba(224,90,74,.7)',   borderRadius:4, borderSkipped:false },
+        { label: t('wants'),   data: wantsArr, backgroundColor: 'rgba(212,134,14,.7)',  borderRadius:4, borderSkipped:false },
+        { label: t('savings'), data: savArr,   backgroundColor: 'rgba(58,170,102,.7)',  borderRadius:4, borderSkipped:false },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false}, tooltip:{
+        callbacks:{ label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}` }
+      }},
+      scales:{
+        x:{ grid:{color:gridColor}, ticks:{color:tickColor,font:{size:10}} },
+        y:{ grid:{color:gridColor}, ticks:{color:tickColor,font:{size:10}, callback:v=>'€'+v.toLocaleString('it-IT')} }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════════
+function openSettings() {
+  document.getElementById('splitNeeds').value  = splits.needs;
+  document.getElementById('splitWants').value  = splits.wants;
+  document.getElementById('splitSavings').value= splits.savings;
+  document.getElementById('roll-needs-toggle').checked   = rolloverEnabled.needs;
+  document.getElementById('roll-wants-toggle').checked   = rolloverEnabled.wants;
+  document.getElementById('roll-savings-toggle').checked = rolloverEnabled.savings;
+  updateSplitTotal();
+  renderLangThemeButtons();
+  document.getElementById('settingsModal').classList.add('open');
+}
+function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
+function updateSplitTotal() {
+  const n=parseInt(document.getElementById('splitNeeds').value)||0;
+  const w=parseInt(document.getElementById('splitWants').value)||0;
+  const s=parseInt(document.getElementById('splitSavings').value)||0;
+  const el=document.getElementById('splitTotal');
+  el.textContent=`Total: ${n+w+s}%`;
+  el.className='split-total'+(n+w+s===100?'':' invalid');
+}
+function saveSettings() {
+  rolloverEnabled = {
+    needs:  document.getElementById('roll-needs-toggle').checked,
+    wants:  document.getElementById('roll-wants-toggle').checked,
+    savings:document.getElementById('roll-savings-toggle').checked,
+  };
+  saveData(); render();
+}
+function saveSplits() {
+  const n=parseInt(document.getElementById('splitNeeds').value)||0;
+  const w=parseInt(document.getElementById('splitWants').value)||0;
+  const s=parseInt(document.getElementById('splitSavings').value)||0;
+  if(n+w+s!==100){toast(t('splitsSum'));return;}
+  if(n<1||w<1||s<1){toast(t('splitsMin'));return;}
+  splits={needs:n,wants:w,savings:s};
+  rolloverEnabled={
+    needs:  document.getElementById('roll-needs-toggle').checked,
+    wants:  document.getElementById('roll-wants-toggle').checked,
+    savings:document.getElementById('roll-savings-toggle').checked,
+  };
+  document.getElementById('splitLabel').textContent=`${n} · ${w} · ${s}`;
+  saveData();closeSettings();render();toast(t('splitsUpdated'));
+}
+document.getElementById('settingsModal').addEventListener('click',e=>{ if(e.target===document.getElementById('settingsModal'))closeSettings(); });
+
+// ═══════════════════════════════════════════════════════════════
+// FILTER
+// ═══════════════════════════════════════════════════════════════
+function setFilter(f) {
+  activeFilter=f;
+  ['all','income','needs','wants','savings'].forEach(c=>{ document.getElementById('chip-'+c).classList.toggle('active',c===f); });
+  renderTransactions();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RING
+// ═══════════════════════════════════════════════════════════════
+function stateClass(pct) { return pct>=100?'danger':pct>=75?'warn':'ok'; }
+function setRing(cat, pct) {
+  const sc=stateClass(pct);
+  const ring=document.getElementById('ring-'+cat);
+  ring.style.strokeDashoffset = CIRC*(1-Math.min(pct,100)/100);
+  ring.className=`ring-fill ring-${sc}`;
+  const rp=document.getElementById('ringpct-'+cat);
+  rp.textContent=Math.round(pct)+'%';
+  rp.className=`ring-pct ${sc}`;
+  document.getElementById('spent-'+cat).className=`bucket-spent ${sc}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAIN RENDER
+// ═══════════════════════════════════════════════════════════════
+function render() {
+  const md = getMonthData();
+  const txns = md.transactions;
+
+  const incomeTxns = txns.filter(t=>t.type==='income');
+  const totalIncome = incomeTxns.reduce((a,b)=>a+b.amount,0);
+  document.getElementById('totalIncomeDisplay').textContent = fmt(totalIncome);
+  document.getElementById('incomeCount').textContent = incomeTxns.length===0 ? t('noEntriesYetSub') : t('sources',incomeTxns.length);
+
+  const spent = {needs:0,wants:0,savings:0};
+  txns.filter(t=>t.type==='expense').forEach(t=>{ if(t.cat in spent) spent[t.cat]+=t.amount; });
+
+  const budgets = {};
+  ['needs','wants','savings'].forEach(cat => {
+    const rollover = getRollover(cat);
+    budgets[cat] = totalIncome * splits[cat] / 100 + rollover;
+    // show rollover indicator
+    const rollEl = document.getElementById('roll-'+cat);
+    if (rollEl) rollEl.textContent = rollover>0 ? t('rolloverCarried', fmt(rollover)) : '';
+  });
+
+  ['needs','wants','savings'].forEach(cat => {
+    const s=spent[cat], b=budgets[cat];
+    const pct = b>0?(s/b)*100:0;
+    setRing(cat,pct);
+    document.getElementById('spent-'+cat).textContent=fmt(s);
+    document.getElementById('alloc-'+cat).textContent=totalIncome?`${splits[cat]}% · ${fmt(b)}`:`${splits[cat]}%`;
+    document.getElementById('of-'+cat).textContent=totalIncome?`of ${fmt(b)}`:lang==='it'?'aggiungi entrate':'add income';
+    document.getElementById('over-'+cat).textContent=b>0&&s>b?`▲ ${fmt(s-b)} over`:'';
+  });
+
+  // balance
+  const totalSpent=Object.values(spent).reduce((a,b)=>a+b,0);
+  const balance=totalIncome-totalSpent;
+  const balEl=document.getElementById('balanceDisplay');
+  balEl.textContent=totalIncome?fmt(balance):'€—';
+  balEl.className='value '+(totalIncome?(balance>=0?'balance-positive':'balance-negative'):'balance-neutral');
+  document.getElementById('balanceSub').textContent=totalIncome?(balance>=0?t('surplus'):t('deficit')):'—';
+
+  // safe banner
+  const banner=document.getElementById('safeBanner');
+  const safeVal=budgets.wants-spent.wants;
+  if(totalIncome>0){
+    banner.className='safe-banner '+(safeVal<0?'danger':safeVal<budgets.wants*.25?'warn':'');
+    document.getElementById('safeVal').textContent=fmt(Math.abs(safeVal));
+    document.getElementById('safeDesc').textContent=safeVal>=0?`${t('safeToSpend')} — ${splits.wants}%`:lang==='it'?`Fuori dal ${splits.wants}%`:`Over ${splits.wants}% wants`;
+    document.getElementById('safeBannerLabel').textContent=safeVal>=0?t('safeToSpend'):t('overBudget');
+  } else { banner.className='safe-banner empty'; }
+
+  renderTransactions();
+  renderNetWorth();
+  renderGoals();
+}
+
+function renderTransactions() {
+  const md=getMonthData();
+  let txns=[...md.transactions];
+  if(activeFilter!=='all') txns=txns.filter(tx=>activeFilter==='income'?tx.type==='income':tx.cat===activeFilter);
+  document.getElementById('txnHeader').textContent=`${t('transactions')} (${md.transactions.length})`;
+  const list=document.getElementById('txnList');
+  if(!txns.length){list.innerHTML=`<div class="empty-state"><div class="icon">📋</div>${t('noEntries')}</div>`;return;}
+  const emojis={needs:'🏠',wants:'☕',savings:'💰',income:'💵'};
+  list.innerHTML=txns.map(tx=>`
+    <div class="txn-item">
+      <div class="txn-dot dot-${tx.cat}"></div>
+      <div class="txn-info">
+        <div class="txn-desc">${esc(tx.desc)}</div>
+        <div class="txn-meta">${emojis[tx.cat]} ${t(tx.cat==='income'?'income':tx.cat)} · ${tx.date}</div>
+      </div>
+      <div class="txn-amount ${tx.cat}">${tx.type==='income'?'+':'−'}${fmt(tx.amount)}</div>
+      <button class="txn-del" onclick="deleteTransaction(${tx.id})">✕</button>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════════════════════
+document.getElementById('expDesc').onkeydown   = e=>{if(e.key==='Enter')document.getElementById('expAmount').focus();};
+document.getElementById('expAmount').onkeydown = e=>{if(e.key==='Enter')addExpense();};
+document.getElementById('incDesc').onkeydown   = e=>{if(e.key==='Enter')document.getElementById('incAmount').focus();};
+document.getElementById('incAmount').onkeydown = e=>{if(e.key==='Enter')addIncome();};
+document.getElementById('recDesc').onkeydown   = e=>{if(e.key==='Enter')document.getElementById('recAmount').focus();};
+document.getElementById('recAmount').onkeydown = e=>{if(e.key==='Enter')addRecurring();};
+document.getElementById('recIncDesc').onkeydown  = e=>{if(e.key==='Enter')document.getElementById('recIncAmount').focus();};
+document.getElementById('recIncAmount').onkeydown= e=>{if(e.key==='Enter')addRecurringIncome();};
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+let toastTimer;
+function toast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// QUICK LOG (MacroDroid URL params)
+// ═══════════════════════════════════════════════════════════════
+let qmCat='wants', qmAmount=0, qmAutoTimer=null, qmCountdown=8;
+const qmIcons={wants:'☕',savings:'💰',needs:'🏠',income:'💵'};
+
+function qmSetCat(cat) {
+  qmCat=cat;
+  ['wants','savings','needs'].forEach(c=>{ document.getElementById('qmbtn-'+c).className='cat-btn'+(c===cat?' selected-'+c:''); });
+  document.getElementById('qm-icon').textContent=qmIcons[cat];
+  document.getElementById('qm-cat-label').textContent=t(cat);
+  const btn=document.getElementById('qm-confirm-btn');
+  const colors={wants:[`var(--wants-soft)`,`rgba(212,134,14,.3)`,`var(--wants)`],savings:[`var(--savings-soft)`,`rgba(58,170,102,.3)`,`var(--savings)`],needs:[`var(--needs-soft)`,`rgba(224,90,74,.3)`,`var(--needs)`]};
+  const [bg,border,color]=colors[cat]||colors.wants;
+  btn.style.background=bg; btn.style.borderColor=border; btn.style.color=color;
+}
+
+function openQuickModal(amount,cat,desc) {
+  qmAmount=amount; qmCat=cat;
+  document.getElementById('qm-amount').textContent=fmt(amount);
+  document.getElementById('qm-desc').textContent=desc||'Trade Republic';
+  qmSetCat(cat);
+  document.getElementById('quickModal').classList.add('open');
+  qmCountdown=8;
+  document.getElementById('qm-timer').textContent=`Auto-logging in ${qmCountdown}s…`;
+  qmAutoTimer=setInterval(()=>{
+    qmCountdown--;
+    if(qmCountdown<=0){clearInterval(qmAutoTimer);confirmQuickLog();}
+    else document.getElementById('qm-timer').textContent=`Auto-logging in ${qmCountdown}s…`;
+  },1000);
+}
+
+function closeQuickModal() { clearInterval(qmAutoTimer); document.getElementById('quickModal').classList.remove('open'); history.replaceState({},'',window.location.pathname); }
+
+function confirmQuickLog() {
+  clearInterval(qmAutoTimer);
+  document.getElementById('quickModal').classList.remove('open');
+  getMonthData().transactions.unshift({id:Date.now(),desc:document.getElementById('qm-desc').textContent,amount:qmAmount,type:'expense',cat:qmCat,date:todayStr()});
+  saveData();render();
+  toast(`${qmIcons[qmCat]} ${fmt(qmAmount)} → ${t(qmCat)} ✓`);
+  history.replaceState({},'',window.location.pathname);
+}
+
+function checkURLParams() {
+  const p=new URLSearchParams(window.location.search);
+  const amount=parseFloat(p.get('amount'));
+  const cat=p.get('cat')||'wants';
+  const desc=p.get('desc')||'Trade Republic';
+  if(!isNaN(amount)&&amount>0) setTimeout(()=>openQuickModal(amount,cat,desc),400);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// APPLY PREFS (lang + theme)
+// ═══════════════════════════════════════════════════════════════
+function applyPrefs() {
+  setLang(prefs.lang||'en', false);
+  setTheme(prefs.theme||'dark', false);
+  document.getElementById('splitLabel').textContent=`${splits.needs} · ${splits.wants} · ${splits.savings}`;
+  updateMonthLabel();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SAVINGS GOALS
+// ═══════════════════════════════════════════════════════════════
+let selectedGoalEmoji = '🌟';
+
+function selectGoalEmoji(e) {
+  selectedGoalEmoji = e;
+  document.querySelectorAll('.emoji-opt').forEach(el => {
+    el.classList.toggle('selected', el.textContent === e);
+  });
+}
+
+function addGoal() {
+  const name   = document.getElementById('goalName').value.trim();
+  const target = parseFloat(document.getElementById('goalTarget').value);
+  if (!name)           { toast(t('goalAddDesc'));   return; }
+  if (!target || target <= 0) { toast(t('goalAddTarget')); return; }
+  goals.push({ id: Date.now(), name, emoji: selectedGoalEmoji, target, saved: 0 });
+  document.getElementById('goalName').value   = '';
+  document.getElementById('goalTarget').value = '';
+  saveData();
+  renderGoals();
+  toast(t('goalAdded'));
+}
+
+function deleteGoal(id) {
+  goals = goals.filter(g => g.id !== id);
+  saveData(); renderGoals(); toast(t('goalDeleted'));
+}
+
+function contributeGoal(id) {
+  const input = document.getElementById('gcontrib-' + id);
+  const amount = parseFloat(input.value);
+  if (!amount || amount <= 0) return;
+  const goal = goals.find(g => g.id === id);
+  if (!goal) return;
+  goal.saved = Math.min(goal.saved + amount, goal.target);
+  input.value = '';
+  saveData(); renderGoals();
+  toast(goal.saved >= goal.target ? t('goalComplete') : t('goalContributed', fmt(amount)));
+}
+
+function renderGoals() {
+  const list = document.getElementById('goalList');
+  if (!list) return;
+  if (!goals.length) {
+    list.innerHTML = `<div class="no-goals">${t('noGoals')}</div>`;
+    return;
+  }
+  list.innerHTML = goals.map(g => {
+    const pct     = g.target > 0 ? Math.min(100, Math.round(g.saved / g.target * 100)) : 0;
+    const done    = pct >= 100;
+    const barW    = pct + '%';
+    return `
+    <div class="goal-item${done ? ' complete' : ''}">
+      <div class="goal-header">
+        <span class="goal-emoji">${g.emoji}</span>
+        <span class="goal-name">${esc(g.name)}</span>
+        <span class="goal-pct">${done ? '✓' : pct + '%'}</span>
+        <button class="goal-del" onclick="deleteGoal(${g.id})">✕</button>
+      </div>
+      <div class="goal-bar-track"><div class="goal-bar-fill" style="width:${barW}"></div></div>
+      <div class="goal-amounts">
+        <span><strong>${fmt(g.saved)}</strong> ${lang==='it'?'risparmiati':'saved'}</span>
+        <span>${lang==='it'?'di':'of'} <strong>${fmt(g.target)}</strong></span>
+      </div>
+      ${done ? '' : `
+      <div class="goal-contribute">
+        <input type="number" id="gcontrib-${g.id}" placeholder="€" min="0.01" step="0.01"
+          onkeydown="if(event.key==='Enter')contributeGoal(${g.id})">
+        <button onclick="contributeGoal(${g.id})">${t('contributeBtn')}</button>
+      </div>`}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHANGE PIN
+// ═══════════════════════════════════════════════════════════════
+const CP_STEPS   = ['verify', 'new', 'confirm'];
+let cpEntries    = { verify:'', new:'', confirm:'' };
+let cpNewFirst   = '';
+
+function openChangePinModal() {
+  cpEntries = { verify:'', new:'', confirm:'' };
+  cpNewFirst = '';
+  CP_STEPS.forEach(s => {
+    cpShowStep(s, s === 'verify');
+    cpUpdateDots(s);
+    document.getElementById('cpError-' + s).textContent = '';
+  });
+  // apply current language labels
+  document.getElementById('cpLabel-verify').textContent  = t('currentPINLabel');
+  document.getElementById('cpLabel-new').textContent     = t('newPINLabel');
+  document.getElementById('cpLabel-confirm').textContent = t('confirmNewPINLabel');
+  document.getElementById('changePinTitle').textContent  = t('changePIN');
+  document.getElementById('btn-cpCancel').textContent    = t('cancel');
+  closeSettings();
+  document.getElementById('changePinModal').classList.add('open');
+}
+function closeChangePinModal() { document.getElementById('changePinModal').classList.remove('open'); }
+document.getElementById('changePinModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('changePinModal')) closeChangePinModal();
+});
+
+function cpShowStep(step, show) {
+  document.getElementById('cpStep-' + step).classList.toggle('active', show);
+}
+
+function cpUpdateDots(step, cls = 'filled') {
+  const entry = cpEntries[step] || '';
+  const prefix = { verify:'v', new:'n', confirm:'c' }[step];
+  for (let i = 0; i < 4; i++) {
+    document.getElementById('cpd-' + prefix + i).className =
+      'pin-dot' + (i < entry.length ? ' ' + cls : '');
+  }
+}
+
+function cpKey(step, digit) {
+  if (cpEntries[step].length >= 4) return;
+  cpEntries[step] += digit;
+  cpUpdateDots(step);
+  if (cpEntries[step].length === 4) setTimeout(() => cpCheck(step), 120);
+}
+
+function cpDel(step) {
+  cpEntries[step] = cpEntries[step].slice(0, -1);
+  cpUpdateDots(step);
+}
+
+function cpCheck(step) {
+  if (step === 'verify') {
+    const stored = localStorage.getItem(LS_PIN) || '';
+    if (cpEntries.verify === stored) {
+      cpShowStep('verify', false);
+      cpShowStep('new', true);
+    } else {
+      cpUpdateDots('verify', 'error');
+      document.getElementById('cpError-verify').textContent = t('wrongCurrentPIN');
+      setTimeout(() => {
+        cpEntries.verify = '';
+        cpUpdateDots('verify');
+        document.getElementById('cpError-verify').textContent = '';
+      }, 900);
+    }
+  } else if (step === 'new') {
+    cpNewFirst = cpEntries.new;
+    cpShowStep('new', false);
+    cpShowStep('confirm', true);
+  } else if (step === 'confirm') {
+    if (cpEntries.confirm === cpNewFirst) {
+      localStorage.setItem(LS_PIN, cpNewFirst);
+      closeChangePinModal();
+      toast(t('pinChanged'));
+    } else {
+      cpUpdateDots('confirm', 'error');
+      document.getElementById('cpError-confirm').textContent = t('pinsNoMatch');
+      setTimeout(() => {
+        cpEntries.new = ''; cpEntries.confirm = ''; cpNewFirst = '';
+        cpShowStep('confirm', false);
+        cpShowStep('new', true);
+        cpUpdateDots('new'); cpUpdateDots('confirm');
+        document.getElementById('cpError-confirm').textContent = '';
+      }, 900);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+(async () => {
+  const setupDone = localStorage.getItem(LS_SETUP);
+  const pinSet    = localStorage.getItem(LS_PIN);
+
+  if (!setupDone || !pinSet) {
+    // First run — show wizard
+    showSetupWizard();
+    document.getElementById('setupWizard').style.display='flex';
+    // Apply dark theme default for wizard
+    document.documentElement.setAttribute('data-theme','dark');
+    return;
+  }
+
+  // Load data
+  await loadData();
+  applyPrefs();
+  applyI18N();
+
+  // Check session
+  if (sessionStorage.getItem(SESSION_KEY)) {
+    unlock();
+  } else {
+    showLockScreen();
+  }
+})();
+</script>
+</body>
+</html>
