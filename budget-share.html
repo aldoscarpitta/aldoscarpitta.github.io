@@ -162,56 +162,6 @@ select option { background:var(--surface2); }
 .legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
 .no-trends { text-align:center; padding:40px 20px; color:var(--ink3); font-size:.8rem; }
 
-/* ── NET WORTH ── */
-.nw-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
-.nw-section h3 { font-family:'Playfair Display',serif; font-size:.92rem; color:var(--ink2); margin-bottom:12px; }
-.nw-display { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:14px; }
-.nw-card { background:var(--surface2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:10px 12px; text-align:center; }
-.nw-card .nw-label { font-size:.62rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); margin-bottom:4px; }
-.nw-card .nw-val { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; }
-.nw-card.total .nw-val { color:var(--savings); }
-.nw-card.total.negative .nw-val { color:var(--danger); }
-.nw-form { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-bottom:8px; }
-.nw-form label { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink3); display:block; margin-bottom:4px; }
-.nw-history { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-.nw-hist-item { background:var(--surface2); border:1px solid var(--border2); border-radius:6px; padding:4px 9px; font-size:.7rem; color:var(--ink2); }
-.nw-hist-item span { color:var(--savings); font-weight:600; margin-left:4px; }
-.nw-hist-item span.neg { color:var(--danger); }
-
-/* ── SAVINGS GOALS ── */
-.goals-section { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
-.goals-section h3 { font-family:'Playfair Display',serif; font-size:.92rem; color:var(--ink2); margin-bottom:14px; }
-.goal-list { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
-.goal-item { background:var(--surface2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:12px 13px; }
-.goal-item.complete { border-color:rgba(58,170,102,.4); background:rgba(58,170,102,.06); }
-.goal-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.goal-emoji { font-size:1.3rem; flex-shrink:0; }
-.goal-name { font-weight:600; font-size:.88rem; flex:1; }
-.goal-pct { font-size:.72rem; font-weight:700; color:var(--savings); }
-.goal-item.complete .goal-pct { color:var(--ok); }
-.goal-bar-track { height:6px; background:var(--border2); border-radius:3px; margin-bottom:8px; overflow:hidden; }
-.goal-bar-fill { height:100%; border-radius:3px; background:var(--savings); transition:width .5s cubic-bezier(.4,0,.2,1); }
-.goal-item.complete .goal-bar-fill { background:var(--ok); }
-.goal-amounts { display:flex; justify-content:space-between; font-size:.72rem; color:var(--ink3); margin-bottom:8px; }
-.goal-amounts strong { color:var(--ink2); }
-.goal-contribute { display:flex; gap:6px; align-items:center; }
-.goal-contribute input { flex:1; padding:6px 9px; font-size:.8rem; }
-.goal-contribute button { padding:6px 12px; border:none; border-radius:var(--radius-sm); background:var(--savings-soft); color:var(--savings); font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:600; cursor:pointer; border:1px solid rgba(58,170,102,.3)!important; white-space:nowrap; }
-.goal-contribute button:hover { background:rgba(58,170,102,.2); }
-.goal-del { background:none; border:none; cursor:pointer; color:var(--ink3); font-size:.82rem; padding:2px 5px; border-radius:4px; transition:all .15s; opacity:.4; }
-.goal-del:hover { background:var(--needs-soft); color:var(--needs); opacity:1; }
-.goal-add-form { border-top:1px solid var(--border); padding-top:13px; }
-.goal-add-form h4 { font-size:.8rem; color:var(--ink3); letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px; }
-.emoji-picker { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:9px; }
-.emoji-opt { font-size:1.3rem; padding:4px 6px; border-radius:7px; border:1px solid var(--border2); background:var(--surface2); cursor:pointer; transition:all .15s; line-height:1; }
-.emoji-opt.selected { border-color:var(--savings); background:var(--savings-soft); }
-.no-goals { text-align:center; padding:18px; color:var(--ink3); font-size:.8rem; }
-
-/* ── CHANGE PIN MODAL ── */
-.pin-change-step { display:none; flex-direction:column; align-items:center; }
-.pin-change-step.active { display:flex; }
-.pin-change-title { font-size:.78rem; color:var(--ink2); letter-spacing:.08em; text-transform:uppercase; margin-bottom:18px; text-align:center; }
-
 /* ── MODAL ── */
 .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:500; display:none; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
 .modal-overlay.open { display:flex; }
@@ -307,7 +257,6 @@ select option { background:var(--surface2); }
 @media(max-width:380px) {
   .buckets { grid-template-columns:1fr 1fr; }
   .income-row { grid-template-columns:1fr; }
-  .nw-display { grid-template-columns:1fr 1fr; }
 }
 </style>
 </head>
@@ -591,64 +540,6 @@ select option { background:var(--surface2); }
     <div class="txn-list" id="txnList"></div>
   </div>
 
-  <!-- NET WORTH -->
-  <div class="nw-section" style="margin-top:16px">
-    <h3 id="lbl-netWorth">Net Worth</h3>
-    <div class="nw-display">
-      <div class="nw-card">
-        <div class="nw-label" id="lbl-assets">Assets</div>
-        <div class="nw-val income-val" id="nwAssetsDisplay">€—</div>
-      </div>
-      <div class="nw-card">
-        <div class="nw-label" id="lbl-liabilities">Liabilities</div>
-        <div class="nw-val" style="color:var(--danger)" id="nwLiabDisplay">€—</div>
-      </div>
-      <div class="nw-card total" id="nwTotalCard">
-        <div class="nw-label">Net Worth</div>
-        <div class="nw-val" id="nwTotalDisplay">€—</div>
-      </div>
-    </div>
-    <div class="nw-form">
-      <div>
-        <label id="lbl-nwAssets">Total assets (€)</label>
-        <input type="number" id="nwAssets" placeholder="e.g. 5000" min="0" step="1">
-      </div>
-      <div>
-        <label id="lbl-nwLiab">Liabilities (€)</label>
-        <input type="number" id="nwLiab" placeholder="e.g. 200" min="0" step="1">
-      </div>
-    </div>
-    <button class="action-btn income" onclick="saveNetWorth()" id="btn-updateNW">Update this month</button>
-    <div class="nw-history" id="nwHistory"></div>
-  </div>
-
-  <!-- SAVINGS GOALS -->
-  <div class="goals-section" style="margin-top:16px">
-    <h3 id="lbl-goalsTitle">Savings Goals</h3>
-    <div class="goal-list" id="goalList"></div>
-
-    <div class="goal-add-form">
-      <h4 id="lbl-addGoalSection">New goal</h4>
-      <div class="emoji-picker" id="emojiPicker">
-        <span class="emoji-opt" onclick="selectGoalEmoji('🏖')">🏖</span>
-        <span class="emoji-opt" onclick="selectGoalEmoji('✈️')">✈️</span>
-        <span class="emoji-opt" onclick="selectGoalEmoji('🚗')">🚗</span>
-        <span class="emoji-opt" onclick="selectGoalEmoji('🏠')">🏠</span>
-        <span class="emoji-opt" onclick="selectGoalEmoji('🎓')">🎓</span>
-        <span class="emoji-opt" onclick="selectGoalEmoji('💻')">💻</span>
-        <span class="emoji-opt" onclick="selectGoalEmoji('🎸')">🎸</span>
-        <span class="emoji-opt" onclick="selectGoalEmoji('🌟')">🌟</span>
-        <span class="emoji-opt" onclick="selectGoalEmoji('🏋')">🏋</span>
-        <span class="emoji-opt" onclick="selectGoalEmoji('💍')">💍</span>
-      </div>
-      <div class="input-row" style="margin-bottom:8px">
-        <input type="text" id="goalName" placeholder="Goal name (e.g. Holiday)">
-        <input type="number" id="goalTarget" placeholder="€" min="1" step="1">
-      </div>
-      <button class="action-btn income" onclick="addGoal()" id="btn-addGoal">Add Goal</button>
-    </div>
-  </div>
-
 </div><!-- end .container -->
 
 <!-- QUICK LOG MODAL -->
@@ -765,12 +656,6 @@ select option { background:var(--surface2); }
       </div>
     </div>
 
-    <!-- Change PIN -->
-    <div class="settings-group">
-      <span class="settings-group-label" id="lbl-changePIN">PIN</span>
-      <button class="action-btn expense" onclick="openChangePinModal()" id="btn-changePIN" style="margin-top:2px">🔑 Change PIN</button>
-    </div>
-
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeSettings()" id="btn-settingsCancel">Cancel</button>
       <button class="btn-save" onclick="saveSplits()" id="btn-settingsSave">Save</button>
@@ -779,63 +664,6 @@ select option { background:var(--surface2); }
 </div>
 
 <div class="toast" id="toast"></div>
-
-<!-- CHANGE PIN MODAL -->
-<div class="modal-overlay" id="changePinModal">
-  <div class="modal" style="text-align:center;padding:28px 22px;max-width:340px">
-    <h2 id="changePinTitle">Change PIN</h2>
-
-    <!-- Step: verify current PIN -->
-    <div class="pin-change-step active" id="cpStep-verify">
-      <div class="pin-change-title" id="cpLabel-verify">Enter current PIN</div>
-      <div class="pin-dots" id="cpDots-verify">
-        <div class="pin-dot" id="cpd-v0"></div><div class="pin-dot" id="cpd-v1"></div>
-        <div class="pin-dot" id="cpd-v2"></div><div class="pin-dot" id="cpd-v3"></div>
-      </div>
-      <div class="pin-pad" style="max-width:260px">
-        <button class="pin-key" onclick="cpKey('verify','1')">1</button><button class="pin-key" onclick="cpKey('verify','2')">2</button><button class="pin-key" onclick="cpKey('verify','3')">3</button>
-        <button class="pin-key" onclick="cpKey('verify','4')">4</button><button class="pin-key" onclick="cpKey('verify','5')">5</button><button class="pin-key" onclick="cpKey('verify','6')">6</button>
-        <button class="pin-key" onclick="cpKey('verify','7')">7</button><button class="pin-key" onclick="cpKey('verify','8')">8</button><button class="pin-key" onclick="cpKey('verify','9')">9</button>
-        <button class="pin-key empty" disabled></button><button class="pin-key" onclick="cpKey('verify','0')">0</button><button class="pin-key del" onclick="cpDel('verify')">⌫</button>
-      </div>
-      <div class="pin-error-msg" id="cpError-verify"></div>
-    </div>
-
-    <!-- Step: enter new PIN -->
-    <div class="pin-change-step" id="cpStep-new">
-      <div class="pin-change-title" id="cpLabel-new">Enter new PIN</div>
-      <div class="pin-dots" id="cpDots-new">
-        <div class="pin-dot" id="cpd-n0"></div><div class="pin-dot" id="cpd-n1"></div>
-        <div class="pin-dot" id="cpd-n2"></div><div class="pin-dot" id="cpd-n3"></div>
-      </div>
-      <div class="pin-pad" style="max-width:260px">
-        <button class="pin-key" onclick="cpKey('new','1')">1</button><button class="pin-key" onclick="cpKey('new','2')">2</button><button class="pin-key" onclick="cpKey('new','3')">3</button>
-        <button class="pin-key" onclick="cpKey('new','4')">4</button><button class="pin-key" onclick="cpKey('new','5')">5</button><button class="pin-key" onclick="cpKey('new','6')">6</button>
-        <button class="pin-key" onclick="cpKey('new','7')">7</button><button class="pin-key" onclick="cpKey('new','8')">8</button><button class="pin-key" onclick="cpKey('new','9')">9</button>
-        <button class="pin-key empty" disabled></button><button class="pin-key" onclick="cpKey('new','0')">0</button><button class="pin-key del" onclick="cpDel('new')">⌫</button>
-      </div>
-      <div class="pin-error-msg" id="cpError-new"></div>
-    </div>
-
-    <!-- Step: confirm new PIN -->
-    <div class="pin-change-step" id="cpStep-confirm">
-      <div class="pin-change-title" id="cpLabel-confirm">Confirm new PIN</div>
-      <div class="pin-dots" id="cpDots-confirm">
-        <div class="pin-dot" id="cpd-c0"></div><div class="pin-dot" id="cpd-c1"></div>
-        <div class="pin-dot" id="cpd-c2"></div><div class="pin-dot" id="cpd-c3"></div>
-      </div>
-      <div class="pin-pad" style="max-width:260px">
-        <button class="pin-key" onclick="cpKey('confirm','1')">1</button><button class="pin-key" onclick="cpKey('confirm','2')">2</button><button class="pin-key" onclick="cpKey('confirm','3')">3</button>
-        <button class="pin-key" onclick="cpKey('confirm','4')">4</button><button class="pin-key" onclick="cpKey('confirm','5')">5</button><button class="pin-key" onclick="cpKey('confirm','6')">6</button>
-        <button class="pin-key" onclick="cpKey('confirm','7')">7</button><button class="pin-key" onclick="cpKey('confirm','8')">8</button><button class="pin-key" onclick="cpKey('confirm','9')">9</button>
-        <button class="pin-key empty" disabled></button><button class="pin-key" onclick="cpKey('confirm','0')">0</button><button class="pin-key del" onclick="cpDel('confirm')">⌫</button>
-      </div>
-      <div class="pin-error-msg" id="cpError-confirm"></div>
-    </div>
-
-    <button class="btn-cancel" onclick="closeChangePinModal()" id="btn-cpCancel" style="width:100%;padding:10px;border-radius:var(--radius-sm);margin-top:16px;font-family:'DM Sans',sans-serif;font-size:.84rem;font-weight:600;cursor:pointer">Cancel</button>
-  </div>
-</div>
 </div><!-- end #appContent -->
 
 <script>
@@ -860,8 +688,6 @@ const I18N = {
     rolloverSection:'Rollover unused budget',
     rollNeeds:'Needs rollover', rollWants:'Wants rollover', rollSavings:'Savings rollover',
     save:'Save', cancel:'Cancel',
-    netWorth:'Net Worth', assets:'Assets', liabilities:'Liabilities',
-    updateNW:'Update this month', nwAssets:'Total assets (€)', nwLiab:'Liabilities (€)',
     trends:'Monthly Trends', syncBackup:'Sync & Backup',
     choosePIN:'Choose your PIN', confirmPIN:'Confirm your PIN',
     enterPIN:'Enter your PIN', pinsNoMatch:"PINs don't match — try again.",
@@ -880,26 +706,12 @@ const I18N = {
     noRecExpYet:'No recurring expenses saved yet.',
     noRecIncYet:'No recurring income saved yet.',
     backupDL:'Backup downloaded ✓', importOK:'Import successful ✓', importFail:'Import failed — invalid file.',
-    gistOK:'Gist sync enabled ✓', nwSaved:'Net worth updated ✓',
+    gistOK:'Gist sync enabled ✓',
     surplus:'surplus this month', deficit:'deficit this month',
     noEntriesYetSub:'no entries yet',
     sources: n => n===1?'1 source':`${n} sources`,
     rolloverCarried: n => `+${n} carried over`,
     noTrendsData:'Add data for at least 2 months to see trends.',
-    // savings goals
-    goalsTitle:'Savings Goals', addGoalSection:'New goal',
-    goalNamePlaceholder:'Goal name (e.g. Holiday)', goalTargetPlaceholder:'Target €',
-    addGoal:'Add Goal', deleteGoal:'Delete', contributeBtn:'+ Add',
-    noGoals:'No goals yet. Add one below.',
-    goalComplete:'Goal reached! 🎉',
-    goalContributed: a => `${a} added to goal ✓`,
-    goalAdded:'Goal added ✓', goalDeleted:'Goal removed',
-    goalAddDesc:'Enter a goal name', goalAddTarget:'Enter a target amount',
-    goalSelectEmoji:'Pick an emoji',
-    // PIN change
-    changePIN:'Change PIN', currentPINLabel:'Enter current PIN',
-    newPINLabel:'Enter new PIN', confirmNewPINLabel:'Confirm new PIN',
-    pinChanged:'PIN changed ✓', wrongCurrentPIN:'Wrong PIN — try again.',
   },
   it: {
     title:'Budget', totalIncome:'Entrate Totali', balance:'Saldo',
@@ -918,8 +730,6 @@ const I18N = {
     rolloverSection:'Riporta budget non usato',
     rollNeeds:'Riporta Necessità', rollWants:'Riporta Desideri', rollSavings:'Riporta Risparmi',
     save:'Salva', cancel:'Annulla',
-    netWorth:'Patrimonio Netto', assets:'Attività', liabilities:'Passività',
-    updateNW:'Aggiorna questo mese', nwAssets:'Attività totali (€)', nwLiab:'Passività (€)',
     trends:'Andamento Mensile', syncBackup:'Sincronizzazione',
     choosePIN:'Scegli il tuo PIN', confirmPIN:'Conferma il PIN',
     enterPIN:'Inserisci il PIN', pinsNoMatch:'I PIN non corrispondono — riprova.',
@@ -937,26 +747,12 @@ const I18N = {
     noRecExpYet:'Nessuna spesa ricorrente ancora.',
     noRecIncYet:'Nessuna entrata ricorrente ancora.',
     backupDL:'Backup scaricato ✓', importOK:'Importazione riuscita ✓', importFail:'Importazione fallita.',
-    gistOK:'Sincronizzazione Gist attiva ✓', nwSaved:'Patrimonio netto aggiornato ✓',
+    gistOK:'Sincronizzazione Gist attiva ✓',
     surplus:'avanzo questo mese', deficit:'deficit questo mese',
     noEntriesYetSub:'nessuna voce ancora',
     sources: n => n===1?'1 fonte':`${n} fonti`,
     rolloverCarried: n => `+${n} riportato`,
     noTrendsData:'Aggiungi dati per almeno 2 mesi per vedere i trend.',
-    // savings goals
-    goalsTitle:'Obiettivi di Risparmio', addGoalSection:'Nuovo obiettivo',
-    goalNamePlaceholder:'Nome (es. Vacanza)', goalTargetPlaceholder:'Obiettivo €',
-    addGoal:'Aggiungi Obiettivo', deleteGoal:'Elimina', contributeBtn:'+ Aggiungi',
-    noGoals:'Nessun obiettivo. Aggiungine uno.',
-    goalComplete:'Obiettivo raggiunto! 🎉',
-    goalContributed: a => `${a} aggiunto all\'obiettivo ✓`,
-    goalAdded:'Obiettivo aggiunto ✓', goalDeleted:'Obiettivo rimosso',
-    goalAddDesc:'Inserisci un nome', goalAddTarget:'Inserisci un importo',
-    goalSelectEmoji:'Scegli un\'emoji',
-    // PIN change
-    changePIN:'Cambia PIN', currentPINLabel:'Inserisci il PIN attuale',
-    newPINLabel:'Inserisci il nuovo PIN', confirmNewPINLabel:'Conferma il nuovo PIN',
-    pinChanged:'PIN cambiato ✓', wrongCurrentPIN:'PIN errato — riprova.',
   }
 };
 
@@ -1004,13 +800,8 @@ function applyI18N() {
     'lbl-rollNeeds':'rollNeeds', 'lbl-rollWants':'rollWants', 'lbl-rollSavings':'rollSavings',
     'btn-settingsCancel':'cancel', 'btn-settingsSave':'save',
     'btn-syncCancel':'cancel',
-    'lbl-netWorth':'netWorth', 'lbl-assets':'assets', 'lbl-liabilities':'liabilities',
-    'btn-updateNW':'updateNW', 'lbl-nwAssets':'nwAssets', 'lbl-nwLiab':'nwLiab',
     'lbl-trends':'trends', 'lbl-syncBackup':'syncBackup',
     'lbl-manualBackup':'manualBackup',
-    'lbl-goalsTitle':'goalsTitle', 'lbl-addGoalSection':'addGoalSection',
-    'btn-addGoal':'addGoal',
-    'lbl-changePIN':'changePIN', 'btn-changePIN':'changePIN',
   };
   for (const [id, key] of Object.entries(map)) {
     const el = document.getElementById(id);
@@ -1038,10 +829,6 @@ function applyI18N() {
   if (expDesc) expDesc.placeholder = t('descPlaceholder');
   const incDesc = document.getElementById('incDesc');
   if (incDesc) incDesc.placeholder = t('sourcePlaceholder');
-  const goalName = document.getElementById('goalName');
-  if (goalName) goalName.placeholder = t('goalNamePlaceholder');
-  const goalTarget = document.getElementById('goalTarget');
-  if (goalTarget) goalTarget.placeholder = t('goalTargetPlaceholder');
   // chips
   const chipMap = {all:'All/Tutti',income:'income',needs:'needs',wants:'wants',savings:'savings'};
   const chipLabels = { en:{all:'All',income:'Income',needs:'Needs',wants:'Wants',savings:'Savings'}, it:{all:'Tutti',income:'Entrate',needs:'Necessità',wants:'Desideri',savings:'Risparmi'} };
@@ -1152,7 +939,7 @@ async function wizSaveGist() {
   localStorage.setItem(LS_GIST, JSON.stringify(gistCfg));
   document.getElementById('wGistError').textContent = 'Testing…';
   try {
-    await gistWrite(JSON.stringify({ version:1, months:{}, recurring:[], recurringIncome:[], splits:{needs:50,wants:30,savings:20}, rolloverEnabled:{needs:false,wants:false,savings:false}, netWorth:{}, goals:[], prefs:{lang:'en',theme:'dark'} }));
+    await gistWrite(JSON.stringify({ version:1, months:{}, recurring:[], recurringIncome:[], splits:{needs:50,wants:30,savings:20}, rolloverEnabled:{needs:false,wants:false,savings:false}, prefs:{lang:'en',theme:'dark'} }));
     wizGoStep(2);
   } catch(e) {
     document.getElementById('wGistError').textContent = 'Connection failed: '+e.message;
@@ -1238,8 +1025,6 @@ let recurring = [];
 let recurringIncome = [];
 let splits = { needs:50, wants:30, savings:20 };
 let rolloverEnabled = { needs:false, wants:false, savings:false };
-let netWorthData = {};
-let goals = [];
 let prefs = { lang:'en', theme:'dark' };
 
 // ═══════════════════════════════════════════════════════════════
@@ -1273,8 +1058,6 @@ function migrate(d) {
   if (!d.version || d.version < DATA_VERSION) {
     d.version = DATA_VERSION;
     d.rolloverEnabled = d.rolloverEnabled || { needs:false, wants:false, savings:false };
-    d.netWorth = d.netWorth || {};
-    d.goals = d.goals || [];
     d.prefs = d.prefs || { lang:'en', theme:'dark' };
   }
   return d;
@@ -1310,18 +1093,16 @@ function applyLoaded(d) {
   recurringIncome = d.recurringIncome || [];
   splits = d.splits || { needs:50, wants:30, savings:20 };
   rolloverEnabled = d.rolloverEnabled || { needs:false, wants:false, savings:false };
-  netWorthData = d.netWorth || {};
-  goals = d.goals || [];
   prefs = d.prefs || { lang:'en', theme:'dark' };
 }
 
 function resetState() {
   data={}; recurring=[]; recurringIncome=[]; splits={needs:50,wants:30,savings:20};
-  rolloverEnabled={needs:false,wants:false,savings:false}; netWorthData={}; goals=[]; prefs={lang:'en',theme:'dark'};
+  rolloverEnabled={needs:false,wants:false,savings:false}; prefs={lang:'en',theme:'dark'};
 }
 
 function buildPayload() {
-  return JSON.stringify({ version:DATA_VERSION, months:data, recurring, recurringIncome, splits, rolloverEnabled, netWorth:netWorthData, goals, prefs });
+  return JSON.stringify({ version:DATA_VERSION, months:data, recurring, recurringIncome, splits, rolloverEnabled, prefs });
 }
 
 async function saveData() {
@@ -1551,46 +1332,6 @@ function getRollover(cat) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// NET WORTH
-// ═══════════════════════════════════════════════════════════════
-function saveNetWorth() {
-  const assets = parseFloat(document.getElementById('nwAssets').value)||0;
-  const liab   = parseFloat(document.getElementById('nwLiab').value)||0;
-  netWorthData[getMonthKey()] = { assets, liabilities: liab };
-  saveData();
-  renderNetWorth();
-  toast(t('nwSaved'));
-}
-
-function renderNetWorth() {
-  const k = getMonthKey();
-  const entry = netWorthData[k];
-  if (entry) {
-    document.getElementById('nwAssetsDisplay').textContent = fmt(entry.assets);
-    document.getElementById('nwLiabDisplay').textContent  = fmt(entry.liabilities);
-    const nw = entry.assets - entry.liabilities;
-    document.getElementById('nwTotalDisplay').textContent = fmt(nw);
-    document.getElementById('nwTotalCard').className = 'nw-card total' + (nw<0?' negative':'');
-    document.getElementById('nwAssets').value = entry.assets;
-    document.getElementById('nwLiab').value   = entry.liabilities;
-  } else {
-    ['nwAssetsDisplay','nwLiabDisplay','nwTotalDisplay'].forEach(id=>{ document.getElementById(id).textContent='€—'; });
-    document.getElementById('nwTotalCard').className='nw-card total';
-  }
-  // history: last 4 months with data
-  const sorted = Object.entries(netWorthData)
-    .sort((a,b)=>b[0].localeCompare(a[0])).slice(0,4);
-  const hist = document.getElementById('nwHistory');
-  if (sorted.length === 0) { hist.innerHTML=''; return; }
-  hist.innerHTML = sorted.map(([mk, e]) => {
-    const [y,m] = mk.split('-');
-    const mn = getMonthNames()[parseInt(m)-1];
-    const nw = e.assets - e.liabilities;
-    return `<div class="nw-hist-item">${mn.slice(0,3)} ${y}<span class="${nw<0?'neg':''}">${fmt(nw)}</span></div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════
 // TRENDS CHART
 // ═══════════════════════════════════════════════════════════════
 let trendsChart = null;
@@ -1780,8 +1521,6 @@ function render() {
   } else { banner.className='safe-banner empty'; }
 
   renderTransactions();
-  renderNetWorth();
-  renderGoals();
 }
 
 function renderTransactions() {
@@ -1886,174 +1625,6 @@ function applyPrefs() {
   setTheme(prefs.theme||'dark', false);
   document.getElementById('splitLabel').textContent=`${splits.needs} · ${splits.wants} · ${splits.savings}`;
   updateMonthLabel();
-}
-
-// ═══════════════════════════════════════════════════════════════
-// SAVINGS GOALS
-// ═══════════════════════════════════════════════════════════════
-let selectedGoalEmoji = '🌟';
-
-function selectGoalEmoji(e) {
-  selectedGoalEmoji = e;
-  document.querySelectorAll('.emoji-opt').forEach(el => {
-    el.classList.toggle('selected', el.textContent === e);
-  });
-}
-
-function addGoal() {
-  const name   = document.getElementById('goalName').value.trim();
-  const target = parseFloat(document.getElementById('goalTarget').value);
-  if (!name)           { toast(t('goalAddDesc'));   return; }
-  if (!target || target <= 0) { toast(t('goalAddTarget')); return; }
-  goals.push({ id: Date.now(), name, emoji: selectedGoalEmoji, target, saved: 0 });
-  document.getElementById('goalName').value   = '';
-  document.getElementById('goalTarget').value = '';
-  saveData();
-  renderGoals();
-  toast(t('goalAdded'));
-}
-
-function deleteGoal(id) {
-  goals = goals.filter(g => g.id !== id);
-  saveData(); renderGoals(); toast(t('goalDeleted'));
-}
-
-function contributeGoal(id) {
-  const input = document.getElementById('gcontrib-' + id);
-  const amount = parseFloat(input.value);
-  if (!amount || amount <= 0) return;
-  const goal = goals.find(g => g.id === id);
-  if (!goal) return;
-  goal.saved = Math.min(goal.saved + amount, goal.target);
-  input.value = '';
-  saveData(); renderGoals();
-  toast(goal.saved >= goal.target ? t('goalComplete') : t('goalContributed', fmt(amount)));
-}
-
-function renderGoals() {
-  const list = document.getElementById('goalList');
-  if (!list) return;
-  if (!goals.length) {
-    list.innerHTML = `<div class="no-goals">${t('noGoals')}</div>`;
-    return;
-  }
-  list.innerHTML = goals.map(g => {
-    const pct     = g.target > 0 ? Math.min(100, Math.round(g.saved / g.target * 100)) : 0;
-    const done    = pct >= 100;
-    const barW    = pct + '%';
-    return `
-    <div class="goal-item${done ? ' complete' : ''}">
-      <div class="goal-header">
-        <span class="goal-emoji">${g.emoji}</span>
-        <span class="goal-name">${esc(g.name)}</span>
-        <span class="goal-pct">${done ? '✓' : pct + '%'}</span>
-        <button class="goal-del" onclick="deleteGoal(${g.id})">✕</button>
-      </div>
-      <div class="goal-bar-track"><div class="goal-bar-fill" style="width:${barW}"></div></div>
-      <div class="goal-amounts">
-        <span><strong>${fmt(g.saved)}</strong> ${lang==='it'?'risparmiati':'saved'}</span>
-        <span>${lang==='it'?'di':'of'} <strong>${fmt(g.target)}</strong></span>
-      </div>
-      ${done ? '' : `
-      <div class="goal-contribute">
-        <input type="number" id="gcontrib-${g.id}" placeholder="€" min="0.01" step="0.01"
-          onkeydown="if(event.key==='Enter')contributeGoal(${g.id})">
-        <button onclick="contributeGoal(${g.id})">${t('contributeBtn')}</button>
-      </div>`}
-    </div>`;
-  }).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// CHANGE PIN
-// ═══════════════════════════════════════════════════════════════
-const CP_STEPS   = ['verify', 'new', 'confirm'];
-let cpEntries    = { verify:'', new:'', confirm:'' };
-let cpNewFirst   = '';
-
-function openChangePinModal() {
-  cpEntries = { verify:'', new:'', confirm:'' };
-  cpNewFirst = '';
-  CP_STEPS.forEach(s => {
-    cpShowStep(s, s === 'verify');
-    cpUpdateDots(s);
-    document.getElementById('cpError-' + s).textContent = '';
-  });
-  // apply current language labels
-  document.getElementById('cpLabel-verify').textContent  = t('currentPINLabel');
-  document.getElementById('cpLabel-new').textContent     = t('newPINLabel');
-  document.getElementById('cpLabel-confirm').textContent = t('confirmNewPINLabel');
-  document.getElementById('changePinTitle').textContent  = t('changePIN');
-  document.getElementById('btn-cpCancel').textContent    = t('cancel');
-  closeSettings();
-  document.getElementById('changePinModal').classList.add('open');
-}
-function closeChangePinModal() { document.getElementById('changePinModal').classList.remove('open'); }
-document.getElementById('changePinModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('changePinModal')) closeChangePinModal();
-});
-
-function cpShowStep(step, show) {
-  document.getElementById('cpStep-' + step).classList.toggle('active', show);
-}
-
-function cpUpdateDots(step, cls = 'filled') {
-  const entry = cpEntries[step] || '';
-  const prefix = { verify:'v', new:'n', confirm:'c' }[step];
-  for (let i = 0; i < 4; i++) {
-    document.getElementById('cpd-' + prefix + i).className =
-      'pin-dot' + (i < entry.length ? ' ' + cls : '');
-  }
-}
-
-function cpKey(step, digit) {
-  if (cpEntries[step].length >= 4) return;
-  cpEntries[step] += digit;
-  cpUpdateDots(step);
-  if (cpEntries[step].length === 4) setTimeout(() => cpCheck(step), 120);
-}
-
-function cpDel(step) {
-  cpEntries[step] = cpEntries[step].slice(0, -1);
-  cpUpdateDots(step);
-}
-
-function cpCheck(step) {
-  if (step === 'verify') {
-    const stored = localStorage.getItem(LS_PIN) || '';
-    if (cpEntries.verify === stored) {
-      cpShowStep('verify', false);
-      cpShowStep('new', true);
-    } else {
-      cpUpdateDots('verify', 'error');
-      document.getElementById('cpError-verify').textContent = t('wrongCurrentPIN');
-      setTimeout(() => {
-        cpEntries.verify = '';
-        cpUpdateDots('verify');
-        document.getElementById('cpError-verify').textContent = '';
-      }, 900);
-    }
-  } else if (step === 'new') {
-    cpNewFirst = cpEntries.new;
-    cpShowStep('new', false);
-    cpShowStep('confirm', true);
-  } else if (step === 'confirm') {
-    if (cpEntries.confirm === cpNewFirst) {
-      localStorage.setItem(LS_PIN, cpNewFirst);
-      closeChangePinModal();
-      toast(t('pinChanged'));
-    } else {
-      cpUpdateDots('confirm', 'error');
-      document.getElementById('cpError-confirm').textContent = t('pinsNoMatch');
-      setTimeout(() => {
-        cpEntries.new = ''; cpEntries.confirm = ''; cpNewFirst = '';
-        cpShowStep('confirm', false);
-        cpShowStep('new', true);
-        cpUpdateDots('new'); cpUpdateDots('confirm');
-        document.getElementById('cpError-confirm').textContent = '';
-      }, 900);
-    }
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════
