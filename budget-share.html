@@ -267,24 +267,6 @@ select option { background:var(--surface2); }
   .income-row { grid-template-columns:1fr; }
 }
 
-/* ── ORGANISM ── */
-#organism-view { display:flex; flex-direction:column; align-items:center; margin-bottom:12px; }
-#orgCanvas { width:100%; max-width:480px; aspect-ratio:1/1; display:block; border-radius:16px; }
-.org-pills { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; width:100%; max-width:480px; margin-top:10px; }
-.org-pill { border-radius:12px; border:1px solid var(--border); padding:10px 10px 8px; display:flex; flex-direction:column; align-items:center; gap:2px; }
-.org-pill.pill-needs  { background:var(--needs-soft);  border-color:rgba(224,90,74,.22); }
-.org-pill.pill-wants  { background:var(--wants-soft);  border-color:rgba(212,134,14,.22); }
-.org-pill.pill-savings{ background:var(--savings-soft);border-color:rgba(58,170,102,.22); }
-.org-pill .pill-name { font-size:.6rem; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--ink3); }
-.org-pill .bucket-spent { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; line-height:1; }
-.org-pill .ring-pct { font-size:.7rem; font-weight:600; color:var(--ink2); }
-.org-pill .ring-pct.ok { color:var(--ok); }
-.org-pill .ring-pct.warn { color:var(--warn); }
-.org-pill .ring-pct.danger { color:var(--danger); }
-.org-pill .bucket-spent.ok { color:var(--ok); }
-.org-pill .bucket-spent.warn { color:var(--warn); }
-.org-pill .bucket-spent.danger { color:var(--danger); }
-.org-pill .bucket-rollover { font-size:.58rem; color:var(--income-c); text-align:center; }
 </style>
 </head>
 <body>
@@ -443,37 +425,61 @@ select option { background:var(--surface2); }
     <div class="safe-desc" id="safeDesc">—</div>
   </div>
 
-  <!-- ORGANISM VIEW -->
-  <div id="organism-view">
-    <canvas id="orgCanvas"></canvas>
-    <div class="org-pills">
-      <div class="org-pill pill-needs">
-        <span class="pill-name" id="bname-needs">Needs</span>
-        <span class="bucket-spent ok" id="spent-needs">€0</span>
-        <span class="ring-pct ok" id="ringpct-needs">0%</span>
-        <span class="bucket-rollover" id="roll-needs"></span>
+  <!-- RING BUCKETS -->
+  <div class="buckets">
+    <div class="bucket">
+      <div class="bucket-ring">
+        <svg viewBox="0 0 72 72" width="72" height="72">
+          <circle class="ring-bg" cx="36" cy="36" r="30"/>
+          <circle id="ring-needs" class="ring-fill ring-ok" cx="36" cy="36" r="30" stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+        </svg>
+        <div class="ring-label">
+          <span class="ring-pct ok" id="ringpct-needs">0%</span>
+          <span class="ring-sub" id-t="needs">Needs</span>
+        </div>
       </div>
-      <div class="org-pill pill-wants">
-        <span class="pill-name" id="bname-wants">Wants</span>
-        <span class="bucket-spent ok" id="spent-wants">€0</span>
-        <span class="ring-pct ok" id="ringpct-wants">0%</span>
-        <span class="bucket-rollover" id="roll-wants"></span>
-      </div>
-      <div class="org-pill pill-savings">
-        <span class="pill-name" id="bname-savings">Savings</span>
-        <span class="bucket-spent ok" id="spent-savings">€0</span>
-        <span class="ring-pct ok" id="ringpct-savings">0%</span>
-        <span class="bucket-rollover" id="roll-savings"></span>
-      </div>
+      <div class="bucket-name" id="bname-needs">Needs</div>
+      <div class="bucket-alloc"><span id="alloc-needs">€0</span></div>
+      <div class="bucket-spent ok" id="spent-needs">€0</div>
+      <div class="bucket-of"><span id="of-needs"></span></div>
+      <div class="bucket-over danger" id="over-needs"></div>
+      <div class="bucket-rollover" id="roll-needs"></div>
     </div>
-    <!-- Hidden elements kept for render() compatibility -->
-    <div style="display:none" aria-hidden="true">
-      <span id="alloc-needs"></span><span id="alloc-wants"></span><span id="alloc-savings"></span>
-      <span id="of-needs"></span><span id="of-wants"></span><span id="of-savings"></span>
-      <span id="over-needs"></span><span id="over-wants"></span><span id="over-savings"></span>
-      <svg><circle id="ring-needs" class="ring-fill ring-ok" stroke-dasharray="188.5"/>
-           <circle id="ring-wants" class="ring-fill ring-ok" stroke-dasharray="188.5"/>
-           <circle id="ring-savings" class="ring-fill ring-ok" stroke-dasharray="188.5"/></svg>
+    <div class="bucket">
+      <div class="bucket-ring">
+        <svg viewBox="0 0 72 72" width="72" height="72">
+          <circle class="ring-bg" cx="36" cy="36" r="30"/>
+          <circle id="ring-wants" class="ring-fill ring-ok" cx="36" cy="36" r="30" stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+        </svg>
+        <div class="ring-label">
+          <span class="ring-pct ok" id="ringpct-wants">0%</span>
+          <span class="ring-sub" id-t="wants">Wants</span>
+        </div>
+      </div>
+      <div class="bucket-name" id="bname-wants">Wants</div>
+      <div class="bucket-alloc"><span id="alloc-wants">€0</span></div>
+      <div class="bucket-spent ok" id="spent-wants">€0</div>
+      <div class="bucket-of"><span id="of-wants"></span></div>
+      <div class="bucket-over danger" id="over-wants"></div>
+      <div class="bucket-rollover" id="roll-wants"></div>
+    </div>
+    <div class="bucket">
+      <div class="bucket-ring">
+        <svg viewBox="0 0 72 72" width="72" height="72">
+          <circle class="ring-bg" cx="36" cy="36" r="30"/>
+          <circle id="ring-savings" class="ring-fill ring-ok" cx="36" cy="36" r="30" stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+        </svg>
+        <div class="ring-label">
+          <span class="ring-pct ok" id="ringpct-savings">0%</span>
+          <span class="ring-sub" id-t="savings">Savings</span>
+        </div>
+      </div>
+      <div class="bucket-name" id="bname-savings">Savings</div>
+      <div class="bucket-alloc"><span id="alloc-savings">€0</span></div>
+      <div class="bucket-spent ok" id="spent-savings">€0</div>
+      <div class="bucket-of"><span id="of-savings"></span></div>
+      <div class="bucket-over danger" id="over-savings"></div>
+      <div class="bucket-rollover" id="roll-savings"></div>
     </div>
   </div>
 
@@ -612,6 +618,9 @@ select option { background:var(--surface2); }
     <div class="sync-actions">
       <button onclick="exportJSON()" id="btn-export">⬇ Export JSON</button>
       <label class="btn-import-label">⬆ Import JSON<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
+    </div>
+    <div class="sync-actions" style="margin-top:6px">
+      <button onclick="exportCSV()" id="btn-exportCSV" style="width:100%">📊 Download spreadsheet (.csv)</button>
     </div>
     <div class="sync-status-line" id="syncStatusLine"></div>
   </div>
@@ -1149,6 +1158,66 @@ function exportJSON() {
   document.getElementById('syncStatusLine').textContent = t('backupDL');
 }
 
+function exportCSV() {
+  const d = JSON.parse(buildPayload());
+  const rows = [];
+
+  // Header row
+  rows.push(['Date','Year','Month','Description','Type','Category','Amount (€)']);
+
+  // Collect all months sorted chronologically
+  const monthKeys = Object.keys(d.months || {}).sort();
+
+  monthKeys.forEach(ym => {
+    const [year, month] = ym.split('-');
+    const monthName = new Date(ym + '-01').toLocaleString('default', { month: 'long' });
+    const txs = (d.months[ym].transactions || []).slice().sort((a,b) => (a.date||ym) < (b.date||ym) ? -1 : 1);
+
+    txs.forEach(tx => {
+      const date = tx.date || ym + '-01';
+      const type = tx.type === 'income' ? 'Income' : 'Expense';
+      const cat = tx.cat ? (tx.cat.charAt(0).toUpperCase() + tx.cat.slice(1)) : '';
+      const amount = tx.type === 'income' ? tx.amount : -tx.amount;
+      rows.push([date, year, monthName + ' ' + year, tx.desc || '', type, cat, amount]);
+    });
+  });
+
+  // Add a blank row then a monthly summary section
+  rows.push([]);
+  rows.push(['--- Monthly Summary ---','','','','','','']);
+  rows.push(['Month','Income','Needs Spent','Wants Spent','Savings Spent','Total Spent','Balance']);
+
+  monthKeys.forEach(ym => {
+    const monthName = new Date(ym + '-01').toLocaleString('default', { month: 'long' });
+    const txs = d.months[ym].transactions || [];
+    const income  = txs.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+    const needs   = txs.filter(t=>t.type!=='income'&&t.cat==='needs').reduce((s,t)=>s+t.amount,0);
+    const wants   = txs.filter(t=>t.type!=='income'&&t.cat==='wants').reduce((s,t)=>s+t.amount,0);
+    const savings = txs.filter(t=>t.type!=='income'&&t.cat==='savings').reduce((s,t)=>s+t.amount,0);
+    const total   = needs + wants + savings;
+    const balance = income - total;
+    rows.push([monthName + ' ' + ym.split('-')[0],
+      income.toFixed(2), needs.toFixed(2), wants.toFixed(2),
+      savings.toFixed(2), total.toFixed(2), balance.toFixed(2)]);
+  });
+
+  // Convert to CSV string — quote fields that contain commas or quotes
+  function esc(v) {
+    const s = String(v == null ? '' : v);
+    return (s.includes(',') || s.includes('"') || s.includes('\n'))
+      ? '"' + s.replace(/"/g, '""') + '"'
+      : s;
+  }
+  const csv = rows.map(r => r.map(esc).join(',')).join('\r\n');
+
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }); // BOM for Excel UTF-8
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `budget-${new Date().toISOString().slice(0,7)}.csv`;
+  a.click();
+  document.getElementById('syncStatusLine').textContent = '✓ CSV downloaded';
+}
+
 function importJSON(e) {
   const file = e.target.files[0]; if(!file) return;
   const reader = new FileReader();
@@ -1518,7 +1587,6 @@ function render() {
     const s=spent[cat], b=budgets[cat];
     const pct = b>0?(s/b)*100:0;
     setRing(cat,pct);
-    if (window._orgFills) window._orgFills[cat] = pct / 100;
     document.getElementById('spent-'+cat).textContent=fmt(s);
     document.getElementById('alloc-'+cat).textContent=totalIncome?`${splits[cat]}% · ${fmt(b)}`:`${splits[cat]}%`;
     document.getElementById('of-'+cat).textContent=totalIncome?`of ${fmt(b)}`:lang==='it'?'aggiungi entrate':'add income';
@@ -1711,290 +1779,6 @@ window._foregroundSync = function() {
     })
     .catch(() => setSyncDot('err'));
 };
-</script>
-<script>
-// ═══════════════════════════════════════════════════════════════
-// ORGANISM CANVAS — trilobite living geometry
-// ═══════════════════════════════════════════════════════════════
-(function() {
-  const canvas = document.getElementById('orgCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const dpr = window.devicePixelRatio || 1;
-  let W = 0, H = 0, HF = 0;
-
-  window._orgFills = { needs: 0, wants: 0, savings: 0 };
-
-  function resize() {
-    const sz = Math.min(canvas.parentElement.getBoundingClientRect().width, 480);
-    if (sz < 10) return;
-    canvas.style.width  = sz + 'px';
-    canvas.style.height = sz + 'px';
-    canvas.width  = Math.round(sz * dpr);
-    canvas.height = Math.round(sz * dpr);
-    W = H = sz; HF = sz / 2;
-  }
-  const ro = new ResizeObserver(resize);
-  ro.observe(canvas.parentElement);
-  resize();
-
-  // ── Colour ramps ──
-  const RAMPS = {
-    needs:   { dark:  ['#0a2c1c','#1c8050','#8ef0c0','#f04060'],
-                light: ['#e6f7ee','#4ec484','#166040','#f04060'] },
-    wants:   { dark:  ['#3c1006','#c06020','#f8c498','#f01818'],
-                light: ['#fdf0e5','#e88848','#be5020','#f01818'] },
-    savings: { dark:  ['#061628','#1470a8','#8cd8f8','#f0d040'],
-                light: ['#e4f1fb','#4aaede','#1468a0','#f0d040'] },
-  };
-
-  function h2r(h) {
-    return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)];
-  }
-  function lerp3(a,b,t) { return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t]; }
-
-  function armColor(key, fill, alpha) {
-    const dk = document.documentElement.getAttribute('data-theme') !== 'light';
-    const r = dk ? RAMPS[key].dark : RAMPS[key].light;
-    const c = [h2r(r[0]), h2r(r[1]), h2r(r[2]), h2r(r[3])];
-    let rgb;
-    const f = fill < 0 ? 0 : fill;
-    if      (f <= 0.5) rgb = lerp3(c[0], c[1], f * 2);
-    else if (f <= 1.0) rgb = lerp3(c[1], c[2], (f - 0.5) * 2);
-    else               rgb = lerp3(c[2], c[3], Math.min((f - 1.0) / 0.2, 1));
-    const a = alpha !== undefined ? alpha : 1;
-    return `rgba(${Math.round(rgb[0])},${Math.round(rgb[1])},${Math.round(rgb[2])},${a})`;
-  }
-
-  function armColorBlend(key, fill, toWhite, alpha) {
-    const dk = document.documentElement.getAttribute('data-theme') !== 'light';
-    const r = dk ? RAMPS[key].dark : RAMPS[key].light;
-    const c = [h2r(r[0]), h2r(r[1]), h2r(r[2])];
-    const f = fill < 0 ? 0 : fill;
-    let rgb;
-    if (f <= 0.5) rgb = lerp3(c[0], c[1], f * 2);
-    else          rgb = lerp3(c[1], c[2], Math.min((f - 0.5) * 2, 1));
-    const blended = lerp3(rgb, [255, 255, 255], toWhite);
-    return `rgba(${Math.round(blended[0])},${Math.round(blended[1])},${Math.round(blended[2])},${alpha})`;
-  }
-
-  // ── Noise & leaf geometry ──
-  function sn(x, t) {
-    return Math.sin(x*2.38+t)*.43 + Math.sin(x*3.82-t*1.12)*.31 + Math.cos(x*1.14+t*.8)*.26;
-  }
-
-  function leafPts(cx, cy, ang, R, hw, na, t) {
-    const co=Math.cos(ang), si=Math.sin(ang);
-    const pe=Math.cos(ang+Math.PI/2), ps=Math.sin(ang+Math.PI/2);
-    const L=[], Ri=[];
-    for (let s=0; s<=48; s++) {
-      const u=s/48, w=hw*Math.sin(u*Math.PI), r=R*u;
-      const n=sn(u*4.7+ang*.66, t*.00048)*na;
-      const ax=cx+r*co, ay=cy+r*si;
-      L.push( {x: ax+(w+n*hw)*pe, y: ay+(w+n*hw)*ps});
-      Ri.push({x: ax-(w+n*hw)*pe, y: ay-(w+n*hw)*ps});
-    }
-    return [...L, ...Ri.reverse()];
-  }
-
-  function drawSmooth(pts) {
-    if (!pts.length) return;
-    ctx.moveTo(pts[0].x, pts[0].y);
-    for (let i=1; i<pts.length-1; i++) {
-      ctx.quadraticCurveTo(pts[i].x, pts[i].y,
-        (pts[i].x+pts[i+1].x)/2, (pts[i].y+pts[i+1].y)/2);
-    }
-    ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
-  }
-
-  // ── Arm definitions ──
-  const ARMS = [
-    { key:'needs',   ang: 5*Math.PI/6,  bp:5500, na:0.068, ph:4.2 },
-    { key:'wants',   ang: Math.PI/6,    bp:3100, na:0.158, ph:2.1 },
-    { key:'savings', ang:-Math.PI/2,    bp:6400, na:0.050, ph:0   },
-  ];
-  const BR=28, ER=106;
-
-  // ── Particles ──
-  let particles = [];
-  const prevFills = {needs:0, wants:0, savings:0};
-  let wantsAlarmFired = false;
-
-  function spawn(cx, cy, col, n, maxSpd, lifeMin, lifeMax) {
-    for (let i=0; i<n; i++) {
-      const a=Math.random()*Math.PI*2, spd=Math.random()*maxSpd;
-      const life = lifeMin + Math.random()*(lifeMax-lifeMin);
-      particles.push({x:cx,y:cy, vx:Math.cos(a)*spd, vy:Math.sin(a)*spd,
-        life, maxLife:life, col, r:1.2+Math.random()*2.2, drag:0.961});
-    }
-  }
-
-  // ── Stars ──
-  const STARS = Array.from({length:52}, ()=>({
-    x:Math.random(), y:Math.random(),
-    r:0.2+Math.random()*0.7, a:0.04+Math.random()*0.13
-  }));
-
-  // ── Main loop ──
-  function frame(ts) {
-    requestAnimationFrame(frame);
-    if (!W) return;
-
-    const dk = document.documentElement.getAttribute('data-theme') !== 'light';
-    const fills = window._orgFills;
-
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.clearRect(0,0,W,H);
-
-    // Background
-    if (dk) {
-      ctx.fillStyle='#060a10'; ctx.fillRect(0,0,W,H);
-      const vig=ctx.createRadialGradient(HF,HF,HF*.35,HF,HF,HF*1.4);
-      vig.addColorStop(0,'rgba(0,0,0,0)'); vig.addColorStop(1,'rgba(0,0,0,0.58)');
-      ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
-      ctx.save();
-      STARS.forEach(s=>{
-        ctx.beginPath(); ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);
-        ctx.fillStyle=`rgba(255,255,255,${s.a})`; ctx.fill();
-      });
-      ctx.restore();
-    } else {
-      ctx.fillStyle='#f2efe8'; ctx.fillRect(0,0,W,H);
-    }
-
-    // ── Global transform ──
-    const gRot   = ts * 0.0000115;
-    const hexRot = ts * 0.0000049;
-    const gBreath= 1 + 0.007*Math.sin(ts*0.00062);
-
-    ctx.save();
-    ctx.translate(HF,HF); ctx.rotate(gRot); ctx.scale(gBreath,gBreath); ctx.translate(-HF,-HF);
-
-    // Compute tip positions (in local space, before global transform)
-    const tips = ARMS.map(arm => {
-      const fill = Math.max(0, fills[arm.key]||0);
-      const bs = 1 + 0.023*Math.sin(ts/arm.bp+arm.ph);
-      const R2 = (BR + fill*ER)*bs;
-      return { x: HF+R2*Math.cos(arm.ang), y: HF+R2*Math.sin(arm.ang), fill, R:R2 };
-    });
-
-    // Connective web
-    ctx.save();
-    ctx.globalCompositeOperation='source-over';
-    // Axis rays
-    ARMS.forEach((arm,i)=>{
-      ctx.beginPath(); ctx.moveTo(HF,HF); ctx.lineTo(tips[i].x,tips[i].y);
-      ctx.strokeStyle=armColor(arm.key,tips[i].fill,0.055);
-      ctx.lineWidth=0.38; ctx.globalAlpha=1; ctx.stroke();
-    });
-    // Outer triangle
-    ctx.beginPath();
-    ctx.moveTo(tips[0].x,tips[0].y); ctx.lineTo(tips[1].x,tips[1].y);
-    ctx.lineTo(tips[2].x,tips[2].y); ctx.closePath();
-    ctx.setLineDash([2,8]); ctx.lineWidth=0.6; ctx.globalAlpha=0.04;
-    ctx.strokeStyle=dk?'rgba(112,215,185,1)':'rgba(28,120,80,1)'; ctx.stroke();
-    // Inner triangle
-    ctx.beginPath();
-    tips.forEach((tp,i)=>{
-      const ix=HF+(tp.x-HF)*.44, iy=HF+(tp.y-HF)*.44;
-      i===0?ctx.moveTo(ix,iy):ctx.lineTo(ix,iy);
-    });
-    ctx.closePath(); ctx.setLineDash([1,5]); ctx.lineWidth=0.35; ctx.globalAlpha=0.015; ctx.stroke();
-    ctx.setLineDash([]); ctx.globalAlpha=1;
-    ctx.restore();
-
-    // Draw arms
-    ctx.globalCompositeOperation = dk ? 'screen' : 'source-over';
-
-    ARMS.forEach((arm,i)=>{
-      const fill = Math.max(0, fills[arm.key]||0);
-      const bs   = 1 + 0.023*Math.sin(ts/arm.bp+arm.ph);
-      const R2   = (BR + fill*ER)*bs;
-      const hw   = (5  + fill*35)*bs;
-      let   na   = arm.na;
-      if (arm.key==='wants' && fill>1.0) na *= 1+(fill-1)*5.5;
-
-      const pts = leafPts(HF,HF,arm.ang,R2,hw,na,ts);
-      const baseAlpha = dk ? 1.0 : 0.65;
-
-      // Main blade
-      ctx.beginPath(); drawSmooth(pts); ctx.closePath();
-      ctx.fillStyle=armColor(arm.key,fill,baseAlpha); ctx.fill();
-
-      // Facet 1
-      const f1=leafPts(HF,HF,arm.ang-0.086,R2*.59,hw*.31,na*.3,ts);
-      ctx.beginPath(); drawSmooth(f1); ctx.closePath();
-      ctx.fillStyle=armColorBlend(arm.key,fill,0.42,0.12); ctx.fill();
-
-      // Facet 2
-      const f2=leafPts(HF,HF,arm.ang+0.065,R2*.36,hw*.14,na*.1,ts);
-      ctx.beginPath(); drawSmooth(f2); ctx.closePath();
-      ctx.fillStyle=armColorBlend(arm.key,fill,0.42,0.10); ctx.fill();
-
-      // Particle triggers (tip in screen-local coords)
-      const prev = prevFills[arm.key]||0;
-      const tx   = HF+R2*Math.cos(arm.ang), ty=HF+R2*Math.sin(arm.ang);
-      if (arm.key==='savings' && fill>prev+0.01)
-        spawn(tx,ty,'#70d7b9',22,3.2,42,106);
-      if (arm.key==='wants' && fill>1.0 && prev<=1.0 && !wantsAlarmFired) {
-        spawn(tx,ty,'#f01818',14,1.6,20,45); wantsAlarmFired=true;
-      }
-      if (arm.key==='wants' && fill<=1.0) wantsAlarmFired=false;
-    });
-    Object.assign(prevFills, fills);
-
-    // ── Particles ──
-    ctx.globalCompositeOperation='source-over';
-    particles = particles.filter(p=>p.life>0);
-    particles.forEach(p=>{
-      p.x+=p.vx; p.y+=p.vy; p.vx*=p.drag; p.vy*=p.drag; p.life--;
-      const a=(p.life/p.maxLife)*0.64;
-      const rgb=h2r(p.col);
-      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`; ctx.fill();
-    });
-    const maxBloom = Math.min(1, particles.length/22);
-
-    // ── Central hexagon ──
-    const avgFill = ((fills.needs||0)+(fills.wants||0)+(fills.savings||0))/3;
-    const hexR = 4 + avgFill*7 + maxBloom*5;
-    ctx.beginPath();
-    for (let k=0;k<6;k++){
-      const a=hexRot+k*Math.PI/3;
-      const hx=HF+hexR*Math.cos(a), hy=HF+hexR*Math.sin(a);
-      k===0?ctx.moveTo(hx,hy):ctx.lineTo(hx,hy);
-    }
-    ctx.closePath();
-    ctx.fillStyle=dk?`rgba(168,244,212,${0.46+maxBloom*0.22})`:'rgba(28,158,88,0.5)';
-    ctx.fill();
-
-    ctx.restore(); // end global transform
-
-    // ── Labels (counter-rotate) ──
-    ctx.save();
-    ctx.globalCompositeOperation='source-over';
-    ARMS.forEach((arm,i)=>{
-      const fill  = Math.max(0, fills[arm.key]||0);
-      const bs    = 1 + 0.023*Math.sin(ts/arm.bp+arm.ph);
-      const R2    = (BR + fill*ER)*bs;
-      const dist  = R2*gBreath + 20;
-      const lx    = HF + dist*Math.cos(arm.ang+gRot);
-      const ly    = HF + dist*Math.sin(arm.ang+gRot);
-      ctx.save();
-      ctx.translate(lx,ly); ctx.rotate(-gRot);
-      ctx.fillStyle=armColor(arm.key, fill, dk ? 0.82 : 0.72);
-      ctx.font=`700 8px 'DM Sans',sans-serif`;
-      ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(arm.key.toUpperCase(),0,-6);
-      ctx.font=`600 9px 'DM Sans',sans-serif`;
-      ctx.fillText(Math.round(fill*100)+'%',0,5);
-      ctx.restore();
-    });
-    ctx.restore();
-  }
-
-  requestAnimationFrame(frame);
-})();
 </script>
 </body>
 </html>
