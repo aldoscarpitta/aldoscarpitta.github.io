@@ -78,8 +78,13 @@ header p { font-size:.7rem; color:var(--ink3); margin-top:3px; letter-spacing:.1
 .safe-banner.empty { display:none; }
 
 /* ── RING BUCKETS ── */
-.buckets { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px; }
+.buckets { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
 .bucket { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 12px 12px; display:flex; flex-direction:column; align-items:center; }
+.bucket:nth-child(3) { grid-column: 1 / -1; }
+@media (min-width:640px) {
+  .buckets { grid-template-columns:1fr 1fr 1fr; }
+  .bucket:nth-child(3) { grid-column: auto; }
+}
 .bucket-ring { position:relative; width:72px; height:72px; margin-bottom:10px; }
 .bucket-ring svg { transform:rotate(-90deg); }
 .ring-bg { fill:none; stroke:var(--border2); stroke-width:6; }
@@ -1226,6 +1231,8 @@ function importJSON(e) {
       applyLoaded(migrate(JSON.parse(ev.target.result)));
       await saveData();
       applyPrefs(); render();
+      // Block foreground sync for 5s so onResume doesn't overwrite with stale Gist data
+      window._syncCooldown = Date.now() + 5000;
       document.getElementById('syncStatusLine').textContent = t('importOK');
       toast(t('importOK'));
     } catch(err) { document.getElementById('syncStatusLine').textContent = t('importFail'); }
@@ -1766,8 +1773,9 @@ if ('serviceWorker' in navigator) {
 // ═══════════════════════════════════════════════════════════════
 window._foregroundSync = function() {
   if (!window._appReady) return;
-  if (!sessionStorage.getItem(SESSION_KEY)) return;  // user not unlocked yet
-  if (!gistCfg) return;                               // no Gist configured
+  if (!sessionStorage.getItem(SESSION_KEY)) return;
+  if (!gistCfg) return;
+  if (window._syncCooldown && Date.now() < window._syncCooldown) return;  // import just happened
   setSyncDot('busy');
   gistRead()
     .then(remote => {
