@@ -223,6 +223,9 @@
   }
   .tool-btn.add-btn:hover { background: var(--purple-dark); border-color: var(--purple-dark); }
   .tool-btn.setup-toggle:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
+  .tool-btn.sync-btn { color: var(--text-dim); }
+  .tool-btn.sync-btn.connected { border-color: var(--watch); color: var(--watch); }
+  .tool-btn.sync-btn:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
 
   /* Cards */
   .calls-list { display: flex; flex-direction: column; gap: 6px; }
@@ -468,7 +471,52 @@
     font-size: 11px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: 12px;
   }
+
+  /* GitHub sync */
+  #syncStatus {
+    cursor: pointer;
+    transition: color 0.15s;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  #syncStatus:hover { color: var(--purple); }
+
+  .sync-modal-note {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    padding: 10px 14px;
+    background: var(--purple-light);
+    border-radius: 2px;
+  }
+  .sync-modal-note strong { color: var(--purple); }
+  .token-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 5px;
+    line-height: 1.5;
+  }
+  .token-hint a { color: var(--purple); }
+  .btn-danger {
+    background: none;
+    border: 1.5px solid var(--border);
+    color: var(--urgent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 9px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 2px;
+    margin-right: auto;
+  }
+  .btn-danger:hover { border-color: var(--urgent); background: var(--urgent-bg); }
 </style>
 </head>
 <body>
@@ -517,6 +565,7 @@
     <button class="filter-btn" data-filter="applied">Applied</button>
     <div class="toolbar-right">
       <button class="tool-btn setup-toggle" id="showSetup" style="display:none">⚙ Setup</button>
+      <button class="tool-btn sync-btn" id="openSyncModal">↑ GitHub</button>
       <button class="tool-btn add-btn" id="openAdd">+ Add Call</button>
     </div>
   </div>
@@ -526,6 +575,7 @@
 
   <footer>
     <span id="footerDate"></span>
+    <span id="syncStatus" title="Click to configure GitHub sync"></span>
     <span>data saved locally · free, no account needed</span>
   </footer>
 
@@ -533,6 +583,7 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Add / Edit call modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h2 id="modalTitle">Add Open Call</h2>
@@ -577,6 +628,35 @@
   </div>
 </div>
 
+<!-- GitHub sync config modal -->
+<div class="modal-overlay" id="syncModalOverlay">
+  <div class="modal" style="max-width:460px">
+    <h2>GitHub Sync</h2>
+    <p class="modal-subtitle" style="color:var(--text-dim);margin-bottom:16px">Calls are written to <code>calls.json</code> in your repo on every save.</p>
+    <div class="sync-modal-note">
+      When configured, every time you add, edit, or delete a call, the page silently commits <strong>calls.json</strong> to your GitHub repository. GitHub Pages then serves it at <strong>aldoweb.xyz/calls.json</strong> — readable by the weekly Cowork automation.
+    </div>
+    <div class="form-group">
+      <label class="form-label">Repository <span style="font-weight:400;text-transform:none;letter-spacing:0">(username/repo)</span></label>
+      <input class="form-input" id="ghRepo" type="text" placeholder="e.g. aldoscarpitta/aldoweb.xyz">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Personal Access Token</label>
+      <input class="form-input" id="ghToken" type="password" placeholder="ghp_…" autocomplete="off">
+      <p class="token-hint">
+        Create one at <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> →
+        select <strong>repo</strong> scope (or <strong>public_repo</strong> if the repo is public).
+        The token is stored only in this browser's localStorage.
+      </p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="disconnectGh" style="display:none">Disconnect</button>
+      <button class="btn-cancel" id="closeSyncModal">Cancel</button>
+      <button class="btn-save" id="saveSyncConfig">Save &amp; Sync Now</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const BOOKMARKLET = `javascript:(function(){var title=document.title||'';var url=location.href;var trackerUrl='${location.href.split('?')[0]}';var params=new URLSearchParams({bm_title:title,bm_url:url});window.open(trackerUrl+'?'+params.toString(),'_blank');})();`;
 document.getElementById('bookmarkletLink').href = BOOKMARKLET;
@@ -591,7 +671,11 @@ const DEFAULT_CALLS = [
 let calls=[], editingId=null, currentFilter='all';
 
 function loadData(){ const s=localStorage.getItem('openCalls_v1'); calls=s?JSON.parse(s):DEFAULT_CALLS.map(c=>({...c})); if(!s)saveData(); }
-function saveData(){ localStorage.setItem('openCalls_v1',JSON.stringify(calls)); }
+
+function saveData(){
+  localStorage.setItem('openCalls_v1',JSON.stringify(calls));
+  syncToGitHub();
+}
 
 function checkBookmarkletParams(){
   const p=new URLSearchParams(location.search);
@@ -724,6 +808,133 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
 });
 
 document.getElementById('footerDate').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+// =============================================
+// GitHub Sync
+// =============================================
+
+function ghGet(key){ return localStorage.getItem('oc_gh_'+key)||''; }
+function ghSet(key,val){ localStorage.setItem('oc_gh_'+key,val); }
+function ghClear(key){ localStorage.removeItem('oc_gh_'+key); }
+function isGhConfigured(){ return !!(ghGet('repo') && ghGet('token')); }
+
+function updateSyncStatus(msg, state){
+  // state: 'ok' | 'error' | 'busy' | 'idle'
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.textContent = msg;
+  if(state==='ok') el.style.color='var(--watch)';
+  else if(state==='error') el.style.color='var(--urgent)';
+  else if(state==='busy') el.style.color='var(--upcoming)';
+  else el.style.color='var(--text-dim)';
+}
+
+function toBase64Unicode(str){
+  // Unicode-safe base64 encoding
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+async function syncToGitHub(){
+  if(!isGhConfigured()) return;
+  const repo = ghGet('repo');
+  const token = ghGet('token');
+  const path = 'calls.json';
+  const headers = { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' };
+
+  updateSyncStatus('↑ syncing…', 'busy');
+
+  // Get current file SHA (needed to update an existing file)
+  let sha = ghGet('sha') || null;
+  if(!sha){
+    try {
+      const r = await fetch('https://api.github.com/repos/'+repo+'/contents/'+path, { headers });
+      if(r.ok){ const d=await r.json(); sha=d.sha; ghSet('sha', sha); }
+    } catch(e){}
+  }
+
+  const payload = {
+    updated: new Date().toISOString(),
+    calls: calls
+  };
+  const content = toBase64Unicode(JSON.stringify(payload, null, 2));
+  const body = { message: 'Open calls update · ' + new Date().toISOString().split('T')[0], content };
+  if(sha) body.sha = sha;
+
+  try {
+    const r = await fetch('https://api.github.com/repos/'+repo+'/contents/'+path, {
+      method: 'PUT', headers, body: JSON.stringify(body)
+    });
+    if(r.ok){
+      const d = await r.json();
+      ghSet('sha', d.content.sha);
+      const t = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+      updateSyncStatus('↑ synced ' + t, 'ok');
+    } else if(r.status === 409){
+      // SHA conflict — clear cached SHA and retry once
+      ghClear('sha');
+      updateSyncStatus('↑ sync conflict, retrying…', 'busy');
+      setTimeout(syncToGitHub, 1500);
+    } else {
+      const err = await r.json().catch(()=>({}));
+      updateSyncStatus('↑ sync error: ' + (err.message || r.status), 'error');
+    }
+  } catch(e){
+    updateSyncStatus('↑ sync failed (network?)', 'error');
+  }
+}
+
+// GitHub config modal
+function openSyncModal(){
+  const repo = ghGet('repo');
+  document.getElementById('ghRepo').value = repo;
+  document.getElementById('ghToken').value = ghGet('token') ? '••••••••••••••••' : '';
+  document.getElementById('disconnectGh').style.display = repo ? 'block' : 'none';
+  document.getElementById('syncModalOverlay').classList.add('open');
+}
+
+document.getElementById('openSyncModal').addEventListener('click', openSyncModal);
+document.getElementById('syncStatus').addEventListener('click', openSyncModal);
+
+document.getElementById('closeSyncModal').addEventListener('click', ()=>{
+  document.getElementById('syncModalOverlay').classList.remove('open');
+});
+document.getElementById('syncModalOverlay').addEventListener('click', e=>{
+  if(e.target===document.getElementById('syncModalOverlay'))
+    document.getElementById('syncModalOverlay').classList.remove('open');
+});
+
+document.getElementById('saveSyncConfig').addEventListener('click', ()=>{
+  const repo = document.getElementById('ghRepo').value.trim();
+  const tokenInput = document.getElementById('ghToken').value.trim();
+  if(!repo){ alert('Repository is required (username/repo).'); return; }
+  if(!tokenInput){ alert('Personal access token is required.'); return; }
+  ghSet('repo', repo);
+  // Only update token if it was actually changed (not the placeholder dots)
+  if(tokenInput !== '••••••••••••••••') {
+    ghSet('token', tokenInput);
+    ghClear('sha'); // reset SHA when token changes
+  }
+  document.getElementById('syncModalOverlay').classList.remove('open');
+  document.getElementById('openSyncModal').classList.add('connected');
+  syncToGitHub();
+});
+
+document.getElementById('disconnectGh').addEventListener('click', ()=>{
+  if(!confirm('Disconnect GitHub sync? Your calls remain in localStorage.')) return;
+  ['repo','token','sha'].forEach(k => ghClear(k));
+  document.getElementById('syncModalOverlay').classList.remove('open');
+  document.getElementById('openSyncModal').classList.remove('connected');
+  updateSyncStatus('↑ github not connected', 'idle');
+});
+
+// Init
+if(isGhConfigured()){
+  document.getElementById('openSyncModal').classList.add('connected');
+  updateSyncStatus('↑ github connected', 'ok');
+  syncToGitHub();
+} else {
+  updateSyncStatus('↑ connect github', 'idle');
+}
 
 loadData(); updateSetupBar(); renderCalls(); checkBookmarkletParams();
 </script>
