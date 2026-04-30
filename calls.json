@@ -1,5 +1,5 @@
 {
-  "updated": "2026-04-30T22:16:11.022Z",
+  "updated": "2026-04-30T22:16:16.209Z",
   "calls": [
     {
       "id": 4,
@@ -251,6 +251,15 @@
       "deadline": "2026-05-30",
       "status": "watch",
       "url": "https://on-the-move.org/news/polygona-kunstverein-passage-art-residency-programme-2026-photography-and-film-germany",
+      "notes": ""
+    },
+    {
+      "id": 1777587376208,
+      "title": "The Farm: 2027 Residency for Visual Artists Engaging with the Land (Australia) | On the Move",
+      "org": "",
+      "deadline": "2026-06-01",
+      "status": "watch",
+      "url": "https://on-the-move.org/news/farm-2027-residency-visual-artists-engaging-land-australia",
       "notes": ""
     }
   ]
