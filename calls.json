@@ -1,5 +1,5 @@
 {
-  "updated": "2026-04-30T21:04:38.740Z",
+  "updated": "2026-04-30T21:59:26.276Z",
   "calls": [
     {
       "id": 4,
@@ -45,15 +45,6 @@
       "status": "urgent",
       "url": "https://www.getit.fsvgda.it/4-music/",
       "notes": ""
-    },
-    {
-      "id": 1776782476255,
-      "title": "OPEN CALL Augmented Futures - Electric Theater",
-      "org": "",
-      "deadline": "2026-04-30",
-      "status": "urgent",
-      "url": "https://docs.google.com/forms/d/e/1FAIpQLSf6fJ8nFlFbR7yR0c8l3bDmn-wTCViwxIoMUeFJuVvODn1-ww/viewform?pli=1",
-      "notes": "Playground"
     },
     {
       "id": 1776782513519,
@@ -123,7 +114,7 @@
       "title": "Camera Austria/Kulturvermittlung Steiermark: 5th Graz Residency for International Photographers (Austria) | On the Move",
       "org": "",
       "deadline": "2026-04-30",
-      "status": "watch",
+      "status": "applied",
       "url": "https://camera-austria.at/en/2026/03/open-call-5th-graz-residency-for-international-photographers-grip/",
       "notes": "Dysographies ||\n\n+ A statement of purpose (informal)\n+ An artist portfolio (PDF format, max. 15 MB) which contains information about the applicant’s practice and a CV"
     },
