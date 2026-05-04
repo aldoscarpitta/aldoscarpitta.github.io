@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-04T20:28:45.875Z",
+  "updated": "2026-05-04T20:28:54.542Z",
   "calls": [
     {
       "id": 4,
@@ -17,15 +17,6 @@
       "deadline": "2026-06-30",
       "status": "watch",
       "url": "https://www.fondazionecariplo.it/wp-content/uploads/2026/03/Bando_LUOGHI-PLURALI_def.pdf",
-      "notes": ""
-    },
-    {
-      "id": 1776782335274,
-      "title": "Portale gare d'appalto|Dettaglio procedura",
-      "org": "",
-      "deadline": "2026-05-06",
-      "status": "upcoming",
-      "url": "https://gareappalti.zetema.it/PortaleAppalti/it/ppgare_detail.wp?actionPath=/ExtStr2/do/FrontEnd/Bandi/openProcedura.action&currentFrame=7&codice=A00131",
       "notes": ""
     },
     {
