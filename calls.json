@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-06T20:40:12.900Z",
+  "updated": "2026-05-06T20:40:24.467Z",
   "calls": [
     {
       "id": 4,
@@ -150,7 +150,7 @@
       "title": "MON-ART",
       "org": "",
       "deadline": "2026-05-15",
-      "status": "upcoming",
+      "status": "urgent",
       "url": "https://mon-art.org/#/residencies/fvYqXabka30PhV8RNqIe",
       "notes": ""
     }
