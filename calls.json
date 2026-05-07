@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-07T22:28:04.081Z",
+  "updated": "2026-05-07T22:28:06.017Z",
   "calls": [
     {
       "id": 4,
@@ -24,7 +24,7 @@
       "title": "Get it! 4 Music - Get it!",
       "org": "",
       "deadline": "2026-05-07",
-      "status": "urgent",
+      "status": "applied",
       "url": "https://www.getit.fsvgda.it/4-music/",
       "notes": ""
     },
