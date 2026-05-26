@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-25T12:10:27.816Z",
+  "updated": "2026-05-26T18:57:44.425Z",
   "calls": [
     {
       "id": 4,
@@ -24,7 +24,7 @@
       "title": "Art Zoyd Studios: 2026/2027 Residency in Electroacoustic and Electronic Music (France) | On the Move",
       "org": "",
       "deadline": "2026-05-29",
-      "status": "watch",
+      "status": "urgent",
       "url": "https://on-the-move.org/news/art-zoyd-studios-20262027-residency-electroacoustic-and-electronic-music-france",
       "notes": ""
     },
@@ -83,15 +83,6 @@
       "notes": ""
     },
     {
-      "id": 1777587376208,
-      "title": "The Farm: 2027 Residency for Visual Artists Engaging with the Land (Australia) | On the Move",
-      "org": "",
-      "deadline": "2026-06-01",
-      "status": "watch",
-      "url": "https://on-the-move.org/news/farm-2027-residency-visual-artists-engaging-land-australia",
-      "notes": ""
-    },
-    {
       "id": 1778791280648,
       "title": "OPEN CALL: TAG ORDET – Sound Art Lab",
       "org": "",
@@ -137,15 +128,6 @@
       "notes": ""
     },
     {
-      "id": 1778844452226,
-      "title": "Polygona Kunstverein: Passage Art Residency Programme 2026 in Photography and Film (Germany) | On the Move",
-      "org": "",
-      "deadline": "2026-05-30",
-      "status": "upcoming",
-      "url": "https://on-the-move.org/news/polygona-kunstverein-passage-art-residency-programme-2026-photography-and-film-germany",
-      "notes": ""
-    },
-    {
       "id": 1779100701751,
       "title": "Premio Natura Naturans/Naturata – Edizione 3 – Direzione Generale Creatività Contemporanea",
       "org": "",
@@ -164,15 +146,6 @@
       "notes": ""
     },
     {
-      "id": 1779100909282,
-      "title": "Call Residenza artistica Sguardi - Teatro e Critica",
-      "org": "",
-      "deadline": "2026-05-29",
-      "status": "watch",
-      "url": "https://www.teatroecritica.net/2026/04/call-residenza-artistica-sguardi/",
-      "notes": ""
-    },
-    {
       "id": 1779100955691,
       "title": "Bolzano Art Weeks - Open Call",
       "org": "",
@@ -188,15 +161,6 @@
       "deadline": "2026-06-28",
       "status": "upcoming",
       "url": "https://www.invitalia.it/incentivi-e-strumenti/cultura-cresce",
-      "notes": ""
-    },
-    {
-      "id": 1779101094707,
-      "title": "Open Call Art 2027 — La città e l’orizzonte – Fondazione Domenico Cirillo",
-      "org": "",
-      "deadline": "2026-05-30",
-      "status": "upcoming",
-      "url": "https://fondazionedomenicocirillo.org/open-call-art-2027/",
       "notes": ""
     }
   ]
