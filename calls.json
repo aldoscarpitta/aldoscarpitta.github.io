@@ -1,4 +1,203 @@
 {
-  "updated": "2026-06-07T14:26:17.138Z",
-  "calls": []
+  "updated": "2026-06-07T14:26:20.678Z",
+  "calls": [
+    {
+      "id": 4,
+      "title": "Dysographies — Gallery Outreach",
+      "org": "30+ galleries across Europe",
+      "deadline": "2026-09-01",
+      "status": "watch",
+      "url": "",
+      "notes": "Top targets: Galerie Bigaignon, Galerie Minimal Berlin, STILL Fotografia Milan, Matèria Rome."
+    },
+    {
+      "id": 1776781836693,
+      "title": "Bando_LUOGHI-PLURALI_def.pdf",
+      "org": "",
+      "deadline": "2026-06-30",
+      "status": "watch",
+      "url": "https://www.fondazionecariplo.it/wp-content/uploads/2026/03/Bando_LUOGHI-PLURALI_def.pdf",
+      "notes": ""
+    },
+    {
+      "id": 1776782534902,
+      "title": "Kyber Teatro: 2026 Call for Work on the Interaction Between Theatre and New Technologies (Italy) | On the Move",
+      "org": "",
+      "deadline": "2026-06-07",
+      "status": "urgent",
+      "url": "https://on-the-move.org/news/kyber-teatro-2026-call-work-interaction-between-theatre-and-new-technologies-italy",
+      "notes": ""
+    },
+    {
+      "id": 1776796699861,
+      "title": "Reggio Parma Festival 2026",
+      "org": "",
+      "deadline": "2026-06-14",
+      "status": "watch",
+      "url": "https://reggioparmafestival.it/gradus-2026/",
+      "notes": ""
+    },
+    {
+      "id": 1776861811226,
+      "title": "Call for works – Phonurgia Nova",
+      "org": "",
+      "deadline": "2026-06-15",
+      "status": "urgent",
+      "url": "http://phonurgia.fr/contest/call-for-works/",
+      "notes": ""
+    },
+    {
+      "id": 1778791280648,
+      "title": "OPEN CALL: TAG ORDET – Sound Art Lab",
+      "org": "",
+      "deadline": "2026-06-15",
+      "status": "urgent",
+      "url": "https://soundartlab.org/open-call-tag-ordet/",
+      "notes": ""
+    },
+    {
+      "id": 1778791394041,
+      "title": "Fundación Casa Wabi x ArtReview Open-Call Residency Prize 2026–27 - ArtReview",
+      "org": "",
+      "deadline": "2026-06-14",
+      "status": "upcoming",
+      "url": "https://artreview.com/fundacion-casa-wabi-x-artreview-open-call-residency-prize-2026-27/",
+      "notes": ""
+    },
+    {
+      "id": 1778792200091,
+      "title": "SOUND/IMAGE 2026 Call for Works – Sound / Image",
+      "org": "",
+      "deadline": "2026-06-11",
+      "status": "urgent",
+      "url": "https://blogs.gre.ac.uk/sound-image/sound-image-2026-call-for-works/",
+      "notes": ""
+    },
+    {
+      "id": 1779101038957,
+      "title": "Cultura Cresce | Invitalia",
+      "org": "",
+      "deadline": "2026-06-28",
+      "status": "upcoming",
+      "url": "https://www.invitalia.it/incentivi-e-strumenti/cultura-cresce",
+      "notes": ""
+    },
+    {
+      "id": 1780089290912,
+      "title": "COLLAGENE 2026/27 | CALL PER ARTISTƏ - DAS - Dispositivo Arti Sperimentali",
+      "org": "",
+      "deadline": "2026-07-04",
+      "status": "urgent",
+      "url": "https://www.dasbologna.org/progetto/collagene-2026-27-call-per-artiste/",
+      "notes": ""
+    },
+    {
+      "id": 1780089344146,
+      "title": "Open Call per residenza artistica ECDISI - Zo Centro Culture Contemporanee",
+      "org": "",
+      "deadline": "2026-06-24",
+      "status": "urgent",
+      "url": "https://www.zoculture.it/event/open-call-per-residenza-artistica-ecdisi/",
+      "notes": ""
+    },
+    {
+      "id": 1780661901115,
+      "title": "Marble House Project — Artist Residency in Dorset, Vermont",
+      "org": "",
+      "deadline": "2026-06-14",
+      "status": "upcoming",
+      "url": "https://www.marblehouseproject.org/",
+      "notes": ""
+    },
+    {
+      "id": 1780662102553,
+      "title": "HUMUS 2026 - IAC Centro Arti Integrate",
+      "org": "",
+      "deadline": "2026-06-13",
+      "status": "urgent",
+      "url": "https://www.centroiac.com/humus-2026/",
+      "notes": ""
+    },
+    {
+      "id": 1780662289871,
+      "title": "Call for artists – Orvieto Cinema Fest",
+      "org": "",
+      "deadline": "2026-07-30",
+      "status": "watch",
+      "url": "https://www.orvietocinemafest.com/call-for-artists/",
+      "notes": ""
+    },
+    {
+      "id": 1780662382155,
+      "title": "Expedition Leader – Remote Travel Job Opportunity",
+      "org": "",
+      "deadline": "2026-06-18",
+      "status": "upcoming",
+      "url": "https://www.wanderoutexpeditions.com/hiringnow",
+      "notes": ""
+    },
+    {
+      "id": 1780662602230,
+      "title": "Bando nazionale per 4 residenze artistiche per il teatro dedicato alle nuove generazioni  - Teatro e Critica",
+      "org": "",
+      "deadline": "2026-06-14",
+      "status": "urgent",
+      "url": "https://www.teatroecritica.net/2026/05/festival-maggio-allinfanzia-entro-il-20-dicembre-le-candidature-per-le-compagnie-di-teatro-per-le-nuove-generazioni-2/",
+      "notes": ""
+    },
+    {
+      "id": 1780662873245,
+      "title": "Bando Direzione Artistica 2027–2029 di Oriente Occidente - Webzine Theatron 2.0",
+      "org": "",
+      "deadline": "2026-07-12",
+      "status": "upcoming",
+      "url": "https://webzine.theatronduepuntozero.it/bando-direzione-artistica-2027-2029-di-oriente-occidente/",
+      "notes": ""
+    },
+    {
+      "id": 1780662976100,
+      "title": "Call-0-3-chiama-Italia_2027.pdf",
+      "org": "",
+      "deadline": "2026-06-14",
+      "status": "urgent",
+      "url": "https://www.testoniragazzi.it/wp-content/uploads/2026/05/Call-0-3-chiama-Italia_2027.pdf",
+      "notes": ""
+    },
+    {
+      "id": 1780678984993,
+      "title": "OPEN CALL / Entra nel #3 Numero / Pre-iscriviti / Deadline 16 GIUGNO - Etimologia Magazine",
+      "org": "",
+      "deadline": "2026-06-15",
+      "status": "upcoming",
+      "url": "https://www.etimologiamagazine.com/2026/03/26/entra-nel-3-numero-pre-iscriviti_deadline-16-giugno/",
+      "notes": ""
+    },
+    {
+      "id": 1780679052052,
+      "title": "Re.Te.Ospitale",
+      "org": "",
+      "deadline": "2026-06-17",
+      "status": "upcoming",
+      "url": "https://www.compagniateatralepetra.com/residenzateatraleospitale",
+      "notes": ""
+    },
+    {
+      "id": 1780679095502,
+      "title": "Biennale del Gran Sasso | Arte contemporanea nel cuore dell’appenino",
+      "org": "",
+      "deadline": "2026-06-20",
+      "status": "upcoming",
+      "url": "https://biennaledelgransasso.it/",
+      "notes": ""
+    },
+    {
+      "id": 1780679508303,
+      "title": "Bando Trame del Sud per una compagnia in residenza - Teatro e Critica",
+      "org": "",
+      "deadline": "2026-06-19",
+      "status": "upcoming",
+      "url": "https://www.teatroecritica.net/2026/06/bando-trame-del-sud-per-una-compagnia-in-residenza/",
+      "notes": ""
+    }
+  ]
 }
