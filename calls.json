@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-15T22:51:19.952Z",
+  "updated": "2026-06-15T23:05:04.865Z",
   "calls": [
     {
       "id": 4,
@@ -98,15 +98,6 @@
       "deadline": "2026-06-20",
       "status": "upcoming",
       "url": "https://biennaledelgransasso.it/",
-      "notes": ""
-    },
-    {
-      "id": 1780679508303,
-      "title": "Bando Trame del Sud per una compagnia in residenza - Teatro e Critica",
-      "org": "",
-      "deadline": "2026-06-19",
-      "status": "upcoming",
-      "url": "https://www.teatroecritica.net/2026/06/bando-trame-del-sud-per-una-compagnia-in-residenza/",
       "notes": ""
     }
   ]
