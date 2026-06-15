@@ -836,6 +836,7 @@ function toBase64Unicode(str){
 
 async function syncToGitHub(){
   if(!isGhConfigured()) return;
+  if(calls.length === 0) { updateSyncStatus('↑ skipped — tracker empty', 'idle'); return; }
   const repo = ghGet('repo');
   const token = ghGet('token');
   const path = 'calls.json';
@@ -927,7 +928,9 @@ document.getElementById('disconnectGh').addEventListener('click', ()=>{
   updateSyncStatus('↑ github not connected', 'idle');
 });
 
-// Init
+// Init — loadData() MUST run before syncToGitHub() so calls[] is populated
+loadData(); updateSetupBar(); renderCalls(); checkBookmarkletParams();
+
 if(isGhConfigured()){
   document.getElementById('openSyncModal').classList.add('connected');
   updateSyncStatus('↑ github connected', 'ok');
@@ -935,8 +938,6 @@ if(isGhConfigured()){
 } else {
   updateSyncStatus('↑ connect github', 'idle');
 }
-
-loadData(); updateSetupBar(); renderCalls(); checkBookmarkletParams();
 </script>
 </body>
 </html>
