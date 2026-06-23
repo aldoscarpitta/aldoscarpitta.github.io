@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-23T22:26:58.559Z",
+  "updated": "2026-06-23T22:27:36.124Z",
   "calls": [
     {
       "id": 4,
@@ -77,8 +77,8 @@
       "id": 1780679095502,
       "title": "Biennale del Gran Sasso | Arte contemporanea nel cuore dell’appenino",
       "org": "",
-      "deadline": "2026-06-20",
-      "status": "upcoming",
+      "deadline": "2026-06-27",
+      "status": "urgent",
       "url": "https://biennaledelgransasso.it/",
       "notes": ""
     }
