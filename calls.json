@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T11:04:50.306Z",
+  "updated": "2026-06-28T11:04:57.773Z",
   "calls": [
     {
       "id": 4,
@@ -98,6 +98,15 @@
       "deadline": "2026-07-12",
       "status": "urgent",
       "url": "https://www.officinateatraleactuar.it/post/no-filter-2",
+      "notes": ""
+    },
+    {
+      "id": 1782644697773,
+      "title": "Nutrimenti_habitat creativo 2026 – Associazione Demetra",
+      "org": "",
+      "deadline": "2026-08-14",
+      "status": "urgent",
+      "url": "https://www.associazionedemetra.it/nutrimenti_habitat-creativo-2026/",
       "notes": ""
     }
   ]
