@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T11:23:05.854Z",
+  "updated": "2026-06-28T11:23:55.952Z",
   "calls": [
     {
       "id": 4,
@@ -125,6 +125,15 @@
       "deadline": "2026-07-31",
       "status": "watch",
       "url": "https://www.plurality-university.org/calendar/futurs-indomptables-contribuez-a-la-rencontre-2026-d-u",
+      "notes": ""
+    },
+    {
+      "id": 1782645835951,
+      "title": "Home - 23Est Festival",
+      "org": "",
+      "deadline": "2026-07-09",
+      "status": "upcoming",
+      "url": "https://www.23est.it/",
       "notes": ""
     }
   ]
