@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T10:49:45.687Z",
+  "updated": "2026-06-28T10:50:03.966Z",
   "calls": [
     {
       "id": 4,
@@ -53,6 +53,15 @@
       "deadline": "2026-06-27",
       "status": "urgent",
       "url": "https://biennaledelgransasso.it/",
+      "notes": ""
+    },
+    {
+      "id": 1782643803965,
+      "title": "Platform",
+      "org": "",
+      "deadline": "2026-06-29",
+      "status": "urgent",
+      "url": "https://platform.fi/residency-program-2027/",
       "notes": ""
     }
   ]
