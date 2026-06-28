@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T11:47:48.069Z",
+  "updated": "2026-06-28T11:48:03.242Z",
   "calls": [
     {
       "id": 4,
@@ -170,6 +170,15 @@
       "deadline": "2026-07-14",
       "status": "upcoming",
       "url": "https://www.neroeditions.com/d-is-for-duchamp-the-deep-dyed-deceiver/",
+      "notes": ""
+    },
+    {
+      "id": 1782647280672,
+      "title": "Call for room designs / installations / performances - ZW FESTIVAL 5.0 2026",
+      "org": "",
+      "deadline": "2026-08-05",
+      "status": "upcoming",
+      "url": "https://form.jotform.com/251661955490363",
       "notes": ""
     }
   ]
