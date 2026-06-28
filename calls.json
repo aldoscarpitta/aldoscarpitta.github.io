@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T11:27:41.216Z",
+  "updated": "2026-06-28T11:27:43.210Z",
   "calls": [
     {
       "id": 4,
@@ -143,6 +143,15 @@
       "deadline": "2026-07-29",
       "status": "upcoming",
       "url": "https://www.imaginarius.pt/en/international-open-call/",
+      "notes": ""
+    },
+    {
+      "id": 1782646063210,
+      "title": "A4 Residency Art Center International Residency 2027 (China) | On the Move",
+      "org": "",
+      "deadline": "2026-12-30",
+      "status": "upcoming",
+      "url": "https://on-the-move.org/news/a4-residency-art-center-international-residency-2027-china",
       "notes": ""
     }
   ]
