@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T11:26:21.074Z",
+  "updated": "2026-06-28T11:27:41.216Z",
   "calls": [
     {
       "id": 4,
@@ -134,6 +134,15 @@
       "deadline": "2026-07-09",
       "status": "upcoming",
       "url": "https://www.23est.it/",
+      "notes": ""
+    },
+    {
+      "id": 1782645985287,
+      "title": "International open call: emerging and mid-career artists | Imaginarius",
+      "org": "",
+      "deadline": "2026-07-29",
+      "status": "upcoming",
+      "url": "https://www.imaginarius.pt/en/international-open-call/",
       "notes": ""
     }
   ]
