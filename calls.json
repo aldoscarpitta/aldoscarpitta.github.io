@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T11:08:07.455Z",
+  "updated": "2026-06-28T11:08:24.484Z",
   "calls": [
     {
       "id": 4,
@@ -107,6 +107,15 @@
       "deadline": "2026-08-14",
       "status": "urgent",
       "url": "https://www.associazionedemetra.it/nutrimenti_habitat-creativo-2026/",
+      "notes": ""
+    },
+    {
+      "id": 1782644904484,
+      "title": "Residency Program | BASIS Vinschgau Venosta",
+      "org": "",
+      "deadline": "2026-08-31",
+      "status": "upcoming",
+      "url": "https://basis.space/en/projects-basis/residency-program/",
       "notes": ""
     }
   ]
