@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T11:14:33.673Z",
+  "updated": "2026-06-28T11:14:48.928Z",
   "calls": [
     {
       "id": 4,
@@ -116,6 +116,15 @@
       "deadline": "2026-08-31",
       "status": "upcoming",
       "url": "https://basis.space/en/projects-basis/residency-program/",
+      "notes": ""
+    },
+    {
+      "id": 1782645288927,
+      "title": "Untameable Futures: Contribute to u+’s 2026 meeting! | Plurality University Network",
+      "org": "",
+      "deadline": "2026-07-31",
+      "status": "watch",
+      "url": "https://www.plurality-university.org/calendar/futurs-indomptables-contribuez-a-la-rencontre-2026-d-u",
       "notes": ""
     }
   ]
