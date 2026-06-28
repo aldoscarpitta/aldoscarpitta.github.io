@@ -1,5 +1,5 @@
 {
-  "updated": "2026-06-28T10:51:09.430Z",
+  "updated": "2026-06-28T10:51:17.433Z",
   "calls": [
     {
       "id": 4,
@@ -62,6 +62,15 @@
       "deadline": "2026-06-29",
       "status": "urgent",
       "url": "https://platform.fi/residency-program-2027/",
+      "notes": ""
+    },
+    {
+      "id": 1782643877432,
+      "title": "Ocean Space - Tentacular Fellowship",
+      "org": "",
+      "deadline": "2026-07-04",
+      "status": "urgent",
+      "url": "https://tba21.org/oceanspace-research-tentacular-fellowship",
       "notes": ""
     }
   ]
