@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-02T21:27:48.142Z",
+  "updated": "2026-07-02T21:27:53.775Z",
   "calls": [
     {
       "id": 4,
@@ -215,6 +215,15 @@
       "deadline": "2026-07-03",
       "status": "upcoming",
       "url": "https://www.pier2air.tw/en/",
+      "notes": ""
+    },
+    {
+      "id": 1783027673774,
+      "title": "Atheras: Nicosia Ludic Lab for Composers of New Works in Toyful Music Festival 2026 (Cyprus) | On the Move",
+      "org": "",
+      "deadline": "2026-07-14",
+      "status": "urgent",
+      "url": "https://on-the-move.org/news/atheras-nicosia-ludic-lab-composers-new-works-toyful-music-festival-2026-cyprus",
       "notes": ""
     }
   ]
