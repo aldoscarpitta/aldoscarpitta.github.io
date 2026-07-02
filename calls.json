@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-02T20:53:48.552Z",
+  "updated": "2026-07-02T20:54:01.324Z",
   "calls": [
     {
       "id": 4,
@@ -161,6 +161,15 @@
       "deadline": "2026-08-31",
       "status": "upcoming",
       "url": "https://klang.dk/en/open-calls",
+      "notes": ""
+    },
+    {
+      "id": 1783025641324,
+      "title": "Camargo Fellowship 2027-2028: For artists, scholars and thinkers - Fondation Camargo",
+      "org": "",
+      "deadline": "2026-09-20",
+      "status": "urgent",
+      "url": "https://camargofoundation.org/en/camargo-fellowship-2026-2027",
       "notes": ""
     }
   ]
