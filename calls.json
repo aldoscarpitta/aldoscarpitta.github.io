@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-02T20:55:06.396Z",
+  "updated": "2026-07-02T20:55:16.606Z",
   "calls": [
     {
       "id": 4,
@@ -170,6 +170,15 @@
       "deadline": "2026-09-20",
       "status": "urgent",
       "url": "https://camargofoundation.org/en/camargo-fellowship-2026-2027",
+      "notes": ""
+    },
+    {
+      "id": 1783025716605,
+      "title": "mnemotope issue 010 open call!",
+      "org": "",
+      "deadline": "2026-07-19",
+      "status": "upcoming",
+      "url": "https://docs.google.com/forms/d/e/1FAIpQLSekmhEREBKaguU19iEkBfLCbNU9tqEtpbb-bHcw56LlcgTp1g/viewform",
       "notes": ""
     }
   ]
