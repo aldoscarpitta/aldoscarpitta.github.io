@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-02T21:25:35.533Z",
+  "updated": "2026-07-02T21:25:43.356Z",
   "calls": [
     {
       "id": 4,
@@ -197,6 +197,15 @@
       "deadline": "2026-07-14",
       "status": "urgent",
       "url": "https://form.jotform.com/SquareFestival/call2027",
+      "notes": ""
+    },
+    {
+      "id": 1783027543356,
+      "title": "EU–Japan Fest Mobility Support 2026 | On the Move",
+      "org": "",
+      "deadline": "2027-02-10",
+      "status": "urgent",
+      "url": "https://on-the-move.org/news/eu-japan-fest-mobility-support-2026",
       "notes": ""
     }
   ]
