@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-02T21:04:05.815Z",
+  "updated": "2026-07-02T21:04:12.565Z",
   "calls": [
     {
       "id": 4,
@@ -188,6 +188,15 @@
       "deadline": "2026-07-31",
       "status": "urgent",
       "url": "https://studiorizoma.org/editorial/open-call-teatro-garibaldi/",
+      "notes": ""
+    },
+    {
+      "id": 1783026252565,
+      "title": "SQUARE - Mapping the Atlantic - 2027",
+      "org": "",
+      "deadline": "2026-07-14",
+      "status": "urgent",
+      "url": "https://form.jotform.com/SquareFestival/call2027",
       "notes": ""
     }
   ]
