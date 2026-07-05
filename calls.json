@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-05T20:29:48.917Z",
+  "updated": "2026-07-05T20:30:01.638Z",
   "calls": [
     {
       "id": 4,
@@ -35,15 +35,6 @@
       "deadline": "2026-07-19",
       "status": "upcoming",
       "url": "https://www.wanderoutexpeditions.com/hiringnow",
-      "notes": ""
-    },
-    {
-      "id": 1782643877432,
-      "title": "Ocean Space - Tentacular Fellowship",
-      "org": "",
-      "deadline": "2026-07-04",
-      "status": "urgent",
-      "url": "https://tba21.org/oceanspace-research-tentacular-fellowship",
       "notes": ""
     },
     {
