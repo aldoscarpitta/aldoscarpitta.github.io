@@ -81,13 +81,13 @@ var W = 800, H = 800;
 var SNAP = 13;
 
 var PIECES_DEF = [
-  { id: 'lt1', unitPoly: [[0,0],[0,8],[4,4]],       color: '#e76f51' },
-  { id: 'lt2', unitPoly: [[0,0],[8,0],[4,4]],       color: '#457b9d' },
-  { id: 'mt',  unitPoly: [[4,8],[8,8],[8,4]],       color: '#2a9d8f' },
-  { id: 'sq',  unitPoly: [[2,6],[4,8],[6,6],[4,4]], color: '#e9c46a' },
-  { id: 'par', unitPoly: [[6,2],[6,6],[8,4],[8,0]], color: '#8ab17d' },
-  { id: 'st1', unitPoly: [[4,4],[6,6],[6,2]],       color: '#b56576' },
-  { id: 'st2', unitPoly: [[0,8],[4,8],[2,6]],       color: '#6d597a' }
+  { id: 'lt1', unitPoly: [[0,0],[0,8],[4,4]],       color: '#6a1f28' },
+  { id: 'lt2', unitPoly: [[0,0],[8,0],[4,4]],       color: '#8f2a2f' },
+  { id: 'mt',  unitPoly: [[4,8],[8,8],[8,4]],       color: '#b23a34' },
+  { id: 'sq',  unitPoly: [[2,6],[4,8],[6,6],[4,4]], color: '#cf5044' },
+  { id: 'par', unitPoly: [[6,2],[6,6],[8,4],[8,0]], color: '#e0705f' },
+  { id: 'st1', unitPoly: [[4,4],[6,6],[6,2]],       color: '#ec9585' },
+  { id: 'st2', unitPoly: [[0,8],[4,8],[2,6]],       color: '#f4c3b7' }
 ];
 
 PIECES_DEF.forEach(function (d) {
@@ -109,6 +109,7 @@ var selected = -1;
 var dragging = false;
 var dragOff = { x: 0, y: 0 };
 var lastTap = { t: 0, i: -1 };
+var boardRect = null;   /* cached during a drag to avoid layout reads */
 
 var SCATTER_SPOTS = [
   [140, 300], [400, 640], [665, 260], [135, 630],
@@ -125,7 +126,7 @@ function scatter() {
     };
   });
   selected = -1;
-  draw();
+  scheduleDraw();
 }
 
 function transformed(p) {
@@ -136,13 +137,26 @@ function transformed(p) {
   });
 }
 
+/* --- render, driven on a single requestAnimationFrame per frame --- */
+var pendingDraw = false;
+function scheduleDraw() {
+  if (pendingDraw) return;
+  pendingDraw = true;
+  requestAnimationFrame(function () {
+    pendingDraw = false;
+    draw();
+  });
+}
+
 function draw() {
   ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, W, H);
 
   ctx.lineJoin = 'round';
-  pieces.forEach(function (p, i) {
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#000000';
+  pieces.forEach(function (p) {
     var pts = transformed(p);
     ctx.beginPath();
     ctx.moveTo(pts[0][0], pts[0][1]);
@@ -150,14 +164,12 @@ function draw() {
     ctx.closePath();
     ctx.fillStyle = p.color;
     ctx.fill();
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = (i === selected) ? 5 : 3;
     ctx.stroke();
   });
 }
 
 function canvasPoint(e) {
-  var r = canvas.getBoundingClientRect();
+  var r = boardRect || canvas.getBoundingClientRect();
   return {
     x: (e.clientX - r.left) * (W / r.width),
     y: (e.clientY - r.top) * (H / r.height)
@@ -181,6 +193,7 @@ function hit(pt) {
 
 canvas.addEventListener('pointerdown', function (e) {
   e.preventDefault();
+  boardRect = canvas.getBoundingClientRect();
   var pt = canvasPoint(e);
   var h = hit(pt);
 
@@ -194,7 +207,7 @@ canvas.addEventListener('pointerdown', function (e) {
     if (now - lastTap.t < 300 && lastTap.i === tappedId) {
       p.rot += Math.PI / 4;
       lastTap = { t: 0, i: -1 };
-      draw();
+      scheduleDraw();
       return;
     }
     lastTap = { t: now, i: tappedId };
@@ -208,7 +221,7 @@ canvas.addEventListener('pointerdown', function (e) {
     selected = -1;
     lastTap = { t: 0, i: -1 };
   }
-  draw();
+  scheduleDraw();
 });
 
 canvas.addEventListener('pointermove', function (e) {
@@ -216,14 +229,14 @@ canvas.addEventListener('pointermove', function (e) {
   var pt = canvasPoint(e);
   pieces[selected].x = Math.max(10, Math.min(W - 10, pt.x - dragOff.x));
   pieces[selected].y = Math.max(10, Math.min(H - 10, pt.y - dragOff.y));
-  draw();
+  scheduleDraw();
 });
 
 canvas.addEventListener('pointerup', function () {
   if (dragging && selected > -1) snapSelected();
   dragging = false;
   canvas.classList.remove('dragging');
-  draw();
+  scheduleDraw();
 });
 canvas.addEventListener('pointercancel', function () {
   dragging = false;
@@ -257,14 +270,14 @@ function rotateSelected() {
   if (selected < 0) return;
   pieces[selected].rot += Math.PI / 4;
   snapSelected();
-  draw();
+  scheduleDraw();
 }
 
 function flipSelected() {
   if (selected < 0) return;
   pieces[selected].flip *= -1;
   snapSelected();
-  draw();
+  scheduleDraw();
 }
 
 document.addEventListener('keydown', function (e) {
@@ -273,17 +286,13 @@ document.addEventListener('keydown', function (e) {
 });
 
 function downloadPNG() {
-  var was = selected;
-  selected = -1;
-  draw();
+  draw();   /* synchronous, so the canvas is current at capture time */
   var a = document.createElement('a');
   a.href = canvas.toDataURL('image/png');
   a.download = 'tangram.png';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  selected = was;
-  draw();
 }
 
 scatter();
