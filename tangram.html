@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tangram</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Courier New', monospace;
+    background: #fff;
+    color: #000;
+    margin: 40px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .wrap { max-width: 640px; }
+
+  h1 {
+    font-size: 14px;
+    font-weight: normal;
+    margin-bottom: 20px;
+  }
+
+  #board {
+    width: 100%;
+    height: auto;
+    display: block;
+    touch-action: none;
+    border: 1px solid #000;
+    background: #fff;
+    cursor: grab;
+  }
+  #board.dragging { cursor: grabbing; }
+
+  .controls { margin-top: 12px; }
+
+  button {
+    background: none;
+    border: none;
+    color: #000;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    margin-right: 16px;
+  }
+  button:hover {
+    background: #000;
+    color: #fff;
+  }
+  button:focus-visible { outline: 1px solid #000; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>tangram</h1>
+
+  <canvas id="board" aria-label="tangram board: drag the pieces, rotate and flip them"></canvas>
+
+  <div class="controls">
+    <button onclick="rotateSelected()" title="R">rotate</button>
+    <button onclick="flipSelected()" title="F">flip</button>
+    <button onclick="scatter()">reset</button>
+    <button onclick="downloadPNG()">png</button>
+  </div>
+
+</div>
+
+<script>
+/* Canonical 7-piece dissection of the 8x8 square.
+   Verified: areas sum to 64, zero gaps, zero overlaps —
+   the pieces recompose the square exactly. */
+
+var UNIT = 40;
+var W = 800, H = 800;
+var SNAP = 13;
+
+var PIECES_DEF = [
+  { id: 'lt1', unitPoly: [[0,0],[0,8],[4,4]],       color: '#e76f51' },
+  { id: 'lt2', unitPoly: [[0,0],[8,0],[4,4]],       color: '#457b9d' },
+  { id: 'mt',  unitPoly: [[4,8],[8,8],[8,4]],       color: '#2a9d8f' },
+  { id: 'sq',  unitPoly: [[2,6],[4,8],[6,6],[4,4]], color: '#e9c46a' },
+  { id: 'par', unitPoly: [[6,2],[6,6],[8,4],[8,0]], color: '#8ab17d' },
+  { id: 'st1', unitPoly: [[4,4],[6,6],[6,2]],       color: '#b56576' },
+  { id: 'st2', unitPoly: [[0,8],[4,8],[2,6]],       color: '#6d597a' }
+];
+
+PIECES_DEF.forEach(function (d) {
+  var cx = 0, cy = 0;
+  d.unitPoly.forEach(function (p) { cx += p[0]; cy += p[1]; });
+  cx /= d.unitPoly.length; cy /= d.unitPoly.length;
+  d.poly = d.unitPoly.map(function (p) { return [(p[0] - cx) * UNIT, (p[1] - cy) * UNIT]; });
+});
+
+var canvas = document.getElementById('board');
+var ctx = canvas.getContext('2d');
+var dpr = Math.min(window.devicePixelRatio || 1, 3);
+canvas.width = W * dpr;
+canvas.height = H * dpr;
+ctx.scale(dpr, dpr);
+
+var pieces = [];
+var selected = -1;
+var dragging = false;
+var dragOff = { x: 0, y: 0 };
+var lastTap = { t: 0, i: -1 };
+
+var SCATTER_SPOTS = [
+  [140, 300], [400, 640], [665, 260], [135, 630],
+  [668, 585], [400, 85],  [615, 700]
+];
+
+function scatter() {
+  pieces = PIECES_DEF.map(function (d, i) {
+    return {
+      id: d.id, poly: d.poly, color: d.color,
+      x: SCATTER_SPOTS[i][0], y: SCATTER_SPOTS[i][1],
+      rot: ((i * 3) % 8) * Math.PI / 4,
+      flip: 1
+    };
+  });
+  selected = -1;
+  draw();
+}
+
+function transformed(p) {
+  var cos = Math.cos(p.rot), sin = Math.sin(p.rot);
+  return p.poly.map(function (pt) {
+    var x = pt[0] * p.flip, y = pt[1];
+    return [p.x + x * cos - y * sin, p.y + x * sin + y * cos];
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.lineJoin = 'round';
+  pieces.forEach(function (p, i) {
+    var pts = transformed(p);
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (var j = 1; j < pts.length; j++) ctx.lineTo(pts[j][0], pts[j][1]);
+    ctx.closePath();
+    ctx.fillStyle = p.color;
+    ctx.fill();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = (i === selected) ? 5 : 3;
+    ctx.stroke();
+  });
+}
+
+function canvasPoint(e) {
+  var r = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left) * (W / r.width),
+    y: (e.clientY - r.top) * (H / r.height)
+  };
+}
+
+function hit(pt) {
+  for (var i = pieces.length - 1; i >= 0; i--) {
+    var poly = transformed(pieces[i]);
+    var inside = false;
+    for (var a = 0, b = poly.length - 1; a < poly.length; b = a++) {
+      if (((poly[a][1] > pt.y) !== (poly[b][1] > pt.y)) &&
+          (pt.x < (poly[b][0] - poly[a][0]) * (pt.y - poly[a][1]) / (poly[b][1] - poly[a][1]) + poly[a][0])) {
+        inside = !inside;
+      }
+    }
+    if (inside) return i;
+  }
+  return -1;
+}
+
+canvas.addEventListener('pointerdown', function (e) {
+  e.preventDefault();
+  var pt = canvasPoint(e);
+  var h = hit(pt);
+
+  if (h > -1) {
+    var now = Date.now();
+    var tappedId = pieces[h].id;
+    var p = pieces.splice(h, 1)[0];
+    pieces.push(p);
+    selected = pieces.length - 1;
+
+    if (now - lastTap.t < 300 && lastTap.i === tappedId) {
+      p.rot += Math.PI / 4;
+      lastTap = { t: 0, i: -1 };
+      draw();
+      return;
+    }
+    lastTap = { t: now, i: tappedId };
+
+    dragging = true;
+    canvas.classList.add('dragging');
+    dragOff.x = pt.x - p.x;
+    dragOff.y = pt.y - p.y;
+    canvas.setPointerCapture(e.pointerId);
+  } else {
+    selected = -1;
+    lastTap = { t: 0, i: -1 };
+  }
+  draw();
+});
+
+canvas.addEventListener('pointermove', function (e) {
+  if (!dragging || selected < 0) return;
+  var pt = canvasPoint(e);
+  pieces[selected].x = Math.max(10, Math.min(W - 10, pt.x - dragOff.x));
+  pieces[selected].y = Math.max(10, Math.min(H - 10, pt.y - dragOff.y));
+  draw();
+});
+
+canvas.addEventListener('pointerup', function () {
+  if (dragging && selected > -1) snapSelected();
+  dragging = false;
+  canvas.classList.remove('dragging');
+  draw();
+});
+canvas.addEventListener('pointercancel', function () {
+  dragging = false;
+  canvas.classList.remove('dragging');
+});
+
+/* vertex-to-vertex snapping between pieces */
+function snapSelected() {
+  var p = pieces[selected];
+  var verts = transformed(p);
+  var targets = [];
+  pieces.forEach(function (q, i) {
+    if (i === selected) return;
+    transformed(q).forEach(function (v) { targets.push(v); });
+  });
+  var best = { d: Infinity, dx: 0, dy: 0 };
+  verts.forEach(function (v) {
+    targets.forEach(function (t) {
+      var dx = t[0] - v[0], dy = t[1] - v[1];
+      var d = Math.sqrt(dx * dx + dy * dy);
+      if (d < best.d) best = { d: d, dx: dx, dy: dy };
+    });
+  });
+  if (best.d < SNAP) {
+    p.x += best.dx;
+    p.y += best.dy;
+  }
+}
+
+function rotateSelected() {
+  if (selected < 0) return;
+  pieces[selected].rot += Math.PI / 4;
+  snapSelected();
+  draw();
+}
+
+function flipSelected() {
+  if (selected < 0) return;
+  pieces[selected].flip *= -1;
+  snapSelected();
+  draw();
+}
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'r' || e.key === 'R') rotateSelected();
+  if (e.key === 'f' || e.key === 'F') flipSelected();
+});
+
+function downloadPNG() {
+  var was = selected;
+  selected = -1;
+  draw();
+  var a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'tangram.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  selected = was;
+  draw();
+}
+
+scatter();
+</script>
+</body>
+</html>
