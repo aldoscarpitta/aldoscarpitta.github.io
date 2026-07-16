@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-16T12:51:39.168Z",
+  "updated": "2026-07-16T12:51:42.123Z",
   "calls": [
     {
       "id": 4,
@@ -134,15 +134,6 @@
       "deadline": "2027-02-10",
       "status": "urgent",
       "url": "https://on-the-move.org/news/eu-japan-fest-mobility-support-2026",
-      "notes": ""
-    },
-    {
-      "id": 1783027673774,
-      "title": "Atheras: Nicosia Ludic Lab for Composers of New Works in Toyful Music Festival 2026 (Cyprus) | On the Move",
-      "org": "",
-      "deadline": "2026-07-14",
-      "status": "urgent",
-      "url": "https://on-the-move.org/news/atheras-nicosia-ludic-lab-composers-new-works-toyful-music-festival-2026-cyprus",
       "notes": ""
     }
   ]
