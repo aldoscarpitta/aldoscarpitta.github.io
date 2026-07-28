@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>bounce</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Courier New', monospace;
+    background: #fff;
+    color: #000;
+    margin: 40px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .wrap { max-width: 640px; }
+
+  h1 {
+    font-size: 14px;
+    font-weight: normal;
+    margin-bottom: 20px;
+  }
+
+  .field { position: relative; }
+
+  #board {
+    width: 100%;
+    height: auto;
+    display: block;
+    touch-action: none;
+    border: 1px solid #000;
+    background: #fff;
+    cursor: crosshair;
+  }
+
+  #msg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 48%;
+    text-align: center;
+    display: none;
+    pointer-events: none;
+  }
+
+  .controls { margin-top: 12px; }
+
+  button {
+    background: none;
+    border: none;
+    color: #000;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    margin-right: 16px;
+  }
+  button:hover {
+    background: #000;
+    color: #fff;
+  }
+  button:focus-visible { outline: 1px solid #000; outline-offset: 2px; }
+
+  #status { color: #000; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>bounce</h1>
+
+  <div class="field">
+    <canvas id="board" aria-label="bounce: move the paddle with the pointer or the arrow keys, clear the bricks"></canvas>
+    <div id="msg"></div>
+  </div>
+
+  <div class="controls">
+    <button id="primary" onclick="primary()">start</button><button onclick="resetGame()">reset</button><button id="snd" onclick="toggleSound()">mute</button><span id="status">score 0 &middot; lives 3</span>
+  </div>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   Logical field is 800 x 600. The canvas is drawn at devicePixel
+   ratio and scaled by CSS, so every constant below is in logical
+   units and independent of the display size.
+   --------------------------------------------------------------- */
+
+var W = 800, H = 600;
+
+var COLS = 10, ROWS = 7;
+var CELL_W = 72, CELL_H = 28;        /* 10 * 72 = 720, centred in 800 */
+var GRID_X = 40, GRID_Y = 64;
+var INSET = 3;                        /* brick is 66 x 22, 6px gutters */
+
+var BALL_R = 8;
+var PADDLE_W = 100, PADDLE_H = 12, PADDLE_Y = 548;
+
+var BASE_SPEED = 380;                 /* logical units per second */
+var MAX_SPEED = 620;
+var SPEED_PER_BRICK = 3;
+var MAX_BOUNCE = 60 * Math.PI / 180;  /* widest deflection off the paddle */
+var SERVE_SPREAD = 25 * Math.PI / 180;
+var PADDLE_KEY_SPEED = 900;
+
+/* Sub-step cap. Must stay below both the brick height (22) and the
+   paddle height (12) or a fast ball can pass through them between
+   frames. At MAX_SPEED and 60fps the ball travels 10.3 units per
+   frame, so this splits into 3 steps. */
+var MAX_STEP = 5;
+
+var SERVE_DELAY = 0.9;                /* seconds the ball rests on the paddle */
+var START_LIVES = 3;
+
+/* ---------------------------------------------------------------
+   SOUND
+
+   One hang drum sample, pitch-shifted by playbackRate. Its own
+   fundamental is G3, 12.8 cents sharp of equal temperament; SAMPLE_TRIM
+   pulls the whole set back into tune so it can sit alongside other
+   tuned material later.
+
+   Columns 0..9 run low to high through the row's mode. Each row is a
+   different mode -- but all seven are ROTATIONS OF ONE COLLECTION
+   (G major), so every one of the 70 bricks draws from the same seven
+   pitch classes. Any subset of the wall, in any state of destruction,
+   is therefore consonant by construction rather than by taste:
+
+     row 6  Ionian on G     G2 A2 B2 C3 D3 E3 F#3 G3 A3 B3
+     row 5  Dorian on A     A2 B2 C3 D3 E3 F#3 G3 A3 B3 C4
+     row 4  Phrygian on B   B2 C3 D3 E3 F#3 G3 A3 B3 C4 D4
+     row 3  Lydian on C     C3 D3 E3 F#3 G3 A3 B3 C4 D4 E4
+     row 2  Mixolydian on D D3 E3 F#3 G3 A3 B3 C4 D4 E4 F#4
+     row 1  Aeolian on E    E3 F#3 G3 A3 B3 C4 D4 E4 F#4 G4
+     row 0  Locrian on F#   F#3 G3 A3 B3 C4 D4 E4 F#4 G4 A4
+
+   Full span G2..A4, playbackRate 0.500..2.245, geometric centre 1.06.
+
+   For genuinely different collections instead -- more modal colour,
+   but rows far apart will clash when heard together -- replace the
+   `deg` line in buildBricks with a per-row interval table rooted on a
+   common tonic. That trade is real; this version chooses adjacency.
+   --------------------------------------------------------------- */
+
+var AUDIO_FILE = 'hang-drum.wav';
+var SAMPLE_TRIM = Math.pow(2, -12.8 / 1200);   /* sample sits 12.8c sharp */
+var TONIC = -12;                               /* G2, relative to the sample's G3 */
+var COLLECTION = [0, 2, 4, 5, 7, 9, 11];       /* major steps; modes are its rotations */
+var MASTER_GAIN = 0.45;
+var PAN_WIDTH = 0.55;                          /* 0 = mono; column maps left to right */
+var HIGH_TILT_DB = -2.0;                       /* per octave, so high bells don't dominate */
+var MAX_VOICES = 32;
+
+/* tangram palette, cool at the top to pale at the bottom */
+var ROW_COLORS = [
+  '#73bcc3',  /* teal */
+  '#8dcfab',  /* mint green */
+  '#7cc248',  /* green */
+  '#fedd38',  /* yellow */
+  '#f9a126',  /* orange */
+  '#edc3d7',  /* pink */
+  '#fcf6aa'   /* pale yellow */
+];
+
+var canvas = document.getElementById('board');
+var ctx = canvas.getContext('2d');
+var msgEl = document.getElementById('msg');
+var statusEl = document.getElementById('status');
+var primaryEl = document.getElementById('primary');
+
+var dpr = Math.min(window.devicePixelRatio || 1, 3);
+canvas.width = W * dpr;
+canvas.height = H * dpr;
+ctx.scale(dpr, dpr);
+
+var bricks = [];
+var paddleX = W / 2;
+var ball = { x: W / 2, y: PADDLE_Y - BALL_R - 1, vx: 0, vy: 0 };
+var speed = BASE_SPEED;
+var score = 0, lives = START_LIVES, destroyed = 0;
+var state = 'idle';                   /* idle serving playing paused over won */
+var serveT = 0;
+var lastTime = 0;
+var keys = { left: false, right: false };
+var rectCache = null;
+var pointerDown = false;
+
+/* ---------------- setup ---------------- */
+
+function buildBricks() {
+  bricks = [];
+  for (var r = 0; r < ROWS; r++) {
+    for (var c = 0; c < COLS; c++) {
+      /* bottom row starts on degree 0, each row up starts one degree
+         higher -- that rotation is what makes each row a new mode */
+      var deg = (ROWS - 1 - r) + c;
+      var semi = TONIC + COLLECTION[deg % 7] + 12 * Math.floor(deg / 7);
+      bricks.push({
+        x: GRID_X + c * CELL_W + INSET,
+        y: GRID_Y + r * CELL_H + INSET,
+        w: CELL_W - INSET * 2,
+        h: CELL_H - INSET * 2,
+        color: ROW_COLORS[r],
+        points: ROWS - r,
+        alive: true,
+        rate: Math.pow(2, semi / 12) * SAMPLE_TRIM,
+        pan: (c / (COLS - 1) * 2 - 1) * PAN_WIDTH,
+        gain: Math.pow(10, (HIGH_TILT_DB * semi / 12) / 20)
+      });
+    }
+  }
+}
+
+/* ---------------- sound ---------------- */
+
+var actx = null, abuf = null, master = null;
+var voices = 0, soundOn = true;
+
+function initAudio() {
+  if (actx) {
+    if (actx.state === 'suspended') actx.resume();
+    return;
+  }
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  try { actx = new AC(); } catch (e) { return; }
+
+  master = actx.createGain();
+  master.gain.value = MASTER_GAIN;
+
+  /* A dense swarm sums well past 0 dBFS. This is a soft limiter, not a
+     colouring compressor -- to bypass it, connect master straight to
+     actx.destination and delete the two lines below. */
+  var lim = actx.createDynamicsCompressor();
+  lim.threshold.value = -4;
+  lim.knee.value = 8;
+  lim.ratio.value = 8;
+  lim.attack.value = 0.005;
+  lim.release.value = 0.25;
+  master.connect(lim);
+  lim.connect(actx.destination);
+
+  fetch(AUDIO_FILE).then(function (res) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.arrayBuffer();
+  }).then(function (arr) {
+    return new Promise(function (ok, no) {
+      var p = actx.decodeAudioData(arr, ok, no);   /* callback form for old Safari */
+      if (p && p.then) p.then(ok, no);             /* promise form everywhere else */
+    });
+  }).then(function (buf) {
+    abuf = buf;
+  })['catch'](function (e) {
+    console.warn('bounce: no sound (' + e.message + '). Needs to be served over ' +
+                 'http, not opened as a file. The game runs silently regardless.');
+  });
+}
+
+/* Each hit gets its own source node and is never stopped early, so
+   notes always ring out whole and overlap freely. Source nodes are
+   one-shot; they are released on 'ended'. */
+function playBrick(b) {
+  if (!soundOn || !abuf || !actx || voices >= MAX_VOICES) return;
+  if (actx.state === 'suspended') actx.resume();
+
+  var s = actx.createBufferSource();
+  s.buffer = abuf;
+  s.playbackRate.value = b.rate;
+
+  var g = actx.createGain();
+  g.gain.value = b.gain;
+
+  if (actx.createStereoPanner) {
+    var p = actx.createStereoPanner();
+    p.pan.value = b.pan;
+    s.connect(p);
+    p.connect(g);
+  } else {
+    s.connect(g);
+  }
+  g.connect(master);
+
+  voices++;
+  s.onended = function () {
+    voices--;
+    try { g.disconnect(); } catch (e) {}
+  };
+  s.start();
+}
+
+function toggleSound() {
+  initAudio();
+  soundOn = !soundOn;
+  document.getElementById('snd').textContent = soundOn ? 'mute' : 'unmute';
+}
+
+function resetGame() {
+  initAudio();
+  buildBricks();
+  score = 0;
+  lives = START_LIVES;
+  destroyed = 0;
+  speed = BASE_SPEED;
+  paddleX = W / 2;
+  dockBall();
+  state = 'idle';
+  hideMsg();
+  updateStatus();
+}
+
+function startGame() {
+  buildBricks();
+  score = 0;
+  lives = START_LIVES;
+  destroyed = 0;
+  speed = BASE_SPEED;
+  hideMsg();
+  updateStatus();
+  dockBall();
+}
+
+function dockBall() {
+  ball.x = paddleX;
+  ball.y = PADDLE_Y - BALL_R - 1;
+  ball.vx = 0;
+  ball.vy = 0;
+  serveT = SERVE_DELAY;
+  state = 'serving';
+  setPrimaryLabel();
+}
+
+function serve() {
+  var off = (Math.random() * 2 - 1) * SERVE_SPREAD;
+  ball.vx = speed * Math.sin(off);
+  ball.vy = -speed * Math.cos(off);
+  state = 'playing';
+  setPrimaryLabel();
+}
+
+/* Rescale velocity to a new magnitude, preserving direction, so the
+   ratio |vy|/speed set by the last paddle hit is never disturbed. */
+function setSpeed(s) {
+  var cur = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+  speed = s;
+  if (cur > 0) {
+    ball.vx = ball.vx / cur * s;
+    ball.vy = ball.vy / cur * s;
+  }
+}
+
+function clampPaddle() {
+  var half = PADDLE_W / 2;
+  if (paddleX < half) paddleX = half;
+  if (paddleX > W - half) paddleX = W - half;
+}
+
+/* ---------------- simulation ---------------- */
+
+function update(dt) {
+  if (state !== 'paused') {
+    if (keys.left) paddleX -= PADDLE_KEY_SPEED * dt;
+    if (keys.right) paddleX += PADDLE_KEY_SPEED * dt;
+    clampPaddle();
+  }
+
+  if (state === 'idle' || state === 'over' || state === 'won') {
+    if (state === 'idle') { ball.x = paddleX; ball.y = PADDLE_Y - BALL_R - 1; }
+    return;
+  }
+
+  if (state === 'serving') {
+    ball.x = paddleX;
+    ball.y = PADDLE_Y - BALL_R - 1;
+    serveT -= dt;
+    if (serveT <= 0) serve();
+    return;
+  }
+
+  if (state !== 'playing') return;
+
+  var steps = Math.max(1, Math.ceil((speed * dt) / MAX_STEP));
+  var sdt = dt / steps;
+  for (var s = 0; s < steps; s++) {
+    if (!stepBall(sdt)) break;
+  }
+}
+
+/* Returns false when the step ended the rally (life lost, cleared). */
+function stepBall(dt) {
+  ball.x += ball.vx * dt;
+  ball.y += ball.vy * dt;
+
+  /* side and top walls */
+  if (ball.x - BALL_R < 0) {
+    ball.x = BALL_R;
+    ball.vx = Math.abs(ball.vx);
+  } else if (ball.x + BALL_R > W) {
+    ball.x = W - BALL_R;
+    ball.vx = -Math.abs(ball.vx);
+  }
+  if (ball.y - BALL_R < 0) {
+    ball.y = BALL_R;
+    ball.vy = Math.abs(ball.vy);
+  }
+
+  /* bricks: circle vs axis-aligned box, resolved on the axis of
+     least overlap. One brick per sub-step; a second brick hit at a
+     seam is picked up by the following sub-step. */
+  for (var i = 0; i < bricks.length; i++) {
+    var b = bricks[i];
+    if (!b.alive) continue;
+    var dx = ball.x - (b.x + b.w / 2);
+    var dy = ball.y - (b.y + b.h / 2);
+    var ox = (b.w / 2 + BALL_R) - Math.abs(dx);
+    var oy = (b.h / 2 + BALL_R) - Math.abs(dy);
+    if (ox > 0 && oy > 0) {
+      if (ox < oy) {
+        ball.x += (dx > 0 ? ox : -ox);
+        ball.vx = -ball.vx;
+      } else {
+        ball.y += (dy > 0 ? oy : -oy);
+        ball.vy = -ball.vy;
+      }
+      b.alive = false;
+      playBrick(b);
+      destroyed++;
+      score += b.points;
+      setSpeed(Math.min(MAX_SPEED, BASE_SPEED + destroyed * SPEED_PER_BRICK));
+      updateStatus();
+      if (destroyed === bricks.length) {
+        state = 'won';
+        showMsg('cleared');
+        setPrimaryLabel();
+        return false;
+      }
+      break;
+    }
+  }
+
+  /* paddle: deflection angle is set by where the ball lands on it,
+     which is the only way the player can aim. Speed is preserved, so
+     |vy| never falls below cos(60) = 0.5 of it — the ball cannot get
+     trapped travelling horizontally. */
+  var pdx = ball.x - paddleX;
+  var pdy = ball.y - (PADDLE_Y + PADDLE_H / 2);
+  var pox = (PADDLE_W / 2 + BALL_R) - Math.abs(pdx);
+  var poy = (PADDLE_H / 2 + BALL_R) - Math.abs(pdy);
+  if (pox > 0 && poy > 0 && ball.vy > 0) {
+    var rel = pdx / (PADDLE_W / 2);
+    if (rel < -1) rel = -1;
+    if (rel > 1) rel = 1;
+    var ang = rel * MAX_BOUNCE;
+    ball.vx = speed * Math.sin(ang);
+    ball.vy = -speed * Math.cos(ang);
+    ball.y = PADDLE_Y - BALL_R - 0.5;
+  }
+
+  /* floor */
+  if (ball.y - BALL_R > H) {
+    lives--;
+    updateStatus();
+    if (lives <= 0) {
+      state = 'over';
+      showMsg('game over');
+      setPrimaryLabel();
+      return false;
+    }
+    dockBall();
+    return false;
+  }
+
+  return true;
+}
+
+/* ---------------- render ---------------- */
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.lineJoin = 'miter';
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#000000';
+  for (var i = 0; i < bricks.length; i++) {
+    var b = bricks[i];
+    if (!b.alive) continue;
+    ctx.fillStyle = b.color;
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+    ctx.strokeRect(b.x, b.y, b.w, b.h);
+  }
+
+  ctx.fillStyle = '#000000';
+  ctx.fillRect(paddleX - PADDLE_W / 2, PADDLE_Y, PADDLE_W, PADDLE_H);
+
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, BALL_R, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function frame(t) {
+  if (!lastTime) lastTime = t;
+  var dt = (t - lastTime) / 1000;
+  lastTime = t;
+  if (dt > 1 / 30) dt = 1 / 30;   /* clamp after a stall or tab switch */
+  update(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+
+/* ---------------- chrome ---------------- */
+
+function updateStatus() {
+  statusEl.innerHTML = 'score ' + score + ' &middot; lives ' + Math.max(0, lives);
+}
+
+function showMsg(t) { msgEl.textContent = t; msgEl.style.display = 'block'; }
+function hideMsg() { msgEl.style.display = 'none'; }
+
+function setPrimaryLabel() {
+  if (state === 'paused') primaryEl.textContent = 'resume';
+  else if (state === 'playing' || state === 'serving') primaryEl.textContent = 'pause';
+  else primaryEl.textContent = 'start';
+}
+
+function primary() {
+  initAudio();
+  if (state === 'idle' || state === 'over' || state === 'won') startGame();
+  else if (state === 'paused') { state = 'playing'; lastTime = 0; }
+  else if (state === 'playing' || state === 'serving') state = 'paused';
+  setPrimaryLabel();
+}
+
+function resumeIfPaused() {
+  if (state === 'paused') { state = 'playing'; lastTime = 0; setPrimaryLabel(); }
+}
+
+/* ---------------- input ---------------- */
+
+function rect() {
+  if (!rectCache) rectCache = canvas.getBoundingClientRect();
+  return rectCache;
+}
+
+function movePaddleTo(clientX) {
+  var r = rect();
+  if (!r.width) return;
+  paddleX = (clientX - r.left) * (W / r.width);
+  clampPaddle();
+}
+
+canvas.addEventListener('pointerdown', function (e) {
+  e.preventDefault();
+  initAudio();
+  rectCache = canvas.getBoundingClientRect();
+  pointerDown = true;
+  try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+  movePaddleTo(e.clientX);
+  if (state === 'idle' || state === 'over' || state === 'won') { startGame(); return; }
+  resumeIfPaused();
+});
+
+canvas.addEventListener('pointermove', function (e) {
+  if (pointerDown || e.pointerType === 'mouse') movePaddleTo(e.clientX);
+});
+
+canvas.addEventListener('pointerup', function (e) {
+  pointerDown = false;
+  try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+});
+
+canvas.addEventListener('pointercancel', function () { pointerDown = false; });
+
+document.addEventListener('keydown', function (e) {
+  initAudio();
+  if (e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
+  else if (e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+  else if (e.key === ' ' || e.key === 'Spacebar') {
+    /* let the browser handle Space when a control has focus, or the
+       button fires and this handler toggles it straight back */
+    if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
+    e.preventDefault();
+    primary();
+  }
+});
+
+document.addEventListener('keyup', function (e) {
+  if (e.key === 'ArrowLeft') keys.left = false;
+  else if (e.key === 'ArrowRight') keys.right = false;
+});
+
+window.addEventListener('resize', function () { rectCache = null; });
+window.addEventListener('orientationchange', function () { rectCache = null; });
+
+window.addEventListener('blur', function () { keys.left = false; keys.right = false; });
+
+document.addEventListener('visibilitychange', function () {
+  lastTime = 0;
+  if (document.hidden && (state === 'playing' || state === 'serving')) {
+    state = 'paused';
+    setPrimaryLabel();
+  }
+});
+
+/* ---------------- go ---------------- */
+
+resetGame();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
