@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>life</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Courier New', monospace;
+    background: #fff;
+    color: #000;
+    margin: 40px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .wrap { max-width: 640px; }
+
+  h1 {
+    font-size: 14px;
+    font-weight: normal;
+    margin-bottom: 20px;
+  }
+
+  #board {
+    width: 100%;
+    height: auto;
+    display: block;
+    touch-action: none;
+    border: 1px solid #000;
+    background: #fff;
+    cursor: crosshair;
+  }
+
+  .controls { margin-top: 12px; }
+
+  button {
+    background: none;
+    border: none;
+    color: #000;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    margin-right: 16px;
+  }
+  button:hover {
+    background: #000;
+    color: #fff;
+  }
+  button:focus-visible { outline: 1px solid #000; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>life</h1>
+
+  <canvas id="board" aria-label="conway's game of life: drag on the board to draw cells"></canvas>
+
+  <div class="controls">
+    <button id="runb" onclick="toggleRun()">pause</button><button onclick="stepOnce()">step</button><button onclick="randomise()">random</button><button onclick="clearAll()">clear</button><button id="spd" onclick="cycleSpeed()">4/s</button><button id="snd" onclick="toggleSound()">mute</button><span id="status">gen 0 &middot; pop 0</span>
+  </div>
+
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   Conway's Life on a 40 x 30 torus. B3/S23.
+
+   Two things beyond the plain rules:
+
+   COLOUR IS AGE, not state. A cell born this generation is teal and
+   works through the palette as it survives, settling on pale yellow
+   after seven generations. So a still life reads as a flat pale
+   block, a chaotic region shimmers cool, and the boundary between
+   settled and active structure is visible at a glance -- which is
+   the interesting thing about a Life board and is invisible when
+   every live cell is the same colour.
+
+   SOUND IS BIRTHS, not population. Playing every live cell would be
+   a wash; playing only what just changed is sparse by nature and
+   tracks the pattern's character. A blinker is a two-note pulse, a
+   glider is a figure that walks across the stereo field, a still
+   life is silent -- correctly, since nothing is happening.
+   --------------------------------------------------------------- */
+
+var W = 800, H = 600;
+var COLS = 40, ROWS = 30;
+var CELL = 20;                         /* 40*20 = 800, 30*20 = 600 */
+var INSET = 1.5;                       /* 17x17 fill, 3px gutter */
+
+var SPEEDS = [2, 4, 8, 16];            /* generations per second */
+var speedIdx = 1;
+
+/* age 1 -> teal, through to 7+ -> pale yellow */
+var AGE_COLORS = [
+  '#73bcc3', '#8dcfab', '#7cc248', '#fedd38', '#f9a126', '#edc3d7', '#fcf6aa'
+];
+
+/* ---------------------------------------------------------------
+   SOUND
+
+   Same hang drum sample as `bounce`, same tuning correction. But
+   where bounce fires one note at a time and can afford the seven
+   diatonic modes, Life fires a handful at once -- so the collection
+   here is G major PENTATONIC, a subset of bounce's G major. No
+   semitones and no tritone means any simultaneity is safe, however
+   many cells are born in the same generation.
+
+   Row picks the pitch (three rows per degree, low at the bottom),
+   column picks the pan. Births are collapsed to one note per degree
+   per generation, panned to the mean column of the births in that
+   band, which caps a generation at ten notes however busy the board
+   is and turns a dense generation into a chord rather than a pile.
+
+   The sample's natural 2.9s decay is cut to about 1.6s here. At 16
+   generations a second the full tail would leave a hundred voices
+   ringing at once.
+   --------------------------------------------------------------- */
+
+var AUDIO_FILE = 'hang-drum.wav';
+var SAMPLE_TRIM = Math.pow(2, -12.8 / 1200);
+var PENT = [-12, -10, -8, -5, -3, 0, 2, 4, 7, 9];   /* G2 A2 B2 D3 E3 G3 A3 B3 D4 E4 */
+var DEGREES = PENT.length;
+var ROWS_PER_DEGREE = ROWS / DEGREES;               /* 3 */
+var MASTER_GAIN = 0.32;
+var PAN_WIDTH = 0.55;
+var HIGH_TILT_DB = -2.0;
+var MAX_NOTES_PER_GEN = 4;                          /* the busiest bands only */
+var DECAY_MAX = 1.6;                                /* seconds, at the slowest rate */
+var DECAY_BUDGET = 7.0;                             /* note length shortens as rate rises */
+var MAX_VOICES = 48;                                /* insurance; the two above do the work */
+
+var canvas = document.getElementById('board');
+var ctx = canvas.getContext('2d');
+var statusEl = document.getElementById('status');
+var runEl = document.getElementById('runb');
+var spdEl = document.getElementById('spd');
+
+var dpr = Math.min(window.devicePixelRatio || 1, 3);
+canvas.width = W * dpr;
+canvas.height = H * dpr;
+ctx.scale(dpr, dpr);
+
+var N = COLS * ROWS;
+var cells = new Uint8Array(N);
+var age = new Uint8Array(N);
+var nextCells = new Uint8Array(N);
+var nextAge = new Uint8Array(N);
+
+var generation = 0, population = 0;
+var running = true;
+var dirty = true;
+var acc = 0, lastTime = 0;
+var painting = false, paintVal = 1, lastPX = -1, lastPY = -1;
+var rectCache = null;
+
+/* ---------------- rules ---------------- */
+
+function step() {
+  var births = [];
+  var pop = 0;
+  for (var r = 0; r < ROWS; r++) {
+    var rm = ((r - 1 + ROWS) % ROWS) * COLS;
+    var rc = r * COLS;
+    var rp = ((r + 1) % ROWS) * COLS;
+    for (var c = 0; c < COLS; c++) {
+      var cm = (c - 1 + COLS) % COLS;
+      var cp = (c + 1) % COLS;
+      var n = cells[rm + cm] + cells[rm + c] + cells[rm + cp] +
+              cells[rc + cm] +                 cells[rc + cp] +
+              cells[rp + cm] + cells[rp + c] + cells[rp + cp];
+      var k = rc + c;
+      var was = cells[k];
+      var live = was ? (n === 2 || n === 3) : (n === 3);
+      if (live) {
+        nextCells[k] = 1;
+        nextAge[k] = was ? (age[k] < 255 ? age[k] + 1 : 255) : 1;
+        if (!was) births.push(k);
+        pop++;
+      } else {
+        nextCells[k] = 0;
+        nextAge[k] = 0;
+      }
+    }
+  }
+  var t = cells; cells = nextCells; nextCells = t;
+  t = age; age = nextAge; nextAge = t;
+  generation++;
+  population = pop;
+  dirty = true;
+  sonify(births);
+  updateStatus();
+}
+
+function stepOnce() {
+  initAudio();
+  if (running) { running = false; setRunLabel(); }
+  step();
+}
+
+function seedRandom() {
+  for (var i = 0; i < N; i++) {
+    var v = Math.random() < 0.28 ? 1 : 0;
+    cells[i] = v;
+    age[i] = v;
+  }
+  generation = 0;
+  countPop();
+  dirty = true;
+  updateStatus();
+}
+
+function randomise() { initAudio(); seedRandom(); }
+
+function clearAll() {
+  initAudio();
+  for (var i = 0; i < N; i++) { cells[i] = 0; age[i] = 0; }
+  generation = 0;
+  population = 0;
+  dirty = true;
+  updateStatus();
+}
+
+function countPop() {
+  var p = 0;
+  for (var i = 0; i < N; i++) if (cells[i]) p++;
+  population = p;
+}
+
+/* ---------------- sound ---------------- */
+
+var actx = null, abuf = null, master = null;
+var voices = 0, soundOn = true;
+
+function initAudio() {
+  if (actx) {
+    if (actx.state === 'suspended') actx.resume();
+    return;
+  }
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  try { actx = new AC(); } catch (e) { return; }
+
+  master = actx.createGain();
+  master.gain.value = MASTER_GAIN;
+
+  /* soft limiter; to bypass, connect master straight to destination */
+  var lim = actx.createDynamicsCompressor();
+  lim.threshold.value = -4;
+  lim.knee.value = 8;
+  lim.ratio.value = 8;
+  lim.attack.value = 0.005;
+  lim.release.value = 0.25;
+  master.connect(lim);
+  lim.connect(actx.destination);
+
+  fetch(AUDIO_FILE).then(function (res) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.arrayBuffer();
+  }).then(function (arr) {
+    return new Promise(function (ok, no) {
+      var p = actx.decodeAudioData(arr, ok, no);
+      if (p && p.then) p.then(ok, no);
+    });
+  }).then(function (buf) {
+    abuf = buf;
+  })['catch'](function (e) {
+    console.warn('life: no sound (' + e.message + '). Needs to be served over ' +
+                 'http, not opened as a file. The board runs silently regardless.');
+  });
+}
+
+function degreeForRow(r) {
+  var d = Math.floor((ROWS - 1 - r) / ROWS_PER_DEGREE);
+  if (d < 0) d = 0;
+  if (d >= DEGREES) d = DEGREES - 1;
+  return d;
+}
+
+/* Note length shortens as the generation rate rises, so the number
+   of overlapping voices stays flat across all four speeds instead of
+   piling up eightfold at 16/s. */
+function decayLen() {
+  var d = DECAY_BUDGET / SPEEDS[speedIdx];
+  return d > DECAY_MAX ? DECAY_MAX : d;
+}
+
+/* Collapse this generation's births to one note per pitch band, then
+   keep only the busiest few. Sounding every band that saw a birth
+   meant a random soup lit all ten every generation -- a flat wash
+   with no shape. Taking the most active bands instead means the
+   sound tracks WHERE the pattern is working, and a structured
+   pattern, which only ever touches one or two bands, is unaffected.
+
+   It is also what keeps the voice count honest: capping inside
+   playNote would have dropped notes in scan order, silencing the top
+   of the board first. */
+function sonify(births) {
+  if (!soundOn || !abuf || !actx || !births.length) return;
+  if (actx.state === 'suspended') actx.resume();
+
+  var sumCol = [], cnt = [], order = [];
+  for (var d = 0; d < DEGREES; d++) { sumCol[d] = 0; cnt[d] = 0; }
+  for (var i = 0; i < births.length; i++) {
+    var k = births[i];
+    var deg = degreeForRow((k / COLS) | 0);
+    sumCol[deg] += k % COLS;
+    cnt[deg]++;
+  }
+  for (d = 0; d < DEGREES; d++) if (cnt[d]) order.push(d);
+  order.sort(function (a, b) { return cnt[b] - cnt[a]; });
+
+  var n = order.length < MAX_NOTES_PER_GEN ? order.length : MAX_NOTES_PER_GEN;
+  for (i = 0; i < n; i++) {
+    var deg2 = order[i];
+    playNote(deg2, sumCol[deg2] / cnt[deg2]);
+  }
+}
+
+function playNote(d, col) {
+  if (voices >= MAX_VOICES) return;
+  var semi = PENT[d];
+  var t0 = actx.currentTime;
+
+  var s = actx.createBufferSource();
+  s.buffer = abuf;
+  s.playbackRate.value = Math.pow(2, semi / 12) * SAMPLE_TRIM;
+
+  var len = decayLen();
+  var g = actx.createGain();
+  var lvl = Math.pow(10, (HIGH_TILT_DB * semi / 12) / 20);
+  g.gain.setValueAtTime(lvl, t0);
+  /* 4.5 time constants before the stop, so it is already inaudible
+     when the node ends and there is no click */
+  g.gain.setTargetAtTime(0, t0 + 0.04, len / 4.5);
+
+  if (actx.createStereoPanner) {
+    var p = actx.createStereoPanner();
+    p.pan.value = (col / (COLS - 1) * 2 - 1) * PAN_WIDTH;
+    s.connect(p);
+    p.connect(g);
+  } else {
+    s.connect(g);
+  }
+  g.connect(master);
+
+  voices++;
+  s.onended = function () {
+    voices--;
+    try { g.disconnect(); } catch (e) {}
+  };
+  s.start(t0);
+  s.stop(t0 + len);
+}
+
+function toggleSound() {
+  initAudio();
+  soundOn = !soundOn;
+  document.getElementById('snd').textContent = soundOn ? 'mute' : 'unmute';
+}
+
+/* ---------------- render ---------------- */
+
+/* Batched by colour: seven fillStyle changes per frame instead of
+   one per live cell, and only redrawn when the board has changed. */
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  var size = CELL - INSET * 2;
+  for (var a = 0; a < AGE_COLORS.length; a++) {
+    ctx.fillStyle = AGE_COLORS[a];
+    var last = (a === AGE_COLORS.length - 1);
+    for (var r = 0; r < ROWS; r++) {
+      var rc = r * COLS;
+      for (var c = 0; c < COLS; c++) {
+        var k = rc + c;
+        if (!cells[k]) continue;
+        var av = age[k];
+        if (av < 1) av = 1;
+        if (last ? (av <= a) : (av !== a + 1)) continue;
+        ctx.fillRect(c * CELL + INSET, r * CELL + INSET, size, size);
+      }
+    }
+  }
+}
+
+function frame(t) {
+  if (!lastTime) lastTime = t;
+  var dt = (t - lastTime) / 1000;
+  lastTime = t;
+  if (dt > 1 / 5) dt = 1 / 5;
+
+  if (running) {
+    acc += dt;
+    var interval = 1 / SPEEDS[speedIdx];
+    var guard = 0;
+    while (acc >= interval && guard < 4) { acc -= interval; step(); guard++; }
+    if (acc > interval) acc = 0;      /* never spiral */
+  }
+
+  if (dirty) { draw(); dirty = false; }
+  requestAnimationFrame(frame);
+}
+
+/* ---------------- chrome ---------------- */
+
+function updateStatus() {
+  statusEl.innerHTML = 'gen ' + generation + ' &middot; pop ' + population;
+}
+function setRunLabel() { runEl.textContent = running ? 'pause' : 'run'; }
+
+function toggleRun() {
+  initAudio();
+  running = !running;
+  acc = 0;
+  lastTime = 0;
+  setRunLabel();
+}
+
+function cycleSpeed() {
+  initAudio();
+  speedIdx = (speedIdx + 1) % SPEEDS.length;
+  spdEl.textContent = SPEEDS[speedIdx] + '/s';
+  acc = 0;
+}
+
+/* ---------------- input ---------------- */
+
+function cellAt(clientX, clientY) {
+  var r = rectCache || (rectCache = canvas.getBoundingClientRect());
+  if (!r.width || !r.height) return -1;
+  var x = (clientX - r.left) * (W / r.width);
+  var y = (clientY - r.top) * (H / r.height);
+  var c = Math.floor(x / CELL), rr = Math.floor(y / CELL);
+  if (c < 0 || c >= COLS || rr < 0 || rr >= ROWS) return -1;
+  return rr * COLS + c;
+}
+
+function paintAt(x, y) {
+  var k = cellAt(x, y);
+  if (k < 0) return;
+  if (cells[k] !== paintVal) {
+    cells[k] = paintVal;
+    age[k] = paintVal ? 1 : 0;
+    population += paintVal ? 1 : -1;
+    if (population < 0) population = 0;
+    dirty = true;
+    updateStatus();
+  }
+}
+
+canvas.addEventListener('pointerdown', function (e) {
+  e.preventDefault();
+  initAudio();
+  rectCache = canvas.getBoundingClientRect();
+  try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+
+  /* Drawing while it evolves is unusable at 8px cells on a phone --
+     the strokes are eaten before the hand finishes. So drawing stops
+     the clock; `run` starts it again. */
+  if (running) { running = false; setRunLabel(); }
+
+  var k = cellAt(e.clientX, e.clientY);
+  if (k < 0) return;
+  paintVal = cells[k] ? 0 : 1;
+  painting = true;
+  lastPX = e.clientX; lastPY = e.clientY;
+  paintAt(e.clientX, e.clientY);
+});
+
+canvas.addEventListener('pointermove', function (e) {
+  if (!painting) return;
+  /* walk the segment so a fast drag does not skip cells */
+  var r = rectCache;
+  if (!r || !r.width) { paintAt(e.clientX, e.clientY); return; }
+  var stepPx = (CELL * 0.5) * (r.width / W);
+  var dx = e.clientX - lastPX, dy = e.clientY - lastPY;
+  var dist = Math.sqrt(dx * dx + dy * dy);
+  var n = Math.max(1, Math.ceil(dist / Math.max(1, stepPx)));
+  for (var i = 1; i <= n; i++) paintAt(lastPX + dx * i / n, lastPY + dy * i / n);
+  lastPX = e.clientX; lastPY = e.clientY;
+});
+
+function endPaint(e) {
+  painting = false;
+  if (e && e.pointerId !== undefined) {
+    try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+  }
+}
+canvas.addEventListener('pointerup', endPaint);
+canvas.addEventListener('pointercancel', endPaint);
+
+document.addEventListener('keydown', function (e) {
+  if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
+  if (e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); toggleRun(); }
+  else if (e.key === 's' || e.key === 'S') stepOnce();
+  else if (e.key === 'r' || e.key === 'R') randomise();
+  else if (e.key === 'c' || e.key === 'C') clearAll();
+});
+
+window.addEventListener('resize', function () { rectCache = null; });
+window.addEventListener('orientationchange', function () { rectCache = null; });
+
+document.addEventListener('visibilitychange', function () {
+  lastTime = 0;
+  acc = 0;
+  if (document.hidden && running) { running = false; setRunLabel(); }
+});
+
+/* ---------------- go ---------------- */
+
+seedRandom();
+setRunLabel();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
