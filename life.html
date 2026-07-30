@@ -47,11 +47,38 @@
     text-decoration: underline;
     margin-right: 16px;
   }
-  button:hover {
-    background: #000;
-    color: #fff;
-  }
+  button:hover { background: #000; color: #fff; }
   button:focus-visible { outline: 1px solid #000; outline-offset: 2px; }
+
+  .tempo { margin-top: 10px; }
+
+  /* the one non-text control on the site; kept to the same black-on-white
+     vocabulary as everything else -- a hairline track and a square handle */
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+    width: 300px;
+    height: 14px;
+    vertical-align: middle;
+    cursor: pointer;
+    margin: 0;
+  }
+  input[type=range]:focus { outline: none; }
+  input[type=range]:focus-visible { outline: 1px solid #000; outline-offset: 3px; }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 1px; background: #000;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 9px; height: 13px; background: #000; border: 0; border-radius: 0;
+    margin-top: -6px;
+  }
+  input[type=range]::-moz-range-track { height: 1px; background: #000; }
+  input[type=range]::-moz-range-thumb {
+    width: 9px; height: 13px; background: #000; border: 0; border-radius: 0;
+  }
+  .tempo span { margin-left: 14px; }
 </style>
 </head>
 <body>
@@ -62,84 +89,141 @@
   <canvas id="board" aria-label="conway's game of life: drag on the board to draw cells"></canvas>
 
   <div class="controls">
-    <button id="runb" onclick="toggleRun()">pause</button><button onclick="stepOnce()">step</button><button onclick="randomise()">random</button><button onclick="clearAll()">clear</button><button id="spd" onclick="cycleSpeed()">4/s</button><button id="snd" onclick="toggleSound()">mute</button><span id="status">gen 0 &middot; pop 0</span>
+    <button id="runb" onclick="toggleRun()">pause</button><button onclick="stepOnce()">step</button><button onclick="randomise()">random</button><button onclick="clearAll()">clear</button><button id="snd" onclick="toggleSound()">mute</button><span id="status">gen 0 &middot; pop 0</span>
+  </div>
+
+  <div class="tempo">
+    <input id="bpm" type="range" min="20" max="600" step="1" value="240"
+           aria-label="tempo in beats per minute" oninput="setBpm(this.value)">
+    <span id="bpmv">240 bpm</span>
   </div>
 
 </div>
 
 <script>
 /* ---------------------------------------------------------------
-   Conway's Life on a 40 x 30 torus. B3/S23.
+   Life as a percussion instrument.
 
-   Two things beyond the plain rules:
+   One generation per beat. Tempo is continuous, and it is the only
+   density control -- the board decides WHAT sounds, the slider
+   decides how fast.
 
-   COLOUR IS AGE, not state. A cell born this generation is teal and
-   works through the palette as it survives, settling on pale yellow
-   after seven generations. So a still life reads as a flat pale
-   block, a chaotic region shimmers cool, and the boundary between
-   settled and active structure is visible at a glance -- which is
-   the interesting thing about a Life board and is invisible when
-   every live cell is the same colour.
+   Nothing is sampled and nothing is quantised to a scale. Three
+   synthesised voices, in the register language of Ikeda / Alva Noto:
+   a clipped click, a very short high sine, and a low sine drum.
 
-   SOUND IS BIRTHS, not population. Playing every live cell would be
-   a wash; playing only what just changed is sparse by nature and
-   tracks the pattern's character. A blinker is a two-note pulse, a
-   glider is a figure that walks across the stereo field, a still
-   life is silent -- correctly, since nothing is happening.
+   WHY POSITION AND NOT COUNT. A random board is spatially uniform
+   and statistically flat -- births per generation, population,
+   cluster count all decay smoothly and carry no rhythm. Measured:
+   births are distributed 33.6 / 32.9 / 33.6 across three row bands
+   at every stage of a run. So aggregate counts cannot make an
+   interesting figure.
+
+   What does vary, sharply and unpredictably, is WHERE the largest
+   simultaneous birth happens. Each voice takes its pitch and pan
+   from the centroid of the biggest cluster of cells born (or dying)
+   that generation. In a soup that jumps around the board and the
+   result is pointillist. On a drawn blinker it alternates between
+   two fixed points, so the figure is exactly periodic. On a glider
+   it walks diagonally, and the tone walks with it.
+
+   An earlier version fired one event per cluster. Measured at 4 to
+   10 events every generation with no silent generations at all --
+   a wall. One event per voice per generation, positioned by the
+   largest cluster, is the whole difference.
    --------------------------------------------------------------- */
 
 var W = 800, H = 600;
 var COLS = 40, ROWS = 30;
-var CELL = 20;                         /* 40*20 = 800, 30*20 = 600 */
-var INSET = 1.5;                       /* 17x17 fill, 3px gutter */
+var CELL = 20;
+var INSET = 1.5;
 
-var SPEEDS = [2, 4, 8, 16];            /* generations per second */
-var speedIdx = 1;
+var RANDOM_DENSITY = 0.14;   /* 30% spikes to 116 births then halves within 100
+                                generations; 12-15% holds a near-flat event rate */
 
 /* age 1 -> teal, through to 7+ -> pale yellow */
 var AGE_COLORS = [
   '#73bcc3', '#8dcfab', '#7cc248', '#fedd38', '#f9a126', '#edc3d7', '#fcf6aa'
 ];
 
-/* ---------------------------------------------------------------
-   SOUND
+/* ---------------- sound design ---------------- */
 
-   Same hang drum sample as `bounce`, same tuning correction. But
-   where bounce fires one note at a time and can afford the seven
-   diatonic modes, Life fires a handful at once -- so the collection
-   here is G major PENTATONIC, a subset of bounce's G major. No
-   semitones and no tritone means any simultaneity is safe, however
-   many cells are born in the same generation.
+var MASTER_GAIN = 0.70;
+var DRIVE = 1.9;                 /* master soft-clip; 0 would be clean */
 
-   Row picks the pitch (three rows per degree, low at the bottom),
-   column picks the pan. Births are collapsed to one note per degree
-   per generation, panned to the mean column of the births in that
-   band, which caps a generation at ten notes however busy the board
-   is and turns a dense generation into a chord rather than a pile.
+/* The rule: the more often a voice fires, the smaller it is. The two
+   that fire on nearly every generation are reduced to a bed -- 4 to
+   10 ms, barely there. What you actually hear as rhythm is the two
+   sparse layers above them. */
 
-   The sample's natural 2.9s decay is cut to about 1.6s here. At 16
-   generations a second the full tail would leave a hundred voices
-   ringing at once.
-   --------------------------------------------------------------- */
+/* tick: fires whenever anything is born, so ~1 per generation */
+var TICK_HI = 9500, TICK_LO = 900;
+var TICK_LEN_MIN = 0.004, TICK_LEN_MAX = 0.011;
+var TICK_VEL = 0.16;
 
-var AUDIO_FILE = 'hang-drum.wav';
-var SAMPLE_TRIM = Math.pow(2, -12.8 / 1200);
-var PENT = [-12, -10, -8, -5, -3, 0, 2, 4, 7, 9];   /* G2 A2 B2 D3 E3 G3 A3 B3 D4 E4 */
-var DEGREES = PENT.length;
-var ROWS_PER_DEGREE = ROWS / DEGREES;               /* 3 */
-var MASTER_GAIN = 0.32;
-var PAN_WIDTH = 0.55;
-var HIGH_TILT_DB = -2.0;
-var MAX_NOTES_PER_GEN = 4;                          /* the busiest bands only */
-var DECAY_MAX = 1.6;                                /* seconds, at the slowest rate */
-var DECAY_BUDGET = 7.0;                             /* note length shortens as rate rises */
-var MAX_VOICES = 48;                                /* insurance; the two above do the work */
+/* click: fires when a death cluster is bigger than the board's own
+   recent average. A fixed size threshold does not work -- early on
+   the board is chaotic and every cluster clears it, so the layer
+   stayed a pulse for the first minute. Measured against the running
+   mean instead: 31% of generations early, 13% over a whole run,
+   gap CV 0.89. Raise the factor for sparser, lower for denser. */
+var CLICK_HI = 12000, CLICK_LO = 500;
+var CLICK_LEN = 0.005;
+var CLICK_VEL = 0.20;
+var CLICK_Q = 9;
+var CLICK_CLIP = 18;
+var CLICK_GATE = 1.4;            /* multiple of the running mean */
+var CLICK_GATE_INERTIA = 0.12;
+
+/* long sine pulse: the Noto voice. Fires when the birth centroid
+   crosses the middle of the board, or when the largest simultaneous
+   birth reaches a new peak. Measured at 1 in 10 on a soup, 1 in 22
+   on a travelling glider, and never on a stationary oscillator --
+   so it marks lateral movement rather than mere activity. */
+var TONE_HI = 5200, TONE_LO = 1150;
+var TONE_LEN_MIN = 0.45, TONE_LEN_MAX = 1.9;
+var TONE_VEL = 0.26;
+var TONE_MIN_GAP = 7;            /* generations between tones */
+/* The birth centroid jitters across the middle constantly, so a bare
+   crossing fired on 22% of early generations -- near-continuous at
+   high tempo. It must now commit to one side of the board before a
+   return counts. Together with a higher peak bar this is 4.5x rarer:
+   5.0% of early generations, 1.5% over a run, gap CV 0.94. */
+var TONE_DEADBAND = 0.65;        /* fraction of the half-width */
+var TONE_PEAK_FLOOR = 10;        /* smallest cluster that counts as a peak */
+var TONE_PEAK_DECAY = 0.991;     /* how fast the peak bar lowers itself */
+var TONE_ATTACK = 0.004;
+
+/* bass: sub, resonant, sent to reverb. The fundamental is below
+   most speakers, so the resonant lowpass sitting well above it is
+   what makes it audible at all -- on a phone you will feel the
+   attack and little else. */
+var BASS_HI = 25, BASS_LO = 18;
+var BASS_RES_HZ = 70;            /* resonance, not cutoff */
+var BASS_RES_Q = 7;
+/* the resonance adds about 8 dB of its own, measured -- this is the
+   compensation, not a taste setting. Change it with BASS_RES_Q. */
+var BASS_VEL = 0.30;
+var BASS_LEN_MIN = 0.55, BASS_LEN_MAX = 1.20;
+var BASS_SNAP = 3.6;             /* pitch drop at the attack */
+var BASS_MIN_SWING = 6;
+var BASS_SWING_FRAC = 0.15;
+
+var REVERB_SECONDS = 2.6, REVERB_DECAY = 2.6, REVERB_DAMP = 0.11;
+var BASS_SEND = 0.55, TONE_SEND = 0.24;
+
+var PAN_MAX = 0.85;
+var VEL_FLOOR = 0.18;
+var LOOKAHEAD = 0.20;            /* seconds of audio scheduled ahead */
+var PUMP_MS = 20;                /* scheduler tick, independent of rendering */
+var SMOOTH = 0.15;               /* drift-parameter inertia per generation */
 
 var canvas = document.getElementById('board');
 var ctx = canvas.getContext('2d');
 var statusEl = document.getElementById('status');
 var runEl = document.getElementById('runb');
-var spdEl = document.getElementById('spd');
+var bpmEl = document.getElementById('bpm');
+var bpmvEl = document.getElementById('bpmv');
 
 var dpr = Math.min(window.devicePixelRatio || 1, 3);
 canvas.width = W * dpr;
@@ -147,23 +231,48 @@ canvas.height = H * dpr;
 ctx.scale(dpr, dpr);
 
 var N = COLS * ROWS;
+
+/* the simulation head runs ahead of what is displayed */
+var simCells = new Uint8Array(N);
+var simAge = new Uint8Array(N);
+var bufCells = new Uint8Array(N);
+var bufAge = new Uint8Array(N);
+var born = new Uint8Array(N);
+var died = new Uint8Array(N);
+var seenFlag = new Uint8Array(N);
+var stack = new Int32Array(N);
+
+/* what is on screen */
 var cells = new Uint8Array(N);
 var age = new Uint8Array(N);
-var nextCells = new Uint8Array(N);
-var nextAge = new Uint8Array(N);
-
 var generation = 0, population = 0;
+
+var pending = [];
+var nextBeat = 0;
+var bpm = 240;
 var running = true;
 var dirty = true;
-var acc = 0, lastTime = 0;
-var painting = false, paintVal = 1, lastPX = -1, lastPY = -1;
+var painting = false, paintVal = 1, lastPX = 0, lastPY = 0;
 var rectCache = null;
+
+/* drift parameters, smoothed */
+var dCentX = 0.5, dCentY = 0.5, dSpread = 0.3, dSettle = 0;
+var lastSide = null, runMaxClust = 0, lastToneGen = -99, genCount = 0;
+var avgDeathClust = 0;
+
+function beatLen() { return 60 / bpm; }
+function now() { return actx ? actx.currentTime : Date.now() / 1000; }
 
 /* ---------------- rules ---------------- */
 
-function step() {
-  var births = [];
-  var pop = 0;
+/* Advances the head one generation and returns everything the sound
+   engine needs: the two biggest clusters of births and of deaths,
+   and the board-wide drift measurements. */
+function computeGen() {
+  var pop = 0, births = 0, deaths = 0;
+  var sx = 0, sy = 0, sxx = 0, syy = 0;
+  born.fill(0); died.fill(0);
+
   for (var r = 0; r < ROWS; r++) {
     var rm = ((r - 1 + ROWS) % ROWS) * COLS;
     var rc = r * COLS;
@@ -171,57 +280,397 @@ function step() {
     for (var c = 0; c < COLS; c++) {
       var cm = (c - 1 + COLS) % COLS;
       var cp = (c + 1) % COLS;
-      var n = cells[rm + cm] + cells[rm + c] + cells[rm + cp] +
-              cells[rc + cm] +                 cells[rc + cp] +
-              cells[rp + cm] + cells[rp + c] + cells[rp + cp];
+      var n = simCells[rm + cm] + simCells[rm + c] + simCells[rm + cp] +
+              simCells[rc + cm] +                    simCells[rc + cp] +
+              simCells[rp + cm] + simCells[rp + c] + simCells[rp + cp];
       var k = rc + c;
-      var was = cells[k];
+      var was = simCells[k];
       var live = was ? (n === 2 || n === 3) : (n === 3);
       if (live) {
-        nextCells[k] = 1;
-        nextAge[k] = was ? (age[k] < 255 ? age[k] + 1 : 255) : 1;
-        if (!was) births.push(k);
+        bufCells[k] = 1;
+        bufAge[k] = was ? (simAge[k] < 255 ? simAge[k] + 1 : 255) : 1;
         pop++;
+        sx += c; sy += r; sxx += c * c; syy += r * r;
+        if (!was) { births++; born[k] = 1; }
       } else {
-        nextCells[k] = 0;
-        nextAge[k] = 0;
+        bufCells[k] = 0;
+        bufAge[k] = 0;
+        if (was) { deaths++; died[k] = 1; }
       }
     }
   }
-  var t = cells; cells = nextCells; nextCells = t;
-  t = age; age = nextAge; nextAge = t;
+
+  var pale = 0;
+  for (var i = 0; i < N; i++) if (bufCells[i] && bufAge[i] >= 7) pale++;
+
+  var t = simCells; simCells = bufCells; bufCells = t;
+  t = simAge; simAge = bufAge; bufAge = t;
+
+  var bc = topCluster(born);
+  var dc = topCluster(died);
+
+  /* long-tone trigger: the birth centroid crossing the middle of the
+     board, or the largest simultaneous birth reaching a new peak.
+     The peak decays so the bar keeps lowering itself. */
+  genCount++;
+  var crossed = false;
+  if (bc) {
+    var mid = (COLS - 1) / 2;
+    var off = bc.col - mid;
+    if (Math.abs(off) > TONE_DEADBAND * mid) {
+      var side = off > 0;
+      if (lastSide !== null && side !== lastSide) crossed = true;
+      lastSide = side;
+    }
+  }
+  runMaxClust *= TONE_PEAK_DECAY;
+  var peaked = false;
+  if (bc && bc.n > Math.max(TONE_PEAK_FLOOR, runMaxClust)) { peaked = true; runMaxClust = bc.n; }
+  var tone = (crossed || peaked) && (genCount - lastToneGen >= TONE_MIN_GAP);
+  if (tone) lastToneGen = genCount;
+
+  var dn = dc ? dc.n : 0;
+  var clickOn = dn > 0 && dn > avgDeathClust * CLICK_GATE;
+  avgDeathClust += (dn - avgDeathClust) * CLICK_GATE_INERTIA;
+
+  /* drift targets, all normalised 0..1 */
+  var tCentX = pop ? (sx / pop) / (COLS - 1) : 0.5;
+  var tCentY = pop ? (sy / pop) / (ROWS - 1) : 0.5;
+  var vx = pop ? Math.sqrt(Math.max(0, sxx / pop - (sx / pop) * (sx / pop))) / (COLS / 2) : 0.3;
+  var tSettle = pop ? pale / pop : 0;
+
+  dCentX += (tCentX - dCentX) * SMOOTH;
+  dCentY += (tCentY - dCentY) * SMOOTH;
+  dSpread += (Math.min(1, vx) - dSpread) * SMOOTH;
+  dSettle += (Math.min(1, tSettle) - dSettle) * SMOOTH;
+
+  return {
+    cells: simCells.slice(), age: simAge.slice(),
+    pop: pop, births: births, deaths: deaths, pale: pale,
+    bc: bc, dc: dc, tone: tone, clickOn: clickOn,
+    centX: dCentX, centY: dCentY, spread: dSpread, settle: dSettle
+  };
+}
+
+/* Largest connected group in a flag array, with its centroid.
+   8-connected, wrapping, iterative so a big soup cannot blow the
+   call stack. */
+function topCluster(flag) {
+  seenFlag.fill(0);
+  var best = null;
+  for (var k = 0; k < N; k++) {
+    if (!flag[k] || seenFlag[k]) continue;
+    var sp = 0, cnt = 0, sr = 0, sc = 0;
+    stack[sp++] = k; seenFlag[k] = 1;
+    while (sp) {
+      var j = stack[--sp];
+      cnt++; sr += (j / COLS) | 0; sc += j % COLS;
+      var jr = (j / COLS) | 0, jc = j % COLS;
+      for (var dr = -1; dr <= 1; dr++) {
+        var nr = (jr + dr + ROWS) % ROWS;
+        for (var dc2 = -1; dc2 <= 1; dc2++) {
+          if (!dr && !dc2) continue;
+          var m = nr * COLS + ((jc + dc2 + COLS) % COLS);
+          if (flag[m] && !seenFlag[m]) { seenFlag[m] = 1; stack[sp++] = m; }
+        }
+      }
+    }
+    if (!best || cnt > best.n) best = { n: cnt, row: sr / cnt, col: sc / cnt };
+  }
+  return best;
+}
+
+/* ---------------- synthesis ---------------- */
+
+var actx = null, master = null, noiseBuf = null, verb = null;
+
+function clipCurve(k) {
+  var n = 1024, c = new Float32Array(n);
+  for (var i = 0; i < n; i++) {
+    var x = i / (n - 1) * 2 - 1;
+    c[i] = Math.tanh(k * x) / Math.tanh(k);
+  }
+  return c;
+}
+
+function initAudio() {
+  if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  try { actx = new AC(); } catch (e) { return; }
+
+  master = actx.createGain();
+  master.gain.value = MASTER_GAIN;
+
+  var shaper = actx.createWaveShaper();
+  shaper.curve = clipCurve(DRIVE);
+  shaper.oversample = '2x';
+
+  var out = actx.createGain();
+  out.gain.value = 0.9;
+  master.connect(shaper);
+  shaper.connect(out);
+  out.connect(actx.destination);
+
+  /* Synthesised impulse response: decaying noise through a one-pole
+     lowpass, so the tail is dark rather than fizzy. No asset. */
+  verb = actx.createConvolver();
+  var vs = Math.floor(actx.sampleRate * REVERB_SECONDS);
+  var ir = actx.createBuffer(2, vs, actx.sampleRate);
+  for (var ch = 0; ch < 2; ch++) {
+    var cd = ir.getChannelData(ch), lp = 0;
+    for (var j = 0; j < vs; j++) {
+      lp += ((Math.random() * 2 - 1) - lp) * REVERB_DAMP;
+      cd[j] = lp * Math.pow(1 - j / vs, REVERB_DECAY);
+    }
+  }
+  verb.buffer = ir;
+  verb.connect(master);
+
+  var len = Math.floor(actx.sampleRate * 0.12);
+  noiseBuf = actx.createBuffer(1, len, actx.sampleRate);
+  var d = noiseBuf.getChannelData(0);
+  for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+
+  nextBeat = actx.currentTime + 0.06;
+}
+
+function panner(p) {
+  if (!actx.createStereoPanner) return null;
+  var n = actx.createStereoPanner();
+  n.pan.value = Math.max(-1, Math.min(1, p));
+  return n;
+}
+
+function chain(node, pan, dest) {
+  var pn = panner(pan);
+  if (pn) { node.connect(pn); pn.connect(dest); }
+  else node.connect(dest);
+}
+
+function send(node, amount) {
+  if (!verb || amount <= 0) return;
+  var g = actx.createGain();
+  g.gain.value = amount;
+  node.connect(g);
+  g.connect(verb);
+}
+
+/* tick -- the bed. A few milliseconds, quiet, one per generation. */
+function fireTick(t, freq, vel, len, pan) {
+  var o = actx.createOscillator();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(freq, t);
+  var g = actx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vel, t + 0.0006);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+  o.connect(g);
+  chain(g, pan, master);
+  o.start(t);
+  o.stop(t + len + 0.02);
+}
+
+/* band-limited noise burst, hard-clipped: the digital click */
+function fireClick(t, freq, vel, pan) {
+  var s = actx.createBufferSource();
+  s.buffer = noiseBuf;
+  var bp = actx.createBiquadFilter();
+  bp.type = 'bandpass';
+  bp.frequency.setValueAtTime(freq, t);
+  bp.Q.value = CLICK_Q;
+  var sh = actx.createWaveShaper();
+  sh.curve = clipCurve(CLICK_CLIP);
+  var g = actx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vel, t + 0.0004);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + CLICK_LEN);
+  s.connect(bp); bp.connect(sh); sh.connect(g);
+  chain(g, pan, master);
+  s.start(t);
+  s.stop(t + CLICK_LEN + 0.02);
+}
+
+/* the long sine pulse: square-ish envelope, held, then released */
+function fireTone(t, freq, vel, len, pan) {
+  var o = actx.createOscillator();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(freq, t);
+  var g = actx.createGain();
+  var hold = len * 0.55;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vel, t + TONE_ATTACK);
+  g.gain.setValueAtTime(vel, t + hold);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+  o.connect(g);
+  var pn = panner(pan);
+  if (pn) { g.connect(pn); pn.connect(master); send(pn, TONE_SEND); }
+  else { g.connect(master); send(g, TONE_SEND); }
+  o.start(t);
+  o.stop(t + len + 0.05);
+}
+
+/* sub bass with a fast downward snap, through a resonance that sits
+   well above the fundamental so it is audible at all */
+function fireBass(t, freq, vel, len, pan) {
+  var o = actx.createOscillator();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(freq * BASS_SNAP, t);
+  o.frequency.exponentialRampToValueAtTime(freq, t + 0.055);
+  var lp = actx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.setValueAtTime(BASS_RES_HZ, t);
+  lp.Q.value = BASS_RES_Q;
+  var g = actx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vel, t + 0.003);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+  o.connect(lp); lp.connect(g);
+  var pn = panner(pan * 0.25);
+  if (pn) { g.connect(pn); pn.connect(master); send(pn, BASS_SEND); }
+  else { g.connect(master); send(g, BASS_SEND); }
+  o.start(t);
+  o.stop(t + len + 0.05);
+}
+
+function expMap(u, lo, hi) { return lo * Math.pow(hi / lo, Math.max(0, Math.min(1, u))); }
+function vel(n, sat) { return VEL_FLOOR + (1 - VEL_FLOOR) * Math.min(1, n / sat); }
+
+/* Row sets frequency, column sets pan, cluster size sets velocity.
+   Board-wide drift widens the image and lengthens the tails. */
+function schedule(gen, t) {
+  if (!actx || !soundOn) return;
+
+  var width = 0.35 + 0.65 * gen.spread;
+  var bias = (gen.centX - 0.5) * 0.5;
+
+  if (gen.bc) {
+    var u = 1 - gen.bc.row / (ROWS - 1);
+    fireTick(t,
+      expMap(u, TICK_LO, TICK_HI),
+      TICK_VEL * vel(gen.bc.n, 8),
+      TICK_LEN_MIN + (TICK_LEN_MAX - TICK_LEN_MIN) * gen.settle,
+      (gen.bc.col / (COLS - 1) * 2 - 1) * PAN_MAX * width + bias);
+  }
+
+  if (gen.dc && gen.clickOn) {
+    var v = 1 - gen.dc.row / (ROWS - 1);
+    fireClick(t,
+      expMap(v, CLICK_LO, CLICK_HI),
+      CLICK_VEL * vel(gen.dc.n, 8),
+      (gen.dc.col / (COLS - 1) * 2 - 1) * PAN_MAX * width + bias);
+  }
+
+  if (gen.tone && gen.bc) {
+    var w = 1 - gen.bc.row / (ROWS - 1);
+    fireTone(t,
+      expMap(w, TONE_LO, TONE_HI),
+      TONE_VEL,
+      TONE_LEN_MIN + (TONE_LEN_MAX - TONE_LEN_MIN) * gen.settle,
+      (gen.bc.col / (COLS - 1) * 2 - 1) * PAN_MAX * width * 0.7 + bias);
+  }
+
+  /* the low voice marks a real swing in the population, so a stable
+     oscillator never triggers it and a collapse always does */
+  var swing = Math.abs(gen.births - gen.deaths);
+  if (swing >= Math.max(BASS_MIN_SWING, gen.pop * BASS_SWING_FRAC)) {
+    fireBass(t,
+      expMap(1 - gen.centY, BASS_LO, BASS_HI),
+      vel(swing, 30) * BASS_VEL,
+      BASS_LEN_MIN + (BASS_LEN_MAX - BASS_LEN_MIN) * gen.settle,
+      bias);
+  }
+}
+
+/* ---------------- transport, on the audio clock ---------------- */
+
+function pump() {
+  if (!running) return;
+  if (!actx) { advanceSilently(); return; }
+  var t0 = actx.currentTime;
+  /* A beat that is a little past due still gets scheduled -- the
+     browser fires it immediately and the grid survives the hiccup.
+     A long stall does not: making up dozens of missed beats would
+     dump them all out at once, so past two beats behind, resync. */
+  if (t0 - nextBeat > 2 * beatLen()) nextBeat = t0;
+  var horizon = t0 + LOOKAHEAD;
+  var guard = 0;
+  while (nextBeat < horizon && guard < 64) {
+    var gen = computeGen();
+    schedule(gen, nextBeat);
+    pending.push({ t: nextBeat, gen: gen });
+    nextBeat += beatLen();
+    guard++;
+  }
+  if (guard >= 64) nextBeat = t0 + beatLen();
+}
+
+/* with sound off there is no audio clock, so fall back to wall time */
+var silentNext = 0;
+function advanceSilently() {
+  var t = Date.now() / 1000;
+  if (!silentNext) silentNext = t;
+  var guard = 0;
+  while (silentNext < t && guard < 8) {
+    var gen = computeGen();
+    show(gen);
+    silentNext += beatLen();
+    guard++;
+  }
+  if (guard >= 8) silentNext = t;
+}
+
+function show(gen) {
+  cells.set(gen.cells);
+  age.set(gen.age);
+  population = gen.pop;
   generation++;
-  population = pop;
   dirty = true;
-  sonify(births);
   updateStatus();
 }
 
-function stepOnce() {
-  initAudio();
-  if (running) { running = false; setRunLabel(); }
-  step();
+/* Rendering only drains the queue and paints. The scheduler runs on
+   its own timer, so a slow frame cannot delay note scheduling. */
+function frame() {
+  if (actx) {
+    var t = actx.currentTime;
+    while (pending.length && pending[0].t <= t) show(pending.shift().gen);
+  } else {
+    pump();
+  }
+  if (dirty) { draw(); dirty = false; }
+  requestAnimationFrame(frame);
+}
+
+/* ---------------- board editing ---------------- */
+
+function syncHead() {
+  simCells.set(cells);
+  simAge.set(age);
+  lastSide = null; runMaxClust = 0; lastToneGen = -99; avgDeathClust = 0;
+  pending.length = 0;
+  if (actx) nextBeat = actx.currentTime + 0.03;
+  silentNext = 0;
 }
 
 function seedRandom() {
   for (var i = 0; i < N; i++) {
-    var v = Math.random() < 0.28 ? 1 : 0;
-    cells[i] = v;
-    age[i] = v;
+    var v = Math.random() < RANDOM_DENSITY ? 1 : 0;
+    cells[i] = v; age[i] = v;
   }
   generation = 0;
   countPop();
+  syncHead();
   dirty = true;
   updateStatus();
 }
-
 function randomise() { initAudio(); seedRandom(); }
 
 function clearAll() {
   initAudio();
-  for (var i = 0; i < N; i++) { cells[i] = 0; age[i] = 0; }
-  generation = 0;
-  population = 0;
+  cells.fill(0); age.fill(0);
+  generation = 0; population = 0;
+  syncHead();
   dirty = true;
   updateStatus();
 }
@@ -232,147 +681,22 @@ function countPop() {
   population = p;
 }
 
-/* ---------------- sound ---------------- */
-
-var actx = null, abuf = null, master = null;
-var voices = 0, soundOn = true;
-
-function initAudio() {
-  if (actx) {
-    if (actx.state === 'suspended') actx.resume();
-    return;
-  }
-  var AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) return;
-  try { actx = new AC(); } catch (e) { return; }
-
-  master = actx.createGain();
-  master.gain.value = MASTER_GAIN;
-
-  /* soft limiter; to bypass, connect master straight to destination */
-  var lim = actx.createDynamicsCompressor();
-  lim.threshold.value = -4;
-  lim.knee.value = 8;
-  lim.ratio.value = 8;
-  lim.attack.value = 0.005;
-  lim.release.value = 0.25;
-  master.connect(lim);
-  lim.connect(actx.destination);
-
-  fetch(AUDIO_FILE).then(function (res) {
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    return res.arrayBuffer();
-  }).then(function (arr) {
-    return new Promise(function (ok, no) {
-      var p = actx.decodeAudioData(arr, ok, no);
-      if (p && p.then) p.then(ok, no);
-    });
-  }).then(function (buf) {
-    abuf = buf;
-  })['catch'](function (e) {
-    console.warn('life: no sound (' + e.message + '). Needs to be served over ' +
-                 'http, not opened as a file. The board runs silently regardless.');
-  });
-}
-
-function degreeForRow(r) {
-  var d = Math.floor((ROWS - 1 - r) / ROWS_PER_DEGREE);
-  if (d < 0) d = 0;
-  if (d >= DEGREES) d = DEGREES - 1;
-  return d;
-}
-
-/* Note length shortens as the generation rate rises, so the number
-   of overlapping voices stays flat across all four speeds instead of
-   piling up eightfold at 16/s. */
-function decayLen() {
-  var d = DECAY_BUDGET / SPEEDS[speedIdx];
-  return d > DECAY_MAX ? DECAY_MAX : d;
-}
-
-/* Collapse this generation's births to one note per pitch band, then
-   keep only the busiest few. Sounding every band that saw a birth
-   meant a random soup lit all ten every generation -- a flat wash
-   with no shape. Taking the most active bands instead means the
-   sound tracks WHERE the pattern is working, and a structured
-   pattern, which only ever touches one or two bands, is unaffected.
-
-   It is also what keeps the voice count honest: capping inside
-   playNote would have dropped notes in scan order, silencing the top
-   of the board first. */
-function sonify(births) {
-  if (!soundOn || !abuf || !actx || !births.length) return;
-  if (actx.state === 'suspended') actx.resume();
-
-  var sumCol = [], cnt = [], order = [];
-  for (var d = 0; d < DEGREES; d++) { sumCol[d] = 0; cnt[d] = 0; }
-  for (var i = 0; i < births.length; i++) {
-    var k = births[i];
-    var deg = degreeForRow((k / COLS) | 0);
-    sumCol[deg] += k % COLS;
-    cnt[deg]++;
-  }
-  for (d = 0; d < DEGREES; d++) if (cnt[d]) order.push(d);
-  order.sort(function (a, b) { return cnt[b] - cnt[a]; });
-
-  var n = order.length < MAX_NOTES_PER_GEN ? order.length : MAX_NOTES_PER_GEN;
-  for (i = 0; i < n; i++) {
-    var deg2 = order[i];
-    playNote(deg2, sumCol[deg2] / cnt[deg2]);
-  }
-}
-
-function playNote(d, col) {
-  if (voices >= MAX_VOICES) return;
-  var semi = PENT[d];
-  var t0 = actx.currentTime;
-
-  var s = actx.createBufferSource();
-  s.buffer = abuf;
-  s.playbackRate.value = Math.pow(2, semi / 12) * SAMPLE_TRIM;
-
-  var len = decayLen();
-  var g = actx.createGain();
-  var lvl = Math.pow(10, (HIGH_TILT_DB * semi / 12) / 20);
-  g.gain.setValueAtTime(lvl, t0);
-  /* 4.5 time constants before the stop, so it is already inaudible
-     when the node ends and there is no click */
-  g.gain.setTargetAtTime(0, t0 + 0.04, len / 4.5);
-
-  if (actx.createStereoPanner) {
-    var p = actx.createStereoPanner();
-    p.pan.value = (col / (COLS - 1) * 2 - 1) * PAN_WIDTH;
-    s.connect(p);
-    p.connect(g);
-  } else {
-    s.connect(g);
-  }
-  g.connect(master);
-
-  voices++;
-  s.onended = function () {
-    voices--;
-    try { g.disconnect(); } catch (e) {}
-  };
-  s.start(t0);
-  s.stop(t0 + len);
-}
-
-function toggleSound() {
+function stepOnce() {
   initAudio();
-  soundOn = !soundOn;
-  document.getElementById('snd').textContent = soundOn ? 'mute' : 'unmute';
+  if (running) { running = false; setRunLabel(); }
+  syncHead();
+  var gen = computeGen();
+  if (actx && soundOn) schedule(gen, actx.currentTime + 0.02);
+  show(gen);
+  syncHead();
 }
 
 /* ---------------- render ---------------- */
 
-/* Batched by colour: seven fillStyle changes per frame instead of
-   one per live cell, and only redrawn when the board has changed. */
 function draw() {
   ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, W, H);
-
   var size = CELL - INSET * 2;
   for (var a = 0; a < AGE_COLORS.length; a++) {
     ctx.fillStyle = AGE_COLORS[a];
@@ -382,8 +706,7 @@ function draw() {
       for (var c = 0; c < COLS; c++) {
         var k = rc + c;
         if (!cells[k]) continue;
-        var av = age[k];
-        if (av < 1) av = 1;
+        var av = age[k] < 1 ? 1 : age[k];
         if (last ? (av <= a) : (av !== a + 1)) continue;
         ctx.fillRect(c * CELL + INSET, r * CELL + INSET, size, size);
       }
@@ -391,25 +714,9 @@ function draw() {
   }
 }
 
-function frame(t) {
-  if (!lastTime) lastTime = t;
-  var dt = (t - lastTime) / 1000;
-  lastTime = t;
-  if (dt > 1 / 5) dt = 1 / 5;
-
-  if (running) {
-    acc += dt;
-    var interval = 1 / SPEEDS[speedIdx];
-    var guard = 0;
-    while (acc >= interval && guard < 4) { acc -= interval; step(); guard++; }
-    if (acc > interval) acc = 0;      /* never spiral */
-  }
-
-  if (dirty) { draw(); dirty = false; }
-  requestAnimationFrame(frame);
-}
-
 /* ---------------- chrome ---------------- */
+
+var soundOn = true;
 
 function updateStatus() {
   statusEl.innerHTML = 'gen ' + generation + ' &middot; pop ' + population;
@@ -419,16 +726,20 @@ function setRunLabel() { runEl.textContent = running ? 'pause' : 'run'; }
 function toggleRun() {
   initAudio();
   running = !running;
-  acc = 0;
-  lastTime = 0;
+  if (running) syncHead();
   setRunLabel();
 }
 
-function cycleSpeed() {
+function setBpm(v) {
+  bpm = Math.max(20, Math.min(600, parseFloat(v) || 240));
+  bpmvEl.textContent = Math.round(bpm) + ' bpm';
+}
+
+function toggleSound() {
   initAudio();
-  speedIdx = (speedIdx + 1) % SPEEDS.length;
-  spdEl.textContent = SPEEDS[speedIdx] + '/s';
-  acc = 0;
+  soundOn = !soundOn;
+  silentNext = 0;
+  document.getElementById('snd').textContent = soundOn ? 'mute' : 'unmute';
 }
 
 /* ---------------- input ---------------- */
@@ -445,15 +756,13 @@ function cellAt(clientX, clientY) {
 
 function paintAt(x, y) {
   var k = cellAt(x, y);
-  if (k < 0) return;
-  if (cells[k] !== paintVal) {
-    cells[k] = paintVal;
-    age[k] = paintVal ? 1 : 0;
-    population += paintVal ? 1 : -1;
-    if (population < 0) population = 0;
-    dirty = true;
-    updateStatus();
-  }
+  if (k < 0 || cells[k] === paintVal) return;
+  cells[k] = paintVal;
+  age[k] = paintVal ? 1 : 0;
+  population += paintVal ? 1 : -1;
+  if (population < 0) population = 0;
+  dirty = true;
+  updateStatus();
 }
 
 canvas.addEventListener('pointerdown', function (e) {
@@ -461,12 +770,7 @@ canvas.addEventListener('pointerdown', function (e) {
   initAudio();
   rectCache = canvas.getBoundingClientRect();
   try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
-
-  /* Drawing while it evolves is unusable at 8px cells on a phone --
-     the strokes are eaten before the hand finishes. So drawing stops
-     the clock; `run` starts it again. */
   if (running) { running = false; setRunLabel(); }
-
   var k = cellAt(e.clientX, e.clientY);
   if (k < 0) return;
   paintVal = cells[k] ? 0 : 1;
@@ -477,19 +781,19 @@ canvas.addEventListener('pointerdown', function (e) {
 
 canvas.addEventListener('pointermove', function (e) {
   if (!painting) return;
-  /* walk the segment so a fast drag does not skip cells */
   var r = rectCache;
   if (!r || !r.width) { paintAt(e.clientX, e.clientY); return; }
   var stepPx = (CELL * 0.5) * (r.width / W);
   var dx = e.clientX - lastPX, dy = e.clientY - lastPY;
-  var dist = Math.sqrt(dx * dx + dy * dy);
-  var n = Math.max(1, Math.ceil(dist / Math.max(1, stepPx)));
+  var n = Math.max(1, Math.ceil(Math.sqrt(dx * dx + dy * dy) / Math.max(1, stepPx)));
   for (var i = 1; i <= n; i++) paintAt(lastPX + dx * i / n, lastPY + dy * i / n);
   lastPX = e.clientX; lastPY = e.clientY;
 });
 
 function endPaint(e) {
+  if (!painting) return;
   painting = false;
+  syncHead();
   if (e && e.pointerId !== undefined) {
     try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
   }
@@ -498,7 +802,8 @@ canvas.addEventListener('pointerup', endPaint);
 canvas.addEventListener('pointercancel', endPaint);
 
 document.addEventListener('keydown', function (e) {
-  if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
+  var ae = document.activeElement;
+  if (ae && (ae.tagName === 'BUTTON' || ae.tagName === 'INPUT')) return;
   if (e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); toggleRun(); }
   else if (e.key === 's' || e.key === 'S') stepOnce();
   else if (e.key === 'r' || e.key === 'R') randomise();
@@ -509,15 +814,15 @@ window.addEventListener('resize', function () { rectCache = null; });
 window.addEventListener('orientationchange', function () { rectCache = null; });
 
 document.addEventListener('visibilitychange', function () {
-  lastTime = 0;
-  acc = 0;
   if (document.hidden && running) { running = false; setRunLabel(); }
 });
 
 /* ---------------- go ---------------- */
 
+setBpm(bpmEl.value);
 seedRandom();
 setRunLabel();
+setInterval(pump, PUMP_MS);
 requestAnimationFrame(frame);
 </script>
 </body>
