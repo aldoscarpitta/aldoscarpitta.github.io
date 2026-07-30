@@ -148,13 +148,22 @@ var AGE_COLORS = [
 
 /* ---------------- sound design ---------------- */
 
-var MASTER_GAIN = 0.70;
+var MASTER_GAIN = 1.05;
 var DRIVE = 1.9;                 /* master soft-clip; 0 would be clean */
 
 /* The rule: the more often a voice fires, the smaller it is. The two
    that fire on nearly every generation are reduced to a bed -- 4 to
    10 ms, barely there. What you actually hear as rhythm is the two
    sparse layers above them. */
+
+/* POPULATION drives how many ticks fall inside one beat. A sparse
+   board gives one; a dense one gives up to four, spread evenly
+   across the beat and taken from the four largest birth clusters.
+   This is what makes drawing a lot of cells sound different from
+   drawing a few, rather than just louder. */
+var POP_PER_SUBDIV = 60;         /* one extra tick per this many cells */
+var MAX_SUBDIV = 4;
+var SUBDIV_FALLOFF = 0.72;       /* each later tick in the beat is quieter */
 
 /* tick: fires whenever anything is born, so ~1 per generation */
 var TICK_HI = 9500, TICK_LO = 900;
@@ -175,6 +184,15 @@ var CLICK_CLIP = 18;
 var CLICK_GATE = 1.4;            /* multiple of the running mean */
 var CLICK_GATE_INERTIA = 0.12;
 
+/* RATCHET: a burst of clicks inside one beat. Fires when births
+   exactly equal deaths, which the study put at 1 in 15.7 overall.
+   With a 10-generation floor it lands at 1 in 13 on a soup, 1 in 10
+   on a drawn blinker or glider, and never on a pulsar. */
+var RATCHET_MIN_GAP = 10;
+var RATCHET_MIN = 3, RATCHET_MAX = 7;
+var RATCHET_FALLOFF = 0.78;
+var CLICK_Q_ALT = 2.5;           /* the modulated alternative to CLICK_Q */
+
 /* long sine pulse: the Noto voice. Fires when the birth centroid
    crosses the middle of the board, or when the largest simultaneous
    birth reaches a new peak. Measured at 1 in 10 on a soup, 1 in 22
@@ -182,16 +200,17 @@ var CLICK_GATE_INERTIA = 0.12;
    so it marks lateral movement rather than mere activity. */
 var TONE_HI = 5200, TONE_LO = 1150;
 var TONE_LEN_MIN = 0.45, TONE_LEN_MAX = 1.9;
-var TONE_VEL = 0.20;
+var TONE_VEL = 0.195;
 var TONE_MIN_GAP = 7;            /* generations between tones */
 /* The birth centroid jitters across the middle constantly, so a bare
    crossing fired on 22% of early generations -- near-continuous at
    high tempo. It must now commit to one side of the board before a
    return counts. Together with a higher peak bar this is 4.5x rarer:
    5.0% of early generations, 1.5% over a run, gap CV 0.94. */
-var TONE_DEADBAND = 0.65;        /* fraction of the half-width */
-var TONE_PEAK_FLOOR = 10;        /* smallest cluster that counts as a peak */
-var TONE_PEAK_DECAY = 0.991;     /* how fast the peak bar lowers itself */
+var TONE_DEADBAND = 0.75;        /* fraction of the half-width */
+var TONE_PEAK_FLOOR = 12;        /* smallest cluster that counts as a peak */
+var TONE_PEAK_DECAY = 0.993;     /* how fast the peak bar lowers itself */
+var TONE_SEND_ALT = 0.70;        /* the modulated alternative to TONE_SEND */
 var TONE_ATTACK = 0.004;
 
 /* bass: sub, resonant, sent to reverb. The fundamental is below
@@ -208,6 +227,20 @@ var BASS_LEN_MIN = 0.55, BASS_LEN_MAX = 1.20;
 var BASS_SNAP = 3.6;             /* pitch drop at the attack */
 var BASS_MIN_SWING = 6;
 var BASS_SWING_FRAC = 0.15;
+
+/* FIVE SLOW MODULATORS. Each latches a switch that stays put for
+   tens of generations, so the piece changes character on its own
+   without any of the per-beat events changing rate. Measured
+   intervals on a soup, in generations:
+     settledness step   1 in 67-150   tick register falls
+     centroid Y crosses 1 in 129-150  stereo image inverts
+     pale vs slow mean  1 in 41-60    click turns from tick to bleep
+     spread crosses     1 in 43-129   tone goes wet
+     centroid X crosses 1 in 180-900  bass jumps an octave        */
+var MOD_SPREAD_MID = 0.42;
+var MOD_SETTLE_STEPS = 5;
+var MOD_TICK_DROP = 0.5;         /* register multiplier when fully settled */
+var MOD_BASS_MUL = 1.7;
 
 var REVERB_SECONDS = 2.6, REVERB_DECAY = 2.6, REVERB_DAMP = 0.11;
 var BASS_SEND = 0.55, TONE_SEND = 0.24;
@@ -258,7 +291,9 @@ var rectCache = null;
 /* drift parameters, smoothed */
 var dCentX = 0.5, dCentY = 0.5, dSpread = 0.3, dSettle = 0;
 var lastSide = null, runMaxClust = 0, lastToneGen = -99, genCount = 0;
-var avgDeathClust = 0;
+var avgDeathClust = 0, lastRatchetGen = -99;
+var modSettleStep = 0, modFlip = false, modClickQ = false, modWet = false, modBassHi = false;
+var prevCentY = null, prevCentX = null, prevSpread = null, prevPale = null, avgPale = 0;
 
 function beatLen() { return 60 / bpm; }
 function now() { return actx ? actx.currentTime : Date.now() / 1000; }
@@ -306,8 +341,10 @@ function computeGen() {
   var t = simCells; simCells = bufCells; bufCells = t;
   t = simAge; simAge = bufAge; bufAge = t;
 
-  var bc = topCluster(born);
-  var dc = topCluster(died);
+  var bcs = topCluster(born);
+  var dcs = topCluster(died);
+  var bc = bcs.length ? bcs[0] : null;
+  var dc = dcs.length ? dcs[0] : null;
 
   /* long-tone trigger: the birth centroid crossing the middle of the
      board, or the largest simultaneous birth reaching a new peak.
@@ -333,6 +370,12 @@ function computeGen() {
   var clickOn = dn > 0 && dn > avgDeathClust * CLICK_GATE;
   avgDeathClust += (dn - avgDeathClust) * CLICK_GATE_INERTIA;
 
+  /* ratchet: births exactly balancing deaths, with a floor on how
+     often it can happen */
+  var ratchet = births > 0 && births === deaths &&
+                (genCount - lastRatchetGen >= RATCHET_MIN_GAP);
+  if (ratchet) lastRatchetGen = genCount;
+
   /* drift targets, all normalised 0..1 */
   var tCentX = pop ? (sx / pop) / (COLS - 1) : 0.5;
   var tCentY = pop ? (sy / pop) / (ROWS - 1) : 0.5;
@@ -344,20 +387,39 @@ function computeGen() {
   dSpread += (Math.min(1, vx) - dSpread) * SMOOTH;
   dSettle += (Math.min(1, tSettle) - dSettle) * SMOOTH;
 
+  /* five slow switches, each latched until its own quantity moves
+     back across the line that set it */
+  var stp = Math.floor(dSettle * MOD_SETTLE_STEPS);
+  if (stp > MOD_SETTLE_STEPS - 1) stp = MOD_SETTLE_STEPS - 1;
+  if (stp !== modSettleStep) modSettleStep = stp;
+  if (prevCentY !== null && (prevCentY - 0.5) * (dCentY - 0.5) < 0) modFlip = !modFlip;
+  if (prevCentX !== null && (prevCentX - 0.5) * (dCentX - 0.5) < 0) modBassHi = !modBassHi;
+  if (prevSpread !== null &&
+      (prevSpread - MOD_SPREAD_MID) * (dSpread - MOD_SPREAD_MID) < 0) modWet = !modWet;
+  if (prevPale !== null && (prevPale - avgPale) * (pale - avgPale) < 0) modClickQ = !modClickQ;
+  avgPale += (pale - avgPale) * 0.03;
+  prevCentY = dCentY; prevCentX = dCentX; prevSpread = dSpread; prevPale = pale;
+
+  var subdiv = 1 + Math.floor(pop / POP_PER_SUBDIV);
+  if (subdiv > MAX_SUBDIV) subdiv = MAX_SUBDIV;
+
   return {
     cells: simCells.slice(), age: simAge.slice(),
+    bcs: bcs, subdiv: subdiv, ratchet: ratchet,
+    modTickMul: 1 - MOD_TICK_DROP * (modSettleStep / (MOD_SETTLE_STEPS - 1)),
+    modFlip: modFlip, modClickQ: modClickQ, modWet: modWet, modBassHi: modBassHi,
     pop: pop, births: births, deaths: deaths, pale: pale,
     bc: bc, dc: dc, tone: tone, clickOn: clickOn,
     centX: dCentX, centY: dCentY, spread: dSpread, settle: dSettle
   };
 }
 
-/* Largest connected group in a flag array, with its centroid.
+/* Connected groups in a flag array, biggest first, with centroids.
    8-connected, wrapping, iterative so a big soup cannot blow the
-   call stack. */
+   call stack. Returns at most MAX_SUBDIV entries. */
 function topCluster(flag) {
   seenFlag.fill(0);
-  var best = null;
+  var found = [];
   for (var k = 0; k < N; k++) {
     if (!flag[k] || seenFlag[k]) continue;
     var sp = 0, cnt = 0, sr = 0, sc = 0;
@@ -375,9 +437,11 @@ function topCluster(flag) {
         }
       }
     }
-    if (!best || cnt > best.n) best = { n: cnt, row: sr / cnt, col: sc / cnt };
+    found.push({ n: cnt, row: sr / cnt, col: sc / cnt });
   }
-  return best;
+  if (!found.length) return [];
+  found.sort(function (a, b) { return b.n - a.n; });
+  return found.length > MAX_SUBDIV ? found.slice(0, MAX_SUBDIV) : found;
 }
 
 /* ---------------- synthesis ---------------- */
@@ -472,13 +536,13 @@ function fireTick(t, freq, vel, len, pan) {
 }
 
 /* band-limited noise burst, hard-clipped: the digital click */
-function fireClick(t, freq, vel, pan) {
+function fireClick(t, freq, vel, pan, q) {
   var s = actx.createBufferSource();
   s.buffer = noiseBuf;
   var bp = actx.createBiquadFilter();
   bp.type = 'bandpass';
   bp.frequency.setValueAtTime(freq, t);
-  bp.Q.value = CLICK_Q;
+  bp.Q.value = q;
   var sh = actx.createWaveShaper();
   sh.curve = clipCurve(CLICK_CLIP);
   var g = actx.createGain();
@@ -492,7 +556,7 @@ function fireClick(t, freq, vel, pan) {
 }
 
 /* the long sine pulse: square-ish envelope, held, then released */
-function fireTone(t, freq, vel, len, pan) {
+function fireTone(t, freq, vel, len, pan, sendAmt) {
   var o = actx.createOscillator();
   o.type = 'sine';
   o.frequency.setValueAtTime(freq, t);
@@ -504,8 +568,8 @@ function fireTone(t, freq, vel, len, pan) {
   g.gain.exponentialRampToValueAtTime(0.0001, t + len);
   o.connect(g);
   var pn = panner(pan);
-  if (pn) { g.connect(pn); pn.connect(master); send(pn, TONE_SEND); }
-  else { g.connect(master); send(g, TONE_SEND); }
+  if (pn) { g.connect(pn); pn.connect(master); send(pn, sendAmt); }
+  else { g.connect(master); send(g, sendAmt); }
   o.start(t);
   o.stop(t + len + 0.05);
 }
@@ -537,37 +601,58 @@ function expMap(u, lo, hi) { return lo * Math.pow(hi / lo, Math.max(0, Math.min(
 function vel(n, sat) { return VEL_FLOOR + (1 - VEL_FLOOR) * Math.min(1, n / sat); }
 
 /* Row sets frequency, column sets pan, cluster size sets velocity.
-   Board-wide drift widens the image and lengthens the tails. */
+   Population sets how many ticks land inside the beat; five slow
+   switches shift register, stereo, timbre and reverb underneath. */
 function schedule(gen, t) {
   if (!actx || !soundOn) return;
 
+  var bl = beatLen();
   var width = 0.35 + 0.65 * gen.spread;
   var bias = (gen.centX - 0.5) * 0.5;
+  var flip = gen.modFlip ? -1 : 1;
+  var panOf = function (cl) {
+    return ((cl.col / (COLS - 1) * 2 - 1) * PAN_MAX * width + bias) * flip;
+  };
 
-  if (gen.bc) {
-    var u = 1 - gen.bc.row / (ROWS - 1);
-    fireTick(t,
-      expMap(u, TICK_LO, TICK_HI),
-      TICK_VEL * vel(gen.bc.n, 8),
-      TICK_LEN_MIN + (TICK_LEN_MAX - TICK_LEN_MIN) * gen.settle,
-      (gen.bc.col / (COLS - 1) * 2 - 1) * PAN_MAX * width + bias);
+  /* TICK, subdivided by how full the board is. Each subdivision
+     takes its pitch from the next largest birth cluster, so a dense
+     board is not just faster but wider in register. */
+  if (gen.bcs.length) {
+    var sub = gen.subdiv;
+    for (var i = 0; i < sub; i++) {
+      var cl = gen.bcs[i % gen.bcs.length];
+      fireTick(t + i * bl / sub,
+        expMap(1 - cl.row / (ROWS - 1), TICK_LO, TICK_HI) * gen.modTickMul,
+        TICK_VEL * vel(cl.n, 8) * Math.pow(SUBDIV_FALLOFF, i),
+        TICK_LEN_MIN + (TICK_LEN_MAX - TICK_LEN_MIN) * gen.settle,
+        panOf(cl));
+    }
   }
 
-  if (gen.dc && gen.clickOn) {
-    var v = 1 - gen.dc.row / (ROWS - 1);
-    fireClick(t,
-      expMap(v, CLICK_LO, CLICK_HI),
-      CLICK_VEL * vel(gen.dc.n, 8),
-      (gen.dc.col / (COLS - 1) * 2 - 1) * PAN_MAX * width + bias);
+  /* CLICK, and its ratchet */
+  if (gen.dc) {
+    var q = gen.modClickQ ? CLICK_Q_ALT : CLICK_Q;
+    var cf = expMap(1 - gen.dc.row / (ROWS - 1), CLICK_LO, CLICK_HI);
+    var cp = panOf(gen.dc);
+    if (gen.ratchet) {
+      var n = RATCHET_MIN + Math.floor(gen.dc.n / 2);
+      if (n > RATCHET_MAX) n = RATCHET_MAX;
+      for (var j = 0; j < n; j++) {
+        fireClick(t + j * bl / n, cf,
+          CLICK_VEL * vel(gen.dc.n, 8) * Math.pow(RATCHET_FALLOFF, j), cp, q);
+      }
+    } else if (gen.clickOn) {
+      fireClick(t, cf, CLICK_VEL * vel(gen.dc.n, 8), cp, q);
+    }
   }
 
   if (gen.tone && gen.bc) {
-    var w = 1 - gen.bc.row / (ROWS - 1);
     fireTone(t,
-      expMap(w, TONE_LO, TONE_HI),
+      expMap(1 - gen.bc.row / (ROWS - 1), TONE_LO, TONE_HI),
       TONE_VEL,
       TONE_LEN_MIN + (TONE_LEN_MAX - TONE_LEN_MIN) * gen.settle,
-      (gen.bc.col / (COLS - 1) * 2 - 1) * PAN_MAX * width * 0.7 + bias);
+      panOf(gen.bc) * 0.7,
+      gen.modWet ? TONE_SEND_ALT : TONE_SEND);
   }
 
   /* the low voice marks a real swing in the population, so a stable
@@ -575,10 +660,10 @@ function schedule(gen, t) {
   var swing = Math.abs(gen.births - gen.deaths);
   if (swing >= Math.max(BASS_MIN_SWING, gen.pop * BASS_SWING_FRAC)) {
     fireBass(t,
-      expMap(1 - gen.centY, BASS_LO, BASS_HI),
+      expMap(1 - gen.centY, BASS_LO, BASS_HI) * (gen.modBassHi ? MOD_BASS_MUL : 1),
       vel(swing, 30) * BASS_VEL,
       BASS_LEN_MIN + (BASS_LEN_MAX - BASS_LEN_MIN) * gen.settle,
-      bias);
+      bias * flip);
   }
 }
 
@@ -648,6 +733,8 @@ function syncHead() {
   simCells.set(cells);
   simAge.set(age);
   lastSide = null; runMaxClust = 0; lastToneGen = -99; avgDeathClust = 0;
+  lastRatchetGen = -99; prevCentY = null; prevCentX = null; prevSpread = null;
+  prevPale = null; avgPale = 0; modSettleStep = 0;
   pending.length = 0;
   if (actx) nextBeat = actx.currentTime + 0.03;
   silentNext = 0;
