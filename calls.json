@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-07-31T23:56:09.008Z",
+  "updated": "2026-07-31T23:56:25.025Z",
   "calls": [
     {
       "id": 4,
@@ -194,6 +194,129 @@
       "lockNote": "",
       "fit": "",
       "dateApprox": false
+    },
+    {
+      "id": 1785542185025,
+      "title": "Q-O2 Brussels — residency",
+      "org": "Q-O2 werkplaats, Brussels",
+      "deadline": "2026-09-15",
+      "status": "observe",
+      "recurs": {
+        "type": "annual-fixed",
+        "pattern": "~15 Sep"
+      },
+      "dateApprox": true,
+      "fit": "Fee-free + subsistence. Workspace for experimental music and sound art — direct fit for contact-piano/eurorack.",
+      "notes": "Fee-free + subsistence.",
+      "history": [],
+      "lockedUntil": null,
+      "lockNote": ""
+    },
+    {
+      "id": 1785542185026,
+      "title": "DAAD Berliner Künstlerprogramm",
+      "org": "DAAD, Berlin",
+      "deadline": "2026-12-15",
+      "status": "observe",
+      "recurs": {
+        "type": "annual-fixed",
+        "pattern": "opens ~mid-Oct, closes 15 Dec"
+      },
+      "fit": "Pays. Capstone-tier — the one that reframes the CV.",
+      "notes": "Opens ~mid-Oct, closes 15 Dec.",
+      "history": [],
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false
+    },
+    {
+      "id": 1785542185027,
+      "title": "Creative Europe Cooperation (Small scale)",
+      "org": "EACEA",
+      "deadline": "2027-05-05",
+      "status": "observe",
+      "recurs": {
+        "type": "annual-fixed",
+        "pattern": "~early May"
+      },
+      "dateApprox": true,
+      "fit": "Org-level, not individual — needs a lead partner. Route in via Curva Minore or a TAB/CRN partner.",
+      "notes": "Org-level application.",
+      "history": [],
+      "lockedUntil": null,
+      "lockNote": ""
+    },
+    {
+      "id": 1785542185028,
+      "title": "EMS Stockholm — Artist in Residence",
+      "org": "Elektronmusikstudion, Stockholm",
+      "deadline": "2027-01-31",
+      "status": "observe",
+      "recurs": {
+        "type": "window",
+        "pattern": "opens 1 Dec",
+        "opensDate": "2026-12-01"
+      },
+      "dateApprox": true,
+      "fit": "Fee-free, studio access only — no fee, no subsistence. Value is the studio, budget the travel separately.",
+      "notes": "Fee-free, studio only. Closing date approximate — confirm when the cycle opens.",
+      "history": [],
+      "lockedUntil": null,
+      "lockNote": ""
+    },
+    {
+      "id": 1785542185029,
+      "title": "Roberto Cimetta Fund — mobility grant",
+      "org": "Roberto Cimetta Fund",
+      "deadline": "2026-09-12",
+      "status": "observe",
+      "recurs": {
+        "type": "rolling",
+        "pattern": "~6wk",
+        "intervalDays": 42
+      },
+      "dateApprox": true,
+      "fit": "Travel grant, Mediterranean-gated. Trapani/Palermo ties make the geographic criterion arguable.",
+      "notes": "Rolling ~6-week cycles. Mediterranean-gated.",
+      "history": [],
+      "lockedUntil": null,
+      "lockNote": ""
+    },
+    {
+      "id": 1785542185030,
+      "title": "Culture Moves Europe — individual mobility",
+      "org": "Goethe-Institut / European Commission",
+      "deadline": "2027-04-30",
+      "status": "observe",
+      "recurs": {
+        "type": "window",
+        "pattern": "opens ~Oct · monthly cutoffs to ~Apr",
+        "opensDate": "2026-10-01"
+      },
+      "dateApprox": true,
+      "lockedUntil": "2028-12-31",
+      "lockNote": "Win-once: one grant per applicant across the 2025–2028 scheme.",
+      "fit": "Only worth spending the single allowed application on a trip that unlocks something bigger.",
+      "notes": "Opens ~Oct, monthly cutoffs through ~Apr.",
+      "history": []
+    },
+    {
+      "id": 1785542185031,
+      "title": "Akademie Schloss Solitude — fellowship",
+      "org": "Akademie Schloss Solitude, Stuttgart",
+      "deadline": "2027-11-30",
+      "status": "observe",
+      "recurs": {
+        "type": "multi-year",
+        "pattern": "biennial",
+        "stepYears": 2
+      },
+      "dateApprox": true,
+      "fit": "Pays. Biennial — next cycle 2027. €15 admin fee (not pay-to-stay).",
+      "notes": "Autumn, biennial. €15 admin fee.",
+      "history": [],
+      "lockedUntil": null,
+      "lockNote": ""
     }
   ]
 }
