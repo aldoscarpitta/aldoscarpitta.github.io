@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-07-31T23:56:25.025Z",
+  "updated": "2026-07-31T23:57:41.579Z",
   "calls": [
     {
       "id": 4,
@@ -35,7 +35,7 @@
       "recurs": {
         "type": "window",
         "pattern": "",
-        "opensDate": "2027-08-01"
+        "opensDate": "2027-07-30"
       },
       "lockedUntil": "2026-12-31",
       "lockNote": "",
