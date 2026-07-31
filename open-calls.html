@@ -22,12 +22,12 @@
     --text: #1A0A2E;
     --text-mid: #6B4FA0;
     --text-dim: #A08EC0;
-    --urgent: #B5291C;
-    --urgent-bg: #FFF0EE;
-    --upcoming: #8A6200;
-    --upcoming-bg: #FFFBEE;
-    --watch: #1E6B42;
-    --watch-bg: #EDFAF3;
+    --hot: #B5291C;
+    --hot-bg: #FFF0EE;
+    --warm: #8A6200;
+    --warm-bg: #FFFBEE;
+    --cool: #1E6B42;
+    --cool-bg: #EDFAF3;
     --applied: #5B2D8E;
     --applied-bg: #EEE6F8;
   }
@@ -193,9 +193,9 @@
   }
   .filter-btn:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
   .filter-btn.active { border-color: var(--purple); color: var(--purple); background: var(--purple-light); font-weight: 600; }
-  .filter-btn[data-filter="urgent"].active { border-color: var(--urgent); color: var(--urgent); background: var(--urgent-bg); }
-  .filter-btn[data-filter="upcoming"].active { border-color: var(--upcoming); color: var(--upcoming); background: var(--upcoming-bg); }
-  .filter-btn[data-filter="watch"].active { border-color: var(--watch); color: var(--watch); background: var(--watch-bg); }
+  .filter-btn[data-filter="interested"].active { border-color: var(--hot); color: var(--hot); background: var(--hot-bg); }
+  .filter-btn[data-filter="curious"].active { border-color: var(--warm); color: var(--warm); background: var(--warm-bg); }
+  .filter-btn[data-filter="observe"].active { border-color: var(--cool); color: var(--cool); background: var(--cool-bg); }
   .filter-btn[data-filter="applied"].active { border-color: var(--applied); color: var(--applied); background: var(--applied-bg); }
 
   .toolbar-right { margin-left: auto; display: flex; gap: 8px; }
@@ -224,7 +224,7 @@
   .tool-btn.add-btn:hover { background: var(--purple-dark); border-color: var(--purple-dark); }
   .tool-btn.setup-toggle:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
   .tool-btn.sync-btn { color: var(--text-dim); }
-  .tool-btn.sync-btn.connected { border-color: var(--watch); color: var(--watch); }
+  .tool-btn.sync-btn.connected { border-color: var(--cool); color: var(--cool); }
   .tool-btn.sync-btn:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
 
   /* Cards */
@@ -243,9 +243,9 @@
     border-radius: 2px;
   }
   .call-card:hover { border-color: var(--border); box-shadow: 0 2px 12px rgba(91,45,142,0.07); }
-  .call-card[data-status="urgent"] { border-left-color: var(--urgent); }
-  .call-card[data-status="upcoming"] { border-left-color: var(--upcoming); }
-  .call-card[data-status="watch"] { border-left-color: var(--watch); }
+  .call-card[data-status="interested"] { border-left-color: var(--hot); }
+  .call-card[data-status="curious"] { border-left-color: var(--warm); }
+  .call-card[data-status="observe"] { border-left-color: var(--cool); }
   .call-card[data-status="applied"] { border-left-color: var(--applied); opacity: 0.5; }
 
   .call-countdown { display: flex; flex-direction: column; align-items: center; padding-top: 2px; }
@@ -256,10 +256,14 @@
     font-weight: 700;
     line-height: 1;
   }
-  .call-card[data-status="urgent"] .countdown-days { color: var(--urgent); }
-  .call-card[data-status="upcoming"] .countdown-days { color: var(--upcoming); }
-  .call-card[data-status="watch"] .countdown-days { color: var(--watch); }
-  .call-card[data-status="applied"] .countdown-days { color: var(--applied); }
+  /* The left bar and the tag carry RELEVANCE (a standing judgement).
+     The countdown number carries URGENCY (a fact about the date).
+     These are independent now, so they must not share a colour source. */
+  .countdown-days.u-soon { color: var(--hot); }
+  .countdown-days.u-near { color: var(--warm); }
+  .countdown-days.u-far  { color: var(--cool); }
+  .countdown-days.u-dim  { color: var(--text-dim); }
+  .countdown-days.u-done { color: var(--applied); }
 
   .countdown-label {
     font-size: 9px;
@@ -298,9 +302,9 @@
     border: 1.5px solid;
     border-radius: 2px;
   }
-  .call-tag.urgent { color: var(--urgent); border-color: var(--urgent); background: var(--urgent-bg); }
-  .call-tag.upcoming { color: var(--upcoming); border-color: var(--upcoming); background: var(--upcoming-bg); }
-  .call-tag.watch { color: var(--watch); border-color: var(--watch); background: var(--watch-bg); }
+  .call-tag.interested { color: var(--hot); border-color: var(--hot); background: var(--hot-bg); }
+  .call-tag.curious { color: var(--warm); border-color: var(--warm); background: var(--warm-bg); }
+  .call-tag.observe { color: var(--cool); border-color: var(--cool); background: var(--cool-bg); }
   .call-tag.applied { color: var(--applied); border-color: var(--applied); background: var(--applied-bg); }
 
   .call-notes { font-size: 12px; font-style: italic; color: var(--text-dim); margin-top: 3px; line-height: 1.5; font-weight: 300; }
@@ -326,7 +330,7 @@
     border-radius: 2px;
   }
   .action-btn:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
-  .action-btn.delete-btn:hover { border-color: var(--urgent); color: var(--urgent); background: var(--urgent-bg); }
+  .action-btn.delete-btn:hover { border-color: var(--hot); color: var(--hot); background: var(--hot-bg); }
 
   .empty-state {
     padding: 56px;
@@ -370,7 +374,7 @@
 
   .modal-subtitle {
     font-size: 12px;
-    color: var(--watch);
+    color: var(--cool);
     font-weight: 500;
     margin-bottom: 22px;
     min-height: 16px;
@@ -404,7 +408,7 @@
     border-color: var(--purple);
     background: #fff;
   }
-  .form-input.highlight { border-color: var(--watch); background: var(--watch-bg); }
+  .form-input.highlight { border-color: var(--cool); background: var(--cool-bg); }
   .form-textarea { resize: vertical; min-height: 70px; }
   .form-select option { background: var(--surface); }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -504,7 +508,7 @@
   .btn-danger {
     background: none;
     border: 1.5px solid var(--border);
-    color: var(--urgent);
+    color: var(--hot);
     font-family: 'DM Sans', sans-serif;
     font-size: 11px;
     font-weight: 600;
@@ -516,7 +520,75 @@
     border-radius: 2px;
     margin-right: auto;
   }
-  .btn-danger:hover { border-color: var(--urgent); background: var(--urgent-bg); }
+  .btn-danger:hover { border-color: var(--hot); background: var(--hot-bg); }
+
+  /* ===== Recurrence ===== */
+  .rec-glyph {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--purple); background: var(--purple-light);
+    border: 1.5px solid var(--purple); border-radius: 2px;
+    padding: 2px 7px; white-space: nowrap;
+  }
+  .lead-flag {
+    font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--warm); border: 1.5px solid var(--warm); background: var(--warm-bg);
+    padding: 2px 7px; border-radius: 2px;
+  }
+  .approx { color: var(--text-dim); font-style: normal; }
+
+  /* Locked rows never read as actionable, whatever the date says */
+  .call-card.locked { opacity: 0.5; background: var(--surface-2); border-left-color: var(--text-dim) !important; }
+  .call-card.locked .countdown-days { color: var(--text-dim) !important; font-size: 19px; }
+  .call-card.locked .call-tag,
+  .call-card.locked .lead-flag { color: var(--text-dim) !important; border-color: var(--text-dim) !important; background: none !important; }
+  .lock-note {
+    font-size: 11px; color: var(--text-mid); font-weight: 500;
+    border-left: 2px solid var(--text-dim); padding-left: 8px; margin-top: 4px; line-height: 1.5;
+  }
+
+  .call-fit { font-size: 12px; color: var(--text-mid); line-height: 1.5; }
+  .call-fit b { font-weight: 600; color: var(--purple); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  details.call-history { margin-top: 5px; }
+  details.call-history summary {
+    cursor: pointer; font-size: 11px; color: var(--text-dim);
+    letter-spacing: 0.05em; list-style: none; display: inline-block;
+    border-bottom: 1px dotted var(--border);
+  }
+  details.call-history summary::-webkit-details-marker { display: none; }
+  details.call-history summary:hover { color: var(--purple); }
+  .history-rows { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+  .history-row { font-size: 11px; color: var(--text-mid); display: flex; gap: 10px; }
+  .history-row .h-cycle { min-width: 96px; color: var(--text-dim); }
+  .history-row .h-out { font-weight: 600; }
+  .h-out.applied { color: var(--applied); }
+  .h-out.skipped { color: var(--text-dim); }
+  .h-out.accepted { color: var(--cool); }
+  .h-out.rejected { color: var(--hot); }
+
+  .filter-btn[data-filter="recurring"].active { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
+
+  /* Recurrence block in the modal */
+  .rec-block {
+    border: 1.5px solid var(--border-light); border-left: 3px solid var(--purple);
+    background: var(--bg); padding: 14px 16px; margin-bottom: 16px; border-radius: 2px;
+  }
+  .rec-block .form-group:last-child { margin-bottom: 0; }
+  .rec-hint { font-size: 11px; color: var(--text-dim); line-height: 1.5; margin-top: 5px; }
+  .rec-sub { display: none; }
+  .rec-sub.show { display: block; }
+  .check-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-mid); }
+  .check-row input { accent-color: var(--purple); width: 15px; height: 15px; }
+  .modal { max-height: 90vh; overflow-y: auto; }
+
+  @media (max-width: 720px) {
+    .header-bar { flex-direction: column; align-items: flex-start; gap: 18px; padding: 24px 20px; }
+    .main { padding: 24px 20px 40px; }
+    .call-card { grid-template-columns: 60px 1fr; }
+    .call-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; opacity: 1; }
+    .setup-bar { flex-direction: column; }
+    .setup-divider { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -527,9 +599,10 @@
     <p>Aldo Scarpitta — residencies, grants, exhibitions</p>
   </div>
   <div class="stats">
-    <div class="stat-item"><span class="stat-number" id="stat-urgent">0</span><span class="stat-label">Urgent</span></div>
-    <div class="stat-item"><span class="stat-number" id="stat-upcoming">0</span><span class="stat-label">Upcoming</span></div>
-    <div class="stat-item"><span class="stat-number" id="stat-watch">0</span><span class="stat-label">Watch</span></div>
+    <div class="stat-item"><span class="stat-number" id="stat-interested">0</span><span class="stat-label">Interested</span></div>
+    <div class="stat-item"><span class="stat-number" id="stat-curious">0</span><span class="stat-label">Curious</span></div>
+    <div class="stat-item"><span class="stat-number" id="stat-observe">0</span><span class="stat-label">Observe</span></div>
+    <div class="stat-item"><span class="stat-number" id="stat-recurring">0</span><span class="stat-label">↻ Recurring</span></div>
   </div>
 </div>
 
@@ -559,12 +632,14 @@
 
   <div class="toolbar">
     <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="urgent">Urgent</button>
-    <button class="filter-btn" data-filter="upcoming">Upcoming</button>
-    <button class="filter-btn" data-filter="watch">Watch</button>
+    <button class="filter-btn" data-filter="interested">Interested</button>
+    <button class="filter-btn" data-filter="curious">Curious</button>
+    <button class="filter-btn" data-filter="observe">Observe</button>
     <button class="filter-btn" data-filter="applied">Applied</button>
+    <button class="filter-btn" data-filter="recurring">↻ Recurring</button>
     <div class="toolbar-right">
       <button class="tool-btn setup-toggle" id="showSetup" style="display:none">⚙ Setup</button>
+      <button class="tool-btn" id="seedRecurring" title="Add the seven recurring calls — skips any already present">↻ Seed</button>
       <button class="tool-btn sync-btn" id="openSyncModal">↑ GitHub</button>
       <button class="tool-btn add-btn" id="openAdd">+ Add Call</button>
     </div>
@@ -606,13 +681,74 @@
       <div class="form-group">
         <label class="form-label">Status</label>
         <select class="form-select" id="fieldStatus">
-          <option value="watch">🟢 Watch</option>
-          <option value="upcoming">🟡 Upcoming</option>
-          <option value="urgent">🔴 Urgent</option>
+          <option value="interested">🔴 Interested</option>
+          <option value="curious">🟡 Curious</option>
+          <option value="observe">🟢 Observe</option>
           <option value="applied">✅ Applied</option>
         </select>
       </div>
     </div>
+    <div class="rec-block">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Recurrence</label>
+          <select class="form-select" id="fieldRecType">
+            <option value="">— one-off —</option>
+            <option value="annual-fixed">↻ Annual (fixed date)</option>
+            <option value="rolling">↻ Rolling (interval)</option>
+            <option value="window">↻ Window (opens → closes)</option>
+            <option value="multi-year">↻ Multi-year</option>
+          </select>
+        </div>
+        <div class="form-group rec-sub" id="subPattern">
+          <label class="form-label">Pattern label</label>
+          <input class="form-input" id="fieldRecPattern" type="text" placeholder="e.g. ~15 Sep · ~6wk · biennial">
+        </div>
+      </div>
+      <div class="form-row rec-sub" id="subWindow">
+        <div class="form-group">
+          <label class="form-label">Opens</label>
+          <input class="form-input" id="fieldOpensDate" type="date">
+          <p class="rec-hint">Sorts on <em>opens</em> until that date passes, then on the deadline above (= closes).</p>
+        </div>
+        <div class="form-group"></div>
+      </div>
+      <div class="form-row rec-sub" id="subRolling">
+        <div class="form-group">
+          <label class="form-label">Interval (days)</label>
+          <input class="form-input" id="fieldIntervalDays" type="number" min="1" placeholder="42">
+          <p class="rec-hint">Next date = last application + interval. Leave the deadline blank to compute it.</p>
+        </div>
+        <div class="form-group"></div>
+      </div>
+      <div class="form-row rec-sub" id="subMulti">
+        <div class="form-group">
+          <label class="form-label">Year step</label>
+          <input class="form-input" id="fieldStepYears" type="number" min="1" placeholder="2">
+        </div>
+        <div class="form-group"></div>
+      </div>
+      <div class="form-group rec-sub" id="subApprox">
+        <label class="check-row"><input type="checkbox" id="fieldApprox"> Date is approximate — cycle not announced yet (shows as <b>~</b>)</label>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Locked until</label>
+        <input class="form-input" id="fieldLockedUntil" type="date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lock reason</label>
+        <input class="form-input" id="fieldLockNote" type="text" placeholder="e.g. one grant per person to 2028">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Fit</label>
+      <input class="form-input" id="fieldFit" type="text" placeholder="Why this suits the work — read next cycle instead of re-evaluating cold">
+    </div>
+
     <div class="form-group">
       <label class="form-label">URL</label>
       <input class="form-input" id="fieldUrl" type="url" placeholder="https://...">
@@ -662,19 +798,243 @@ const BOOKMARKLET = `javascript:(function(){var title=document.title||'';var url
 document.getElementById('bookmarkletLink').href = BOOKMARKLET;
 
 const DEFAULT_CALLS = [
-  { id:1, title:"Residency Proposal — Curva Minore", org:"Curva Minore, Palermo", deadline:"2026-05-31", status:"urgent", url:"", notes:"6-month residency. Playground project + solo piano/eurorack. Revenue-sharing model. 10-session calendar (Tue–Thu)." },
-  { id:2, title:"Berlendis Residency 2027", org:"Marignana Arte, Venice", deadline:"2026-06-30", status:"upcoming", url:"", notes:"3-week January 2027. Dysographies / Venezia: photography + hydrophone soundscape, eurorack + Pure Data." },
-  { id:3, title:"Indagine Milano 2026 / Festival IMMERSIONI", org:"Mare Culturale Urbano & Piccolo Teatro di Milano", deadline:"2026-07-15", status:"upcoming", url:"", notes:"Playground adaptation. Three-phase: outreach → itinerant residency → September installation. San Siro as anchor." },
-  { id:4, title:"Dysographies — Gallery Outreach", org:"30+ galleries across Europe", deadline:"2026-09-01", status:"watch", url:"", notes:"Top targets: Galerie Bigaignon, Galerie Minimal Berlin, STILL Fotografia Milan, Matèria Rome." }
+  { id:1, title:"Residency Proposal — Curva Minore", org:"Curva Minore, Palermo", deadline:"2026-05-31", status:"interested", url:"", notes:"6-month residency. Playground project + solo piano/eurorack. Revenue-sharing model. 10-session calendar (Tue–Thu)." },
+  { id:2, title:"Berlendis Residency 2027", org:"Marignana Arte, Venice", deadline:"2026-06-30", status:"curious", url:"", notes:"3-week January 2027. Dysographies / Venezia: photography + hydrophone soundscape, eurorack + Pure Data." },
+  { id:3, title:"Indagine Milano 2026 / Festival IMMERSIONI", org:"Mare Culturale Urbano & Piccolo Teatro di Milano", deadline:"2026-07-15", status:"curious", url:"", notes:"Playground adaptation. Three-phase: outreach → itinerant residency → September installation. San Siro as anchor." },
+  { id:4, title:"Dysographies — Gallery Outreach", org:"30+ galleries across Europe", deadline:"2026-09-01", status:"observe", url:"", notes:"Top targets: Galerie Bigaignon, Galerie Minimal Berlin, STILL Fotografia Milan, Matèria Rome." }
 ];
+
+// Recurring seed set — added on a fresh install, or on demand via "↻ Seed" (idempotent by title).
+const RECURRING_SEED = [
+  { title:"Q-O2 Brussels — residency", org:"Q-O2 werkplaats, Brussels", deadline:"2026-09-15", status:"observe",
+    recurs:{type:'annual-fixed',pattern:'~15 Sep'}, dateApprox:true,
+    fit:"Fee-free + subsistence. Workspace for experimental music and sound art — direct fit for contact-piano/eurorack.",
+    notes:"Fee-free + subsistence." },
+  { title:"DAAD Berliner Künstlerprogramm", org:"DAAD, Berlin", deadline:"2026-12-15", status:"observe",
+    recurs:{type:'annual-fixed',pattern:'opens ~mid-Oct, closes 15 Dec'},
+    fit:"Pays. Capstone-tier — the one that reframes the CV.",
+    notes:"Opens ~mid-Oct, closes 15 Dec." },
+  { title:"Creative Europe Cooperation (Small scale)", org:"EACEA", deadline:"2027-05-05", status:"observe",
+    recurs:{type:'annual-fixed',pattern:'~early May'}, dateApprox:true,
+    fit:"Org-level, not individual — needs a lead partner. Route in via Curva Minore or a TAB/CRN partner.",
+    notes:"Org-level application." },
+  { title:"EMS Stockholm — Artist in Residence", org:"Elektronmusikstudion, Stockholm", deadline:"2027-01-31", status:"observe",
+    recurs:{type:'window',pattern:'opens 1 Dec',opensDate:'2026-12-01'}, dateApprox:true,
+    fit:"Fee-free, studio access only — no fee, no subsistence. Value is the studio, budget the travel separately.",
+    notes:"Fee-free, studio only. Closing date approximate — confirm when the cycle opens." },
+  { title:"Roberto Cimetta Fund — mobility grant", org:"Roberto Cimetta Fund", deadline:"", status:"observe",
+    recurs:{type:'rolling',pattern:'~6wk',intervalDays:42}, dateApprox:true,
+    fit:"Travel grant, Mediterranean-gated. Trapani/Palermo ties make the geographic criterion arguable.",
+    notes:"Rolling ~6-week cycles. Mediterranean-gated." },
+  { title:"Culture Moves Europe — individual mobility", org:"Goethe-Institut / European Commission", deadline:"2027-04-30", status:"observe",
+    recurs:{type:'window',pattern:'opens ~Oct · monthly cutoffs to ~Apr',opensDate:'2026-10-01'}, dateApprox:true,
+    lockedUntil:"2028-12-31", lockNote:"Win-once: one grant per applicant across the 2025–2028 scheme.",
+    fit:"Only worth spending the single allowed application on a trip that unlocks something bigger.",
+    notes:"Opens ~Oct, monthly cutoffs through ~Apr." },
+  { title:"Akademie Schloss Solitude — fellowship", org:"Akademie Schloss Solitude, Stuttgart", deadline:"2027-11-30", status:"observe",
+    recurs:{type:'multi-year',pattern:'biennial',stepYears:2}, dateApprox:true,
+    fit:"Pays. Biennial — next cycle 2027. €15 admin fee (not pay-to-stay).",
+    notes:"Autumn, biennial. €15 admin fee." }
+];
+
+const SOON_DAYS = 14;   // red
+// LEAD_DAYS (42) is the amber boundary — the same 6 weeks as the lead-time flag,
+// so the number turning amber and the flag appearing are one event, not two.
+function urgencyClass(d){
+  if(d===null) return 'u-dim';
+  if(d < 0) return 'u-dim';
+  if(d <= SOON_DAYS) return 'u-soon';
+  if(d <= LEAD_DAYS) return 'u-near';
+  return 'u-far';
+}
+
+const LS_KEY = 'openCalls_v3';
+const LS_KEY_V2 = 'openCalls_v2';
+const LS_KEY_OLD = 'openCalls_v1';
+
+// v1/v2 statuses were deadline-proximity labels; v3 statuses are relevance
+// labels. The mapping is positional, not semantic — proximity is now read off
+// the date, so an old "urgent" row becomes "interested" and may well sit far
+// from its deadline. That is the intended consequence, not a bug.
+const STATUS_MAP = { urgent:'interested', upcoming:'curious', watch:'observe' };
+const STATUSES = ['interested','curious','observe','applied'];
 
 let calls=[], editingId=null, currentFilter='all';
 
-function loadData(){ const s=localStorage.getItem('openCalls_v1'); calls=s?JSON.parse(s):DEFAULT_CALLS.map(c=>({...c})); if(!s)saveData(); }
+// ---------------------------------------------------------------
+// Date core — every "next occurrence" calculation goes through here
+// ---------------------------------------------------------------
+const DAY_MS = 86400000;
 
-function saveData(){
-  localStorage.setItem('openCalls_v1',JSON.stringify(calls));
-  syncToGitHub();
+function todayD(){ const t=new Date(); t.setHours(0,0,0,0); return t; }
+function isoOf(d){
+  // Local components on purpose. toISOString() is UTC and shifts the date
+  // backwards for CET/CEST before 01:00/02:00 local.
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function todayISO(){ return isoOf(todayD()); }
+function parseISO(s){
+  if(!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return null;
+  const p=s.split('-').map(Number);
+  return new Date(p[0], p[1]-1, p[2]); // local midnight
+}
+function daysUntil(s){
+  const d=parseISO(s); if(!d) return null;
+  // round, not ceil: across a DST boundary the difference is off by an hour,
+  // and ceil turns -90.04 days into -90 but -89.96 into -89.
+  return Math.round((d - todayD())/DAY_MS);
+}
+function addDaysISO(s,n){ const d=parseISO(s); if(!d) return null; d.setDate(d.getDate()+n); return isoOf(d); }
+function addYearsISO(s,n){
+  const d=parseISO(s); if(!d) return null;
+  const day=d.getDate();
+  d.setDate(1);                              // avoid 29 Feb → 1 Mar overflow
+  d.setFullYear(d.getFullYear()+n);
+  const last=new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+  d.setDate(Math.min(day,last));             // clamp 29 Feb → 28 Feb
+  return isoOf(d);
+}
+
+// One period step for a recurring call. The single date-math call-site.
+function stepPeriod(call, iso){
+  const r=call.recurs; if(!r||!iso) return iso;
+  if(r.type==='annual-fixed' || r.type==='window') return addYearsISO(iso,1);
+  if(r.type==='multi-year')  return addYearsISO(iso, Math.max(1, parseInt(r.stepYears,10)||2));
+  if(r.type==='rolling')     return addDaysISO(iso, Math.max(1, parseInt(r.intervalDays,10)||42));
+  return iso;
+}
+
+function isRecurring(c){ return !!(c.recurs && c.recurs.type); }
+
+function isLocked(c){
+  if(!c.lockedUntil) return false;
+  const d=daysUntil(c.lockedUntil);
+  return d!==null && d>=0;   // the lock day itself still counts as locked
+}
+
+// Universal sort key. Window rows sort on OPENS until that date passes —
+// otherwise CME reads "closes in 7 months" when the fact is "opens in 2".
+function sortDateOf(c){
+  const r=c.recurs;
+  if(r && r.type==='window' && r.opensDate){
+    const d=daysUntil(r.opensDate);
+    if(d!==null && d>0) return r.opensDate;
+  }
+  return c.deadline || '';
+}
+function isPreOpen(c){
+  const r=c.recurs;
+  if(!(r && r.type==='window' && r.opensDate)) return false;
+  const d=daysUntil(r.opensDate);
+  return d!==null && d>0;
+}
+
+const LEAD_DAYS = 42;   // 6 weeks
+function hasLeadFlag(c){
+  if(isLocked(c) || c.status==='applied') return false;
+  const d=daysUntil(sortDateOf(c));
+  return d!==null && d>=0 && d<=LEAD_DAYS;
+}
+
+// ---------------------------------------------------------------
+// Roll-forward — in place, idempotent, non-destructive
+// ---------------------------------------------------------------
+function rollDueCalls(){
+  let rolled=0;
+  calls.forEach(c=>{
+    if(!isRecurring(c)) return;
+    if(!Array.isArray(c.history)) c.history=[];
+    const r=c.recurs;
+
+    // Rolling has no cycle you can "miss" — recompute from last application.
+    if(r.type==='rolling'){
+      const dl=daysUntil(c.deadline);
+      if(!c.deadline || dl===null || dl<0){
+        const iv=Math.max(1, parseInt(r.intervalDays,10)||42);
+        const last=c.history.map(h=>h.dateApplied).filter(Boolean).sort().pop();
+        let d=addDaysISO(last||todayISO(), iv);
+        let g=0; while(d && daysUntil(d)<0 && g++<1000) d=addDaysISO(d,iv);
+        if(d && d!==c.deadline){ c.deadline=d; c.dateApprox=true; rolled++; }
+        if(c.status==='applied') c.status='observe';
+      }
+      return;
+    }
+
+    // Fixed-cycle types: step one period at a time so every missed cycle is logged.
+    let g=0;
+    while(c.deadline && daysUntil(c.deadline)<0 && g++<200){
+      const cycle=c.deadline;
+      if(!c.history.some(h=>h.cycle===cycle)){
+        c.history.push({cycle, dateApplied:null, outcome:'skipped'});
+      }
+      const next=stepPeriod(c, cycle);
+      if(!next || next===cycle) break;            // no progress → bail, never loop forever
+      if(r.type==='window' && r.opensDate) r.opensDate=stepPeriod(c, r.opensDate);
+      c.deadline=next;
+      if(c.status==='applied') c.status='observe';  // applied was for the cycle just closed
+      rolled++;
+    }
+  });
+  return rolled;
+}
+
+// ---------------------------------------------------------------
+// Storage — v1 is left intact as the revert path
+// ---------------------------------------------------------------
+function normalise(c){
+  if(!('history' in c) || !Array.isArray(c.history)) c.history=[];
+  if(!('recurs' in c)) c.recurs=null;
+  if(c.recurs && !c.recurs.type) c.recurs=null;
+  if(!('lockedUntil' in c)) c.lockedUntil=null;
+  if(!('lockNote' in c)) c.lockNote='';
+  if(!('fit' in c)) c.fit='';
+  if(!('dateApprox' in c)) c.dateApprox=false;
+  if(!('deadline' in c) || c.deadline===null) c.deadline='';
+  if(STATUS_MAP[c.status]) c.status=STATUS_MAP[c.status];
+  if(STATUSES.indexOf(c.status)===-1) c.status='observe';  // unknown/absent → weakest
+  return c;
+}
+
+function readKey(k){
+  try{
+    const raw=localStorage.getItem(k);
+    if(!raw) return null;
+    const parsed=JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  }catch(e){ console.warn('Unreadable storage key '+k+' — ignored.', e); return null; }
+}
+
+function loadData(){
+  const v3=readKey(LS_KEY);
+  if(v3){ calls=v3.map(c=>normalise({...c})); }
+  else {
+    // Older keys are read but never deleted — each remains a revert path.
+    const prior=readKey(LS_KEY_V2) || readKey(LS_KEY_OLD);
+    if(prior){
+      calls=prior.map(c=>normalise({...c}));
+    } else {
+      calls=DEFAULT_CALLS.map(c=>normalise({...c}))
+        .concat(RECURRING_SEED.map((c,i)=>normalise({id:Date.now()+i, ...c})));
+    }
+    saveLocal();
+  }
+  rollDueCalls();
+  saveLocal();
+}
+
+function saveLocal(){ localStorage.setItem(LS_KEY, JSON.stringify(calls)); }
+function saveData(){ saveLocal(); syncToGitHub(); }
+
+function seedRecurring(){
+  const have=new Set(calls.map(c=>(c.title||'').toLowerCase().trim()));
+  let added=0;
+  RECURRING_SEED.forEach((s,i)=>{
+    if(have.has(s.title.toLowerCase().trim())) return;
+    calls.push(normalise({id:Date.now()+i, ...JSON.parse(JSON.stringify(s))}));
+    added++;
+  });
+  if(added){ rollDueCalls(); saveData(); renderCalls(); showToast(added+' recurring call'+(added===1?'':'s')+' added'); }
+  else showToast('All seed calls already present');
 }
 
 function checkBookmarkletParams(){
@@ -683,62 +1043,155 @@ function checkBookmarkletParams(){
   if(title||url){ history.replaceState({},'',location.pathname); openAddModal({title:title||'',url:url||'',_fromBookmarklet:true}); }
 }
 
-function daysUntil(d){ const t=new Date(); t.setHours(0,0,0,0); return Math.ceil((new Date(d+'T00:00:00')-t)/86400000); }
-function formatDate(d){ return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+function formatDate(d){
+  const p=parseISO(d); if(!p) return '—';
+  return p.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
+// Bookmarklet captures document.title from arbitrary sites — escape before innerHTML.
+function esc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function glyphFor(c){
+  const r=c.recurs; if(!r) return '';
+  const p=(r.pattern||'').trim();
+  if(p) return '↻ '+p;
+  return '↻ '+({'annual-fixed':'annual','rolling':'rolling','window':'window','multi-year':'multi-year'}[r.type]||'recurring');
+}
 
 function renderCalls(){
   const list=document.getElementById('callsList');
   const empty=document.getElementById('emptyState');
   list.innerHTML=''; let visible=0;
-  [...calls].sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).forEach(call=>{
-    if(currentFilter!=='all'&&call.status!==currentFilter) return;
+
+  // ONE list, sorted on the universal key. Rows without any date sort last.
+  const ordered=[...calls].sort((a,b)=>{
+    const x=sortDateOf(a), y=sortDateOf(b);
+    if(!x && !y) return 0;
+    if(!x) return 1;
+    if(!y) return -1;
+    return x < y ? -1 : x > y ? 1 : 0;   // ISO strings sort lexically = chronologically
+  });
+
+  ordered.forEach(call=>{
+    if(currentFilter==='recurring'){ if(!isRecurring(call)) return; }
+    else if(currentFilter!=='all' && call.status!==currentFilter) return;
     visible++;
-    const days=daysUntil(call.deadline), status=call.status;
-    let cd,cl;
-    if(status==='applied'){cd='✓';cl='applied';}
-    else if(days<0){cd=Math.abs(days);cl='days past';}
-    else if(days===0){cd='!';cl='today';}
-    else{cd=days;cl=days===1?'day left':'days left';}
-    const card=document.createElement('div');
-    card.className='call-card'; card.dataset.status=status;
-    card.innerHTML=`
-      <div class="call-countdown"><span class="countdown-days">${cd}</span><span class="countdown-label">${cl}</span></div>
-      <div class="call-body">
-        <div class="call-title">${call.title}</div>
-        <div class="call-meta">
-          ${call.org?`<span class="call-org">${call.org}</span>`:''}
-          <span class="call-deadline">deadline: ${formatDate(call.deadline)}</span>
-          <span class="call-tag ${status}">${status}</span>
+
+    const locked=isLocked(call);
+    const preOpen=isPreOpen(call);
+    const key=sortDateOf(call);
+    const days=daysUntil(key);
+    const status=call.status;
+
+    let cd,cl,uc;
+    if(locked){ cd='🔒'; cl='locked'; uc='u-dim'; }
+    else if(status==='applied'){ cd='✓'; cl='applied'; uc='u-done'; }
+    else if(days===null){ cd='—'; cl='no date'; uc='u-dim'; }
+    else if(preOpen){ cd=days; cl=days===1?'day to open':'days to open'; uc=urgencyClass(days); }
+    else if(days<0){ cd=Math.abs(days); cl='days past'; uc='u-dim'; }
+    else if(days===0){ cd='!'; cl='today'; uc='u-soon'; }
+    else { cd=days; cl=days===1?'day left':'days left'; uc=urgencyClass(days); }
+
+    const tilde = call.dateApprox ? '<span class="approx">~</span>' : '';
+    let dateLine;
+    if(preOpen){
+      dateLine=`<span class="call-deadline">opens: ${tilde}${formatDate(call.recurs.opensDate)} · closes: ${tilde}${formatDate(call.deadline)}</span>`;
+    } else {
+      dateLine=`<span class="call-deadline">deadline: ${tilde}${call.deadline?formatDate(call.deadline):'—'}</span>`;
+    }
+
+    const hist=(call.history||[]).slice().sort((a,b)=> a.cycle<b.cycle?1:-1);
+    const histBlock = hist.length ? `
+      <details class="call-history">
+        <summary>history · ${hist.length} cycle${hist.length===1?'':'s'}</summary>
+        <div class="history-rows">
+          ${hist.map(h=>`<div class="history-row">
+            <span class="h-cycle">${formatDate(h.cycle)}</span>
+            <span class="h-out ${esc(h.outcome||'')}">${esc(h.outcome||'—')}</span>
+            ${h.dateApplied?`<span>applied ${formatDate(h.dateApplied)}</span>`:''}
+          </div>`).join('')}
         </div>
-        ${call.notes?`<div class="call-notes">${call.notes}</div>`:''}
-        ${call.url?`<a class="call-url" href="${call.url}" target="_blank">${call.url}</a>`:''}
+      </details>` : '';
+
+    const card=document.createElement('div');
+    card.className='call-card'+(locked?' locked':'');
+    card.dataset.status=status;
+    card.innerHTML=`
+      <div class="call-countdown"><span class="countdown-days ${uc}">${cd}</span><span class="countdown-label">${cl}</span></div>
+      <div class="call-body">
+        <div class="call-title">${esc(call.title)}</div>
+        <div class="call-meta">
+          ${call.org?`<span class="call-org">${esc(call.org)}</span>`:''}
+          ${dateLine}
+          <span class="call-tag ${esc(status)}">${esc(status)}</span>
+          ${isRecurring(call)?`<span class="rec-glyph">${esc(glyphFor(call))}</span>`:''}
+          ${hasLeadFlag(call)?`<span class="lead-flag">lead time</span>`:''}
+        </div>
+        ${locked?`<div class="lock-note">🔒 locked until ${formatDate(call.lockedUntil)}${call.lockNote?' — '+esc(call.lockNote):''}</div>`:''}
+        ${call.fit?`<div class="call-fit"><b>fit</b> ${esc(call.fit)}</div>`:''}
+        ${call.notes?`<div class="call-notes">${esc(call.notes)}</div>`:''}
+        ${call.url?`<a class="call-url" href="${esc(call.url)}" target="_blank" rel="noopener noreferrer">${esc(call.url)}</a>`:''}
+        ${histBlock}
       </div>
       <div class="call-actions">
         <button class="action-btn" onclick="editCall(${call.id})">Edit</button>
-        ${status!=='applied'?`<button class="action-btn" onclick="markApplied(${call.id})">Applied ✓</button>`:''}
+        ${(status!=='applied'&&!locked)?`<button class="action-btn" onclick="markApplied(${call.id})">Applied ✓</button>`:''}
+        ${(isRecurring(call)&&call.deadline)?`<button class="action-btn" onclick="exportIcs(${call.id})">.ics</button>`:''}
         <button class="action-btn delete-btn" onclick="deleteCall(${call.id})">Delete</button>
       </div>`;
     list.appendChild(card);
   });
+
   empty.style.display=visible===0?'block':'none';
-  document.getElementById('stat-urgent').textContent=calls.filter(c=>c.status==='urgent').length;
-  document.getElementById('stat-upcoming').textContent=calls.filter(c=>c.status==='upcoming').length;
-  document.getElementById('stat-watch').textContent=calls.filter(c=>c.status==='watch').length;
+  // Locked rows are excluded from the counts — they are not actionable.
+  const live=calls.filter(c=>!isLocked(c));
+  document.getElementById('stat-interested').textContent=live.filter(c=>c.status==='interested').length;
+  document.getElementById('stat-curious').textContent=live.filter(c=>c.status==='curious').length;
+  document.getElementById('stat-observe').textContent=live.filter(c=>c.status==='observe').length;
+  document.getElementById('stat-recurring').textContent=calls.filter(isRecurring).length;
+}
+
+const $=id=>document.getElementById(id);
+
+function syncRecFields(){
+  const t=$('fieldRecType').value;
+  $('subPattern').classList.toggle('show', !!t);
+  $('subApprox').classList.toggle('show', !!t);
+  $('subWindow').classList.toggle('show', t==='window');
+  $('subRolling').classList.toggle('show', t==='rolling');
+  $('subMulti').classList.toggle('show', t==='multi-year');
+}
+
+function fillModal(c, pre){
+  $('fieldTitle').value=c.title||'';
+  $('fieldOrg').value=c.org||'';
+  $('fieldDeadline').value=c.deadline||'';
+  $('fieldStatus').value=c.status||'observe';
+  $('fieldUrl').value=c.url||'';
+  $('fieldNotes').value=c.notes||'';
+  $('fieldFit').value=c.fit||'';
+  $('fieldLockedUntil').value=c.lockedUntil||'';
+  $('fieldLockNote').value=c.lockNote||'';
+  const r=c.recurs||{};
+  $('fieldRecType').value=r.type||'';
+  $('fieldRecPattern').value=r.pattern||'';
+  $('fieldOpensDate').value=r.opensDate||'';
+  $('fieldIntervalDays').value=r.intervalDays||'';
+  $('fieldStepYears').value=r.stepYears||'';
+  $('fieldApprox').checked=!!c.dateApprox;
+  syncRecFields();
+  $('modalOverlay').classList.add('open');
 }
 
 function openAddModal(pre={}){
   editingId=null;
-  document.getElementById('modalTitle').textContent='Add Open Call';
-  document.getElementById('modalSubtitle').textContent=pre._fromBookmarklet?'↓ Title and URL filled — add deadline and save.':'';
-  document.getElementById('fieldTitle').value=pre.title||'';
-  document.getElementById('fieldOrg').value=pre.org||'';
-  document.getElementById('fieldDeadline').value=pre.deadline||'';
-  document.getElementById('fieldStatus').value=pre.status||'watch';
-  document.getElementById('fieldUrl').value=pre.url||'';
-  document.getElementById('fieldNotes').value=pre.notes||'';
-  document.getElementById('modalOverlay').classList.add('open');
+  $('modalTitle').textContent='Add Open Call';
+  $('modalSubtitle').textContent=pre._fromBookmarklet?'↓ Title and URL filled — add deadline and save.':'';
+  fillModal({title:pre.title,url:pre.url,deadline:pre.deadline,status:pre.status||'observe',notes:pre.notes,org:pre.org});
   setTimeout(()=>{
-    const dl=document.getElementById('fieldDeadline');
+    const dl=$('fieldDeadline');
     if(pre._fromBookmarklet){dl.classList.add('highlight');dl.focus();}
     else dl.classList.remove('highlight');
   },50);
@@ -747,21 +1200,28 @@ function openAddModal(pre={}){
 function editCall(id){
   const c=calls.find(c=>c.id===id); if(!c) return;
   editingId=id;
-  document.getElementById('modalTitle').textContent='Edit Call';
-  document.getElementById('modalSubtitle').textContent='';
-  document.getElementById('fieldTitle').value=c.title;
-  document.getElementById('fieldOrg').value=c.org||'';
-  document.getElementById('fieldDeadline').value=c.deadline;
-  document.getElementById('fieldStatus').value=c.status;
-  document.getElementById('fieldUrl').value=c.url||'';
-  document.getElementById('fieldNotes').value=c.notes||'';
-  document.getElementById('fieldDeadline').classList.remove('highlight');
-  document.getElementById('modalOverlay').classList.add('open');
+  $('modalTitle').textContent='Edit Call';
+  $('modalSubtitle').textContent='';
+  fillModal(c);
+  $('fieldDeadline').classList.remove('highlight');
 }
 
+// Logging an application writes the cycle entry immediately. When the deadline
+// later passes, rollDueCalls sees the cycle already recorded and will not
+// overwrite it with 'skipped' — that is the idempotency guard.
 function markApplied(id){
-  const c=calls.find(c=>c.id===id);
-  if(c){c.status='applied';saveData();renderCalls();showToast('Marked as applied');}
+  const c=calls.find(c=>c.id===id); if(!c) return;
+  if(isRecurring(c) && c.deadline){
+    const cycle=c.deadline;
+    const ex=(c.history||[]).find(h=>h.cycle===cycle);
+    if(ex){ ex.dateApplied=todayISO(); ex.outcome='applied'; }
+    else { c.history.push({cycle, dateApplied:todayISO(), outcome:'applied'}); }
+    c.status='applied';
+    saveData(); renderCalls();
+    showToast('Applied — logged for cycle '+formatDate(cycle));
+  } else {
+    c.status='applied'; saveData(); renderCalls(); showToast('Marked as applied');
+  }
 }
 
 function deleteCall(id){
@@ -770,15 +1230,79 @@ function deleteCall(id){
 }
 
 function saveCallFromModal(){
-  const title=document.getElementById('fieldTitle').value.trim();
-  const deadline=document.getElementById('fieldDeadline').value;
-  if(!title||!deadline){alert('Title and deadline are required.');return;}
-  const data={title,org:document.getElementById('fieldOrg').value.trim(),deadline,status:document.getElementById('fieldStatus').value,url:document.getElementById('fieldUrl').value.trim(),notes:document.getElementById('fieldNotes').value.trim()};
-  if(editingId){Object.assign(calls.find(c=>c.id===editingId),data);}
-  else{calls.push({id:Date.now(),...data});}
+  const title=$('fieldTitle').value.trim();
+  const deadline=$('fieldDeadline').value;
+  const recType=$('fieldRecType').value;
+  if(!title){ alert('Title is required.'); return; }
+  // Rolling is the one type allowed to have no date — it is computed.
+  if(!deadline && recType!=='rolling'){ alert('Deadline is required (except for rolling recurrence, where it is computed).'); return; }
+
+  const data={
+    title,
+    org:$('fieldOrg').value.trim(),
+    deadline,
+    status:$('fieldStatus').value,
+    url:$('fieldUrl').value.trim(),
+    notes:$('fieldNotes').value.trim(),
+    fit:$('fieldFit').value.trim(),
+    lockedUntil:$('fieldLockedUntil').value||null,
+    lockNote:$('fieldLockNote').value.trim(),
+    dateApprox:$('fieldApprox').checked,
+    recurs: recType ? {
+      type:recType,
+      pattern:$('fieldRecPattern').value.trim(),
+      opensDate: recType==='window' ? ($('fieldOpensDate').value||null) : undefined,
+      intervalDays: recType==='rolling' ? (parseInt($('fieldIntervalDays').value,10)||42) : undefined,
+      stepYears: recType==='multi-year' ? (parseInt($('fieldStepYears').value,10)||2) : undefined
+    } : null
+  };
+  if(data.recurs){ Object.keys(data.recurs).forEach(k=>{ if(data.recurs[k]===undefined) delete data.recurs[k]; }); }
+
+  if(editingId){ Object.assign(calls.find(c=>c.id===editingId), data); }
+  else { calls.push(normalise({id:Date.now(), ...data})); }
+  calls.forEach(normalise);
+  rollDueCalls();
   saveData(); renderCalls();
-  document.getElementById('modalOverlay').classList.remove('open');
+  $('modalOverlay').classList.remove('open');
   showToast(editingId?'Call updated':'Call saved');
+}
+
+// ---------------------------------------------------------------
+// .ics export — the tracker holds data, the calendar does the nagging
+// ---------------------------------------------------------------
+function icsEsc(s){ return String(s==null?'':s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n'); }
+
+function exportIcs(id){
+  const c=calls.find(c=>c.id===id); if(!c || !c.deadline) return;
+  const dt=c.deadline.replace(/-/g,'');
+  const dtEnd=(addDaysISO(c.deadline,1)||c.deadline).replace(/-/g,'');
+  const stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+  const r=c.recurs||{};
+  let rrule='';
+  if(r.type==='annual-fixed') rrule='RRULE:FREQ=YEARLY';
+  else if(r.type==='multi-year') rrule='RRULE:FREQ=YEARLY;INTERVAL='+Math.max(1,parseInt(r.stepYears,10)||2);
+  // rolling and window are deliberately single events — their next date is not a fixed rule.
+
+  const desc=[c.org, c.fit?('FIT: '+c.fit):'', c.notes, c.url,
+              c.lockedUntil?('LOCKED until '+c.lockedUntil+(c.lockNote?' — '+c.lockNote:'')):'']
+             .filter(Boolean).join('\n');
+
+  const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//aldoweb.xyz//open-calls//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+    'BEGIN:VEVENT','UID:oc-'+c.id+'-'+dt+'@aldoweb.xyz','DTSTAMP:'+stamp,
+    'DTSTART;VALUE=DATE:'+dt,'DTEND;VALUE=DATE:'+dtEnd];
+  if(rrule) lines.push(rrule);
+  lines.push('SUMMARY:'+icsEsc('Deadline — '+c.title+(c.dateApprox?' (~approx)':'')));
+  if(desc) lines.push('DESCRIPTION:'+icsEsc(desc));
+  lines.push('BEGIN:VALARM','TRIGGER:-P42D','ACTION:DISPLAY','DESCRIPTION:'+icsEsc('6 weeks to '+c.title),'END:VALARM');
+  lines.push('END:VEVENT','END:VCALENDAR');
+
+  const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=(c.title||'call').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,50)+'.ics';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },0);
+  showToast('.ics exported — 6-week alarm included');
 }
 
 function updateSetupBar(){
@@ -800,6 +1324,8 @@ document.getElementById('openAdd').addEventListener('click',()=>openAddModal());
 document.getElementById('closeModal').addEventListener('click',()=>document.getElementById('modalOverlay').classList.remove('open'));
 document.getElementById('saveCall').addEventListener('click',saveCallFromModal);
 document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');});
+document.getElementById('fieldRecType').addEventListener('change', syncRecFields);
+document.getElementById('seedRecurring').addEventListener('click', seedRecurring);
 document.querySelectorAll('.filter-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -823,9 +1349,9 @@ function updateSyncStatus(msg, state){
   const el = document.getElementById('syncStatus');
   if(!el) return;
   el.textContent = msg;
-  if(state==='ok') el.style.color='var(--watch)';
-  else if(state==='error') el.style.color='var(--urgent)';
-  else if(state==='busy') el.style.color='var(--upcoming)';
+  if(state==='ok') el.style.color='var(--cool)';
+  else if(state==='error') el.style.color='var(--hot)';
+  else if(state==='busy') el.style.color='var(--warm)';
   else el.style.color='var(--text-dim)';
 }
 
@@ -854,6 +1380,7 @@ async function syncToGitHub(){
   }
 
   const payload = {
+    schema: 3,
     updated: new Date().toISOString(),
     calls: calls
   };
