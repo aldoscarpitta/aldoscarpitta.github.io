@@ -1,113 +1,186 @@
 {
-  "updated": "2026-07-31T18:10:35.408Z",
+  "schema": 3,
+  "updated": "2026-07-31T23:54:07.107Z",
   "calls": [
     {
       "id": 4,
       "title": "Dysographies — Gallery Outreach",
       "org": "30+ galleries across Europe",
       "deadline": "2026-09-01",
-      "status": "watch",
+      "status": "observe",
       "url": "",
-      "notes": "Top targets: Galerie Bigaignon, Galerie Minimal Berlin, STILL Fotografia Milan, Matèria Rome."
+      "notes": "Top targets: Galerie Bigaignon, Galerie Minimal Berlin, STILL Fotografia Milan, Matèria Rome.",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1780662382155,
       "title": "Expedition Leader – Remote Travel Job Opportunity",
       "org": "",
       "deadline": "2026-07-28",
-      "status": "upcoming",
+      "status": "curious",
       "url": "https://www.wanderoutexpeditions.com/hiringnow",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1782644697773,
       "title": "Nutrimenti_habitat creativo 2026 – Associazione Demetra",
       "org": "",
       "deadline": "2026-08-14",
-      "status": "urgent",
+      "status": "interested",
       "url": "https://www.associazionedemetra.it/nutrimenti_habitat-creativo-2026/",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1782644904484,
       "title": "Residency Program | BASIS Vinschgau Venosta",
       "org": "",
       "deadline": "2026-08-31",
-      "status": "upcoming",
+      "status": "curious",
       "url": "https://basis.space/en/projects-basis/residency-program/",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1782646063210,
       "title": "A4 Residency Art Center International Residency 2027 (China) | On the Move",
       "org": "",
       "deadline": "2026-12-30",
-      "status": "upcoming",
+      "status": "curious",
       "url": "https://on-the-move.org/news/a4-residency-art-center-international-residency-2027-china",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1782647280672,
       "title": "Call for room designs / installations / performances - ZW FESTIVAL 5.0 2026",
       "org": "",
       "deadline": "2026-08-05",
-      "status": "upcoming",
+      "status": "curious",
       "url": "https://form.jotform.com/251661955490363",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1783024960738,
       "title": "SONOHR Radio & Podcast Festival",
       "org": "",
       "deadline": "2026-08-02",
-      "status": "urgent",
+      "status": "interested",
       "url": "https://wp.sonohr.ch/callforworks2027/",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1783025037394,
       "title": "Open Calls - Klang Festival",
       "org": "",
       "deadline": "2026-08-31",
-      "status": "upcoming",
+      "status": "curious",
       "url": "https://klang.dk/en/open-calls",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1783025641324,
       "title": "Camargo Fellowship 2027-2028: For artists, scholars and thinkers - Fondation Camargo",
       "org": "",
       "deadline": "2026-09-20",
-      "status": "urgent",
+      "status": "interested",
       "url": "https://camargofoundation.org/en/camargo-fellowship-2026-2027",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1783026186982,
       "title": "OPEN CALL – TEATRO GARIBALDI • Fondazione Studio Rizoma",
       "org": "",
       "deadline": "2026-08-09",
-      "status": "urgent",
+      "status": "interested",
       "url": "https://studiorizoma.org/editorial/open-call-teatro-garibaldi/",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1783027543356,
       "title": "EU–Japan Fest Mobility Support 2026 | On the Move",
       "org": "",
       "deadline": "2027-02-10",
-      "status": "urgent",
+      "status": "interested",
       "url": "https://on-the-move.org/news/eu-japan-fest-mobility-support-2026",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     },
     {
       "id": 1785150361921,
       "title": "Perform Europe Open Call for Touring Performing Arts",
       "org": "",
       "deadline": "2026-10-21",
-      "status": "upcoming",
+      "status": "curious",
       "url": "https://performeurope.eu/open-call/",
-      "notes": ""
+      "notes": "",
+      "history": [],
+      "recurs": null,
+      "lockedUntil": null,
+      "lockNote": "",
+      "fit": "",
+      "dateApprox": false
     }
   ]
 }
