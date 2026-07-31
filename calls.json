@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-07-31T23:54:18.053Z",
+  "updated": "2026-07-31T23:55:05.057Z",
   "calls": [
     {
       "id": 4,
@@ -21,16 +21,26 @@
       "id": 1780662382155,
       "title": "Expedition Leader – Remote Travel Job Opportunity",
       "org": "",
-      "deadline": "2026-07-28",
+      "deadline": "2027-07-28",
       "status": "curious",
       "url": "https://www.wanderoutexpeditions.com/hiringnow",
       "notes": "",
-      "history": [],
-      "recurs": null,
-      "lockedUntil": null,
+      "history": [
+        {
+          "cycle": "2026-07-28",
+          "dateApplied": null,
+          "outcome": "skipped"
+        }
+      ],
+      "recurs": {
+        "type": "window",
+        "pattern": "",
+        "opensDate": "2027-08-01"
+      },
+      "lockedUntil": "2026-12-31",
       "lockNote": "",
       "fit": "",
-      "dateApprox": false
+      "dateApprox": true
     },
     {
       "id": 1782644697773,
