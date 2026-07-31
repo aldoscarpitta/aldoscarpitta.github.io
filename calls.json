@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-07-31T23:55:05.057Z",
+  "updated": "2026-07-31T23:55:53.959Z",
   "calls": [
     {
       "id": 4,
@@ -141,11 +141,14 @@
       "url": "https://camargofoundation.org/en/camargo-fellowship-2026-2027",
       "notes": "",
       "history": [],
-      "recurs": null,
+      "recurs": {
+        "type": "annual-fixed",
+        "pattern": ""
+      },
       "lockedUntil": null,
       "lockNote": "",
       "fit": "",
-      "dateApprox": false
+      "dateApprox": true
     },
     {
       "id": 1783026186982,
