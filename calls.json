@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-01T00:01:19.217Z",
+  "updated": "2026-08-01T00:01:31.131Z",
   "calls": [
     {
       "id": 4,
@@ -255,7 +255,7 @@
       "title": "EMS Stockholm — Artist in Residence",
       "org": "Elektronmusikstudion, Stockholm",
       "deadline": "2027-01-31",
-      "status": "observe",
+      "status": "interested",
       "recurs": {
         "type": "window",
         "pattern": "opens 1 Dec",
@@ -266,7 +266,8 @@
       "notes": "Fee-free, studio only. Closing date approximate — confirm when the cycle opens.",
       "history": [],
       "lockedUntil": null,
-      "lockNote": ""
+      "lockNote": "",
+      "url": ""
     },
     {
       "id": 1785542185029,
