@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-07-31T23:57:41.579Z",
+  "updated": "2026-08-01T00:00:38.631Z",
   "calls": [
     {
       "id": 4,
@@ -11,11 +11,15 @@
       "url": "",
       "notes": "Top targets: Galerie Bigaignon, Galerie Minimal Berlin, STILL Fotografia Milan, Matèria Rome.",
       "history": [],
-      "recurs": null,
+      "recurs": {
+        "type": "multi-year",
+        "pattern": "",
+        "stepYears": 1
+      },
       "lockedUntil": null,
       "lockNote": "",
       "fit": "",
-      "dateApprox": false
+      "dateApprox": true
     },
     {
       "id": 1780662382155,
