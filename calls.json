@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-01T00:01:56.198Z",
+  "updated": "2026-08-01T00:02:04.799Z",
   "calls": [
     {
       "id": 4,
@@ -189,7 +189,7 @@
       "title": "Perform Europe Open Call for Touring Performing Arts",
       "org": "",
       "deadline": "2026-10-21",
-      "status": "curious",
+      "status": "interested",
       "url": "https://performeurope.eu/open-call/",
       "notes": "",
       "history": [],
