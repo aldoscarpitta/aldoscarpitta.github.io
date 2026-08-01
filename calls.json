@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-01T00:02:29.924Z",
+  "updated": "2026-08-01T00:02:39.001Z",
   "calls": [
     {
       "id": 4,
@@ -41,7 +41,7 @@
         "pattern": "",
         "opensDate": "2027-07-30"
       },
-      "lockedUntil": "2026-12-31",
+      "lockedUntil": null,
       "lockNote": "",
       "fit": "",
       "dateApprox": true
