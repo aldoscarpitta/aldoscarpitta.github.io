@@ -3,608 +3,501 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Open Calls — Aldo Scarpitta</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAzMiAzMic+PHJlY3Qgd2lkdGg9JzMyJyBoZWlnaHQ9JzMyJyBmaWxsPScjRkZFNjAwJy8+PHRleHQgeD0nMTYnIHk9JzIzJyBmb250LWZhbWlseT0nc2Fucy1zZXJpZicgZm9udC1zaXplPScyMicgZm9udC13ZWlnaHQ9JzcwMCcgZmlsbD0nIzVCMkQ4RScgdGV4dC1hbmNob3I9J21pZGRsZSc+QzwvdGV4dD48L3N2Zz4=">
-<link rel="shortcut icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAzMiAzMic+PHJlY3Qgd2lkdGg9JzMyJyBoZWlnaHQ9JzMyJyBmaWxsPScjRkZFNjAwJy8+PHRleHQgeD0nMTYnIHk9JzIzJyBmb250LWZhbWlseT0nc2Fucy1zZXJpZicgZm9udC1zaXplPScyMicgZm9udC13ZWlnaHQ9JzcwMCcgZmlsbD0nIzVCMkQ4RScgdGV4dC1hbmNob3I9J21pZGRsZSc+QzwvdGV4dD48L3N2Zz4=">
+<title>open calls</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=League+Spartan:wght@700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAzMiAzMic+PHJlY3Qgd2lkdGg9JzMyJyBoZWlnaHQ9JzMyJyBmaWxsPScjMEQwRDBEJy8+PHJlY3QgeD0nMTYnIHk9JzE2JyB3aWR0aD0nMTYnIGhlaWdodD0nMTYnIGZpbGw9JyNGRkZGRkYnLz48Y2lyY2xlIGN4PSc4JyBjeT0nOCcgcj0nOCcgZmlsbD0nIzFCNERBNicvPjxyZWN0IHg9JzE2JyB5PScwJyB3aWR0aD0nMTYnIGhlaWdodD0nMTYnIGZpbGw9JyNFMjIzMUEnLz48cG9seWdvbiBwb2ludHM9JzgsMTYgMTYsMzIgMCwzMicgZmlsbD0nI0Y1QzQwMCcvPjxwYXRoIGQ9J00yOC4yNCAyNi44NSBBNC45IDQuOSAwIDEgMSAyNC4wIDE5LjUnIGZpbGw9J25vbmUnIHN0cm9rZT0nIzBEMEQwRCcgc3Ryb2tlLXdpZHRoPScyLjgnIHN0cm9rZS1saW5lY2FwPSdyb3VuZCcvPjxwb2x5Z29uIHBvaW50cz0nMjYuOCwxOS41IDIzLjUsMjEuNSAyMy41LDE3LjUnIGZpbGw9JyMwRDBEMEQnLz48L3N2Zz4=">
+<link rel="shortcut icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAzMiAzMic+PHJlY3Qgd2lkdGg9JzMyJyBoZWlnaHQ9JzMyJyBmaWxsPScjMEQwRDBEJy8+PHJlY3QgeD0nMTYnIHk9JzE2JyB3aWR0aD0nMTYnIGhlaWdodD0nMTYnIGZpbGw9JyNGRkZGRkYnLz48Y2lyY2xlIGN4PSc4JyBjeT0nOCcgcj0nOCcgZmlsbD0nIzFCNERBNicvPjxyZWN0IHg9JzE2JyB5PScwJyB3aWR0aD0nMTYnIGhlaWdodD0nMTYnIGZpbGw9JyNFMjIzMUEnLz48cG9seWdvbiBwb2ludHM9JzgsMTYgMTYsMzIgMCwzMicgZmlsbD0nI0Y1QzQwMCcvPjxwYXRoIGQ9J00yOC4yNCAyNi44NSBBNC45IDQuOSAwIDEgMSAyNC4wIDE5LjUnIGZpbGw9J25vbmUnIHN0cm9rZT0nIzBEMEQwRCcgc3Ryb2tlLXdpZHRoPScyLjgnIHN0cm9rZS1saW5lY2FwPSdyb3VuZCcvPjxwb2x5Z29uIHBvaW50cz0nMjYuOCwxOS41IDIzLjUsMjEuNSAyMy41LDE3LjUnIGZpbGw9JyMwRDBEMEQnLz48L3N2Zz4=">
 <style>
+  /* ==========================================================
+     Bauhaus system.
+     Colour  — Itten/Kandinsky primaries on white, plus black.
+               Fills are saturated; "ink" variants are the darkened
+               versions used wherever colour has to carry TEXT,
+               because saturated yellow and red cannot reach 4.5:1.
+     Form    — Kandinsky's 1923 correspondence: red square,
+               yellow triangle, blue circle. Used as the relevance
+               marker, so relevance is legible without colour.
+     Type    — Jost (Futura lineage). Futura is present on macOS,
+               so the fallback is faithful if the webfont fails.
+               Lowercase for all interface chrome, after Bayer's
+               Universal alphabet. Call titles keep natural case:
+               they are proper nouns and lowercasing them would
+               cost scanning speed for no argument.
+     Grid    — 8px base unit. Rules, not shadows. No radius anywhere.
+     ========================================================== */
   :root {
-    --bg: #FFFBE8;
-    --surface: #FFFFFF;
-    --surface-2: #FFF7D0;
-    --yellow: #FFE600;
-    --yellow-dark: #E8CF00;
-    --purple: #5B2D8E;
-    --purple-dark: #421f6a;
-    --purple-light: #EEE6F8;
-    --border: #EAD840;
-    --border-light: #F5EFA0;
-    --text: #1A0A2E;
-    --text-mid: #6B4FA0;
-    --text-dim: #A08EC0;
-    --hot: #B5291C;
-    --hot-bg: #FFF0EE;
-    --warm: #8A6200;
-    --warm-bg: #FFFBEE;
-    --cool: #1E6B42;
-    --cool-bg: #EDFAF3;
-    --applied: #5B2D8E;
-    --applied-bg: #EEE6F8;
+    --paper: #FFFFFF;
+    --wash: #F2F1EE;
+
+    --ink: #0D0D0D;
+    --ink-mid: #3D3D3D;
+    --ink-muted: #595959;   /* replaces the old --text-dim; 7.0:1 on white */
+
+    --red: #E2231A;
+    --red-ink: #C0130B;
+    --red-wash: #FCEBEA;
+
+    --yellow: #F5C400;
+    --yellow-ink: #6B5000;
+    --yellow-wash: #FDF6DC;
+
+    --blue: #1B4DA6;
+    --blue-ink: #164390;
+    --blue-wash: #EAF0FA;
+
+    --rule: #0D0D0D;
+    --rule-thin: #C9C9C9;
+
+    --u: 8px;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html { -webkit-text-size-adjust: 100%; }
+
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Jost', 'Futura', 'Century Gothic', 'Avenir Next', 'Trebuchet MS', system-ui, sans-serif;
     font-size: 14px;
+    line-height: 1.45;
     min-height: 100vh;
-    padding: 0;
-    margin: 0;
   }
 
-  /* Header bar — full width yellow */
+  /* Visible focus everywhere. Offset so it never sits under a rule. */
+  :focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 2px;
+  }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0;
+    margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ---------- header ---------- */
   .header-bar {
-    background: var(--yellow);
-    padding: 32px 48px 28px;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    border-bottom: 2px solid var(--yellow-dark);
+    gap: 32px;
+    flex-wrap: wrap;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 40px 40px 16px;
+    border-bottom: 4px solid var(--rule);
   }
 
+  /* Logo lockup: the mark is the favicon at display size, so the tab
+     icon and the page masthead are literally the same artwork. */
+  .logo { display: flex; align-items: center; gap: 16px; }
+  .logo-mark { width: 52px; height: 52px; flex: 0 0 auto; display: block; }
+  .logo-type { display: flex; flex-direction: column; }
+
   .header-left h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 30px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    line-height: 1;
-    margin-bottom: 5px;
-    color: var(--purple);
+    font-family: 'League Spartan', 'Jost', 'Futura', 'Century Gothic', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    line-height: 0.92;
+    letter-spacing: -0.028em;   /* tight, poster-set */
+    text-transform: lowercase;
+    margin-bottom: 7px;
   }
 
   .header-left p {
-    color: var(--purple);
     font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    opacity: 0.65;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
+    color: var(--ink-muted);
   }
 
-  .stats {
-    display: flex;
-    gap: 28px;
-    text-align: right;
-  }
+  .stats { display: flex; gap: 26px; flex-wrap: wrap; }
 
-  .stat-item { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .stat-item { display: flex; align-items: baseline; gap: 8px; }
 
   .stat-number {
-    font-family: 'Syne', sans-serif;
     font-size: 26px;
-    font-weight: 700;
+    font-weight: 500;
     line-height: 1;
-    color: var(--purple);
+    font-variant-numeric: tabular-nums;
   }
 
   .stat-label {
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: 500;
-    color: var(--purple);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    opacity: 0.6;
+    letter-spacing: 0.12em;
+    text-transform: lowercase;
+    color: var(--ink-mid);
+    display: flex; align-items: center; gap: 6px;
   }
 
-  /* Main content area */
-  .main {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 36px 48px 48px;
+  /* Kandinsky markers. Also used inline in the relevance tags. */
+  .mark { display: inline-block; flex: 0 0 auto; }
+  .mark-square { width: 11px; height: 11px; background: var(--red); }
+  .mark-triangle {
+    width: 0; height: 0;
+    border-left: 5.5px solid transparent;
+    border-right: 5.5px solid transparent;
+    border-bottom: 11px solid var(--yellow);
   }
+  .mark-circle { width: 11px; height: 11px; border-radius: 50%; background: var(--blue); }
+  .mark-bar { width: 11px; height: 4px; background: var(--ink-muted); }
 
-  /* Setup bar */
+  /* ---------- main ---------- */
+  .main { max-width: 1040px; margin: 0 auto; padding: 24px 40px 56px; }
+
+  /* ---------- setup bar ---------- */
   .setup-bar {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-left: 4px solid var(--purple);
-    padding: 20px 24px;
-    margin-bottom: 28px;
     display: flex;
-    gap: 28px;
-    align-items: flex-start;
-    border-radius: 2px;
+    gap: 0;
+    align-items: stretch;
+    border: 1px solid var(--rule);
+    border-left: 8px solid var(--yellow);
+    margin-bottom: 24px;
+    position: relative;
   }
   .setup-bar.hidden { display: none; }
 
-  .setup-step { display: flex; flex-direction: column; gap: 7px; flex: 1; }
+  .setup-step { display: flex; flex-direction: column; gap: 6px; flex: 1; padding: 18px 20px; }
 
   .step-num {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--purple);
+    font-size: 10px; font-weight: 600; letter-spacing: 0.16em;
+    text-transform: lowercase; color: var(--ink-muted);
   }
-
-  .step-title { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
-  .step-hint { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+  .step-title { font-size: 13px; font-weight: 500; line-height: 1.35; }
+  .step-hint { font-size: 12px; color: var(--ink-muted); line-height: 1.5; }
 
   .bookmarklet-link {
     display: inline-block;
-    background: var(--purple);
-    color: var(--yellow);
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 8px 16px;
-    text-decoration: none;
-    cursor: grab;
-    letter-spacing: 0.03em;
-    transition: background 0.15s;
-    user-select: none;
-    white-space: nowrap;
-    border-radius: 2px;
+    background: var(--ink); color: var(--paper);
+    font-size: 12px; font-weight: 500; letter-spacing: 0.04em;
+    padding: 8px 14px; text-decoration: none; cursor: grab;
+    user-select: none; white-space: nowrap; align-self: flex-start;
+    min-height: 32px;
   }
-  .bookmarklet-link:hover { background: var(--purple-dark); }
+  .bookmarklet-link:hover { background: var(--blue); }
 
-  .setup-divider { width: 1px; background: var(--border-light); align-self: stretch; }
+  .setup-divider { width: 1px; background: var(--rule-thin); }
 
   .dismiss-btn {
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    cursor: pointer;
-    padding: 0;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    align-self: flex-start;
-    transition: color 0.15s;
+    position: absolute; top: 0; right: 0;
+    background: none; border: none; border-left: 1px solid var(--rule-thin);
+    border-bottom: 1px solid var(--rule-thin);
+    font: inherit; font-size: 11px; letter-spacing: 0.1em;
+    text-transform: lowercase; color: var(--ink-mid);
+    cursor: pointer; padding: 0 12px; min-height: 28px; min-width: 28px;
   }
-  .dismiss-btn:hover { color: var(--text-mid); }
+  .dismiss-btn:hover { background: var(--ink); color: var(--paper); }
 
-  /* Toolbar */
+  /* ---------- toolbar ---------- */
   .toolbar {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-    align-items: center;
+    display: flex; gap: 0; margin-bottom: 24px;
+    flex-wrap: wrap; align-items: stretch;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 16px;
   }
 
-  .filter-btn {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text-mid);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 6px 14px;
+  .filter-btn, .tool-btn {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    font: inherit;
+    font-size: 12px; font-weight: 400;
+    letter-spacing: 0.06em; text-transform: lowercase;
+    padding: 7px 14px;
+    min-height: 32px;
     cursor: pointer;
-    transition: all 0.15s;
-    border-radius: 2px;
+    margin-right: -1px;   /* shared rules, no double borders */
   }
-  .filter-btn:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
-  .filter-btn.active { border-color: var(--purple); color: var(--purple); background: var(--purple-light); font-weight: 600; }
-  .filter-btn[data-filter="interested"].active { border-color: var(--hot); color: var(--hot); background: var(--hot-bg); }
-  .filter-btn[data-filter="curious"].active { border-color: var(--warm); color: var(--warm); background: var(--warm-bg); }
-  .filter-btn[data-filter="observe"].active { border-color: var(--cool); color: var(--cool); background: var(--cool-bg); }
-  .filter-btn[data-filter="applied"].active { border-color: var(--applied); color: var(--applied); background: var(--applied-bg); }
+  .filter-btn:hover, .tool-btn:hover { background: var(--wash); }
+  .filter-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); position: relative; z-index: 1; }
+  .filter-btn[data-filter="interested"].active { background: var(--red); border-color: var(--red); color: var(--paper); }
+  .filter-btn[data-filter="curious"].active { background: var(--yellow); border-color: var(--yellow); color: var(--ink); }
+  .filter-btn[data-filter="observe"].active { background: var(--blue); border-color: var(--blue); color: var(--paper); }
 
-  .toolbar-right { margin-left: auto; display: flex; gap: 8px; }
+  .toolbar-right { margin-left: auto; display: flex; padding-left: 20px; }
+  .toolbar-right .tool-btn { margin-right: -1px; }
+  .tool-btn.add-btn { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 500; }
+  .tool-btn.add-btn:hover { background: var(--blue); border-color: var(--blue); }
+  .tool-btn.sync-btn.connected { border-color: var(--blue); color: var(--blue-ink); }
 
-  .tool-btn {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text-mid);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    cursor: pointer;
-    transition: all 0.15s;
-    border-radius: 2px;
-  }
-  .tool-btn:hover { border-color: var(--text-mid); color: var(--text); }
-  .tool-btn.add-btn {
-    background: var(--purple);
-    border-color: var(--purple);
-    color: var(--yellow);
-    font-weight: 600;
-  }
-  .tool-btn.add-btn:hover { background: var(--purple-dark); border-color: var(--purple-dark); }
-  .tool-btn.setup-toggle:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
-  .tool-btn.sync-btn { color: var(--text-dim); }
-  .tool-btn.sync-btn.connected { border-color: var(--cool); color: var(--cool); }
-  .tool-btn.sync-btn:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
-
-  /* Cards */
-  .calls-list { display: flex; flex-direction: column; gap: 6px; }
+  /* ---------- rows ---------- */
+  /* A continuous ruled block, not floating cards: shared hairlines,
+     one 8px colour bar per row carrying relevance. */
+  .calls-list { display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
 
   .call-card {
-    background: var(--surface);
-    border: 1.5px solid var(--border-light);
-    border-left: 4px solid transparent;
-    padding: 18px 22px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule-thin);
+    border-left: 8px solid var(--ink-muted);
+    padding: 18px 20px;
     display: grid;
-    grid-template-columns: 76px 1fr auto;
+    grid-template-columns: 84px 1fr auto;
     gap: 20px;
     align-items: start;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    border-radius: 2px;
   }
-  .call-card:hover { border-color: var(--border); box-shadow: 0 2px 12px rgba(91,45,142,0.07); }
-  .call-card[data-status="interested"] { border-left-color: var(--hot); }
-  .call-card[data-status="curious"] { border-left-color: var(--warm); }
-  .call-card[data-status="observe"] { border-left-color: var(--cool); }
-  .call-card[data-status="applied"] { border-left-color: var(--applied); opacity: 0.5; }
+  .call-card:last-child { border-bottom: 1px solid var(--rule); }
+  .call-card:hover { background: var(--wash); }
+  .call-card[data-status="interested"] { border-left-color: var(--red); }
+  .call-card[data-status="curious"]    { border-left-color: var(--yellow); }
+  .call-card[data-status="observe"]    { border-left-color: var(--blue); }
+  .call-card[data-status="applied"]    { border-left-color: var(--ink-muted); background: var(--wash); }
 
-  .call-countdown { display: flex; flex-direction: column; align-items: center; padding-top: 2px; }
+  .call-countdown { display: flex; flex-direction: column; align-items: flex-start; }
 
   .countdown-days {
-    font-family: 'Syne', sans-serif;
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1;
+    font-size: 30px; font-weight: 500; line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
   }
-  /* The left bar and the tag carry RELEVANCE (a standing judgement).
-     The countdown number carries URGENCY (a fact about the date).
-     These are independent now, so they must not share a colour source. */
-  .countdown-days.u-soon { color: var(--hot); }
-  .countdown-days.u-near { color: var(--warm); }
-  .countdown-days.u-far  { color: var(--cool); }
-  .countdown-days.u-dim  { color: var(--text-dim); }
-  .countdown-days.u-done { color: var(--applied); }
+  /* Colour on the number means time pressure — nothing else.
+     Black is the resting state, so red actually reads as urgent. */
+  .countdown-days.u-soon { color: var(--red-ink); }
+  .countdown-days.u-near { color: var(--yellow-ink); }
+  .countdown-days.u-far  { color: var(--ink); }
+  .countdown-days.u-dim  { color: var(--ink-muted); }
+  .countdown-days.u-done { color: var(--ink-muted); }
 
   .countdown-label {
-    font-size: 9px;
-    font-weight: 600;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-top: 3px;
-    text-align: center;
+    font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
+    text-transform: lowercase; color: var(--ink-mid); margin-top: 5px;
   }
 
-  .call-body { display: flex; flex-direction: column; gap: 5px; }
+  .call-body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 
-  .call-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.3;
-    color: var(--text);
-  }
+  .call-title { font-size: 17px; font-weight: 500; line-height: 1.3; }
   .call-card[data-status="applied"] .call-title {
-    text-decoration: line-through;
-    text-decoration-color: var(--text-dim);
+    text-decoration: line-through; text-decoration-color: var(--ink-muted);
   }
 
-  .call-meta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 1px; }
-  .call-org { font-size: 12px; font-weight: 400; color: var(--text-mid); }
-  .call-deadline { font-size: 12px; color: var(--text-dim); }
+  .call-meta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 2px; }
+  .call-org { font-size: 12.5px; color: var(--ink-mid); }
+  .call-deadline { font-size: 12.5px; color: var(--ink-muted); font-variant-numeric: tabular-nums; }
 
+  /* Relevance tag: shape carries the colour, the word carries the meaning. */
   .call-tag {
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border: 1.5px solid;
-    border-radius: 2px;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+    text-transform: lowercase; color: var(--ink);
   }
-  .call-tag.interested { color: var(--hot); border-color: var(--hot); background: var(--hot-bg); }
-  .call-tag.curious { color: var(--warm); border-color: var(--warm); background: var(--warm-bg); }
-  .call-tag.observe { color: var(--cool); border-color: var(--cool); background: var(--cool-bg); }
-  .call-tag.applied { color: var(--applied); border-color: var(--applied); background: var(--applied-bg); }
 
-  .call-notes { font-size: 12px; font-style: italic; color: var(--text-dim); margin-top: 3px; line-height: 1.5; font-weight: 300; }
-  .call-url { font-size: 11px; color: var(--text-dim); text-decoration: none; border-bottom: 1px solid var(--border); transition: color 0.15s; word-break: break-all; }
-  .call-url:hover { color: var(--purple); border-color: var(--purple); }
+  .rec-glyph {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
+    color: var(--ink); border: 1px solid var(--rule); padding: 1px 7px;
+    white-space: nowrap;
+  }
+  .lead-flag {
+    font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: lowercase;
+    color: var(--paper); background: var(--red); padding: 2px 8px;
+  }
 
-  .call-actions { display: flex; flex-direction: column; gap: 5px; opacity: 0; transition: opacity 0.15s; }
-  .call-card:hover .call-actions { opacity: 1; }
+  .approx { color: var(--ink-muted); }
+
+  .call-notes { font-size: 12.5px; color: var(--ink-mid); margin-top: 3px; line-height: 1.5; }
+  .call-fit { font-size: 12.5px; color: var(--ink-mid); line-height: 1.5; }
+  .call-fit b {
+    font-weight: 600; color: var(--ink); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: lowercase; margin-right: 4px;
+  }
+  .call-url {
+    font-size: 12px; color: var(--blue-ink); text-decoration: underline;
+    text-underline-offset: 2px; word-break: break-all; align-self: flex-start;
+    padding: 2px 0;
+  }
+  .call-url:hover { background: var(--blue); color: var(--paper); text-decoration: none; }
+
+  /* Actions stay quiet until the row is engaged — but focus counts as
+     engagement, so a keyboard user never tabs to an invisible button. */
+  .call-actions { display: flex; flex-direction: column; gap: 4px; opacity: 0; }
+  .call-card:hover .call-actions,
+  .call-card:focus-within .call-actions { opacity: 1; }
 
   .action-btn {
-    background: none;
-    border: 1.5px solid var(--border);
-    color: var(--text-dim);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-    border-radius: 2px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    font: inherit; font-size: 11px; letter-spacing: 0.05em;
+    text-transform: lowercase;
+    padding: 5px 10px; min-height: 26px;
+    cursor: pointer; white-space: nowrap;
   }
-  .action-btn:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
-  .action-btn.delete-btn:hover { border-color: var(--hot); color: var(--hot); background: var(--hot-bg); }
+  .action-btn:hover { background: var(--ink); color: var(--paper); }
+  .action-btn.delete-btn:hover { background: var(--red); border-color: var(--red); color: var(--paper); }
 
   .empty-state {
-    padding: 56px;
-    text-align: center;
-    color: var(--text-dim);
-    font-size: 13px;
-    letter-spacing: 0.06em;
-    display: none;
+    padding: 56px 20px; text-align: center; color: var(--ink-mid);
+    font-size: 13px; letter-spacing: 0.06em; display: none;
+    border-bottom: 1px solid var(--rule);
   }
 
-  /* Modal */
+  /* ---------- history ---------- */
+  details.call-history { margin-top: 6px; }
+  details.call-history summary {
+    cursor: pointer; font-size: 11.5px; color: var(--ink-mid);
+    letter-spacing: 0.05em; text-transform: lowercase;
+    list-style: none; display: inline-block;
+    border-bottom: 1px solid var(--rule-thin); padding: 3px 0; min-height: 24px;
+  }
+  details.call-history summary::-webkit-details-marker { display: none; }
+  details.call-history summary:hover { color: var(--ink); border-color: var(--ink); }
+  .history-rows { margin-top: 8px; display: flex; flex-direction: column; gap: 3px; }
+  .history-row { font-size: 11.5px; color: var(--ink-mid); display: flex; gap: 12px; }
+  .history-row .h-cycle { min-width: 100px; font-variant-numeric: tabular-nums; }
+  .history-row .h-out { font-weight: 500; text-transform: lowercase; }
+  .h-out.applied  { color: var(--blue-ink); }
+  .h-out.skipped  { color: var(--ink-muted); }
+  .h-out.accepted { color: var(--ink); }
+  .h-out.rejected { color: var(--red-ink); }
+
+  /* ---------- locked ---------- */
+  /* Greyed, but never below 4.5:1 — the lock reason is the most
+     important text on the row, so opacity is not used. */
+  .call-card.locked { background: var(--wash); border-left-color: var(--ink-muted) !important; }
+  .call-card.locked .call-title { color: var(--ink-mid); }
+  .call-card.locked .countdown-days { color: var(--ink-muted) !important; font-size: 20px; }
+  .call-card.locked .lead-flag { background: var(--ink-muted); }
+  .call-card.locked .mark-square { background: var(--ink-muted); }
+  .call-card.locked .mark-circle { background: var(--ink-muted); }
+  .call-card.locked .mark-triangle { border-bottom-color: var(--ink-muted); }
+  .lock-note {
+    font-size: 12px; color: var(--ink-mid); font-weight: 400;
+    border-left: 3px solid var(--ink); padding-left: 10px; margin-top: 5px; line-height: 1.5;
+  }
+
+  /* ---------- modal ---------- */
   .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(26,10,46,0.4);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
+    display: none; position: fixed; inset: 0;
+    background: rgba(13,13,13,0.55); z-index: 100;
+    align-items: center; justify-content: center;
   }
   .modal-overlay.open { display: flex; }
 
   .modal {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    box-shadow: 0 12px 48px rgba(91,45,142,0.18);
-    width: 100%;
-    max-width: 520px;
-    padding: 32px;
-    margin: 20px;
-    border-radius: 2px;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    width: 100%; max-width: 560px; padding: 32px;
+    margin: 20px; max-height: 90vh; overflow-y: auto;
   }
 
   .modal h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 5px;
-    color: var(--text);
+    font-size: 24px; font-weight: 500; text-transform: lowercase;
+    letter-spacing: -0.005em; margin-bottom: 4px;
   }
-
-  .modal-subtitle {
-    font-size: 12px;
-    color: var(--cool);
-    font-weight: 500;
-    margin-bottom: 22px;
-    min-height: 16px;
-  }
+  .modal-subtitle { font-size: 12.5px; color: var(--blue-ink); margin-bottom: 20px; min-height: 16px; }
 
   .form-group { margin-bottom: 16px; }
-
   .form-label {
-    display: block;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-mid);
-    margin-bottom: 6px;
+    display: block; font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: lowercase;
+    color: var(--ink); margin-bottom: 6px;
   }
 
   .form-input, .form-select, .form-textarea {
-    width: 100%;
-    background: var(--bg);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    padding: 9px 12px;
-    outline: none;
-    transition: border-color 0.15s, background 0.15s;
-    border-radius: 2px;
+    width: 100%; background: var(--paper);
+    border: 1px solid var(--ink); color: var(--ink);
+    font: inherit; font-size: 14px; padding: 9px 11px;
+    min-height: 38px; outline: none;
   }
   .form-input:focus, .form-select:focus, .form-textarea:focus {
-    border-color: var(--purple);
-    background: #fff;
+    border-width: 2px; padding: 8px 10px;   /* keeps the box the same size */
+    border-color: var(--blue);
   }
-  .form-input.highlight { border-color: var(--cool); background: var(--cool-bg); }
-  .form-textarea { resize: vertical; min-height: 70px; }
-  .form-select option { background: var(--surface); }
+  .form-input.highlight { border-width: 2px; border-color: var(--red); }
+  .form-textarea { resize: vertical; min-height: 76px; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 26px; }
 
-  .btn-cancel {
-    background: none;
-    border: 1.5px solid var(--border);
-    color: var(--text-mid);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 9px 20px;
-    cursor: pointer;
-    transition: all 0.15s;
-    border-radius: 2px;
+  .btn-cancel, .btn-save, .btn-danger {
+    font: inherit; font-size: 12px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: lowercase;
+    padding: 10px 20px; min-height: 38px; cursor: pointer; border: 1px solid var(--ink);
   }
-  .btn-cancel:hover { border-color: var(--text-mid); color: var(--text); }
+  .btn-cancel { background: var(--paper); color: var(--ink); }
+  .btn-cancel:hover { background: var(--wash); }
+  .btn-save { background: var(--ink); color: var(--paper); }
+  .btn-save:hover { background: var(--blue); border-color: var(--blue); }
+  .btn-danger { background: var(--paper); color: var(--red-ink); border-color: var(--red-ink); margin-right: auto; }
+  .btn-danger:hover { background: var(--red); border-color: var(--red); color: var(--paper); }
 
-  .btn-save {
-    background: var(--purple);
-    border: 1.5px solid var(--purple);
-    color: var(--yellow);
-    font-family: 'Syne', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 9px 20px;
-    cursor: pointer;
-    transition: background 0.15s;
-    border-radius: 2px;
+  /* ---------- recurrence block ---------- */
+  .rec-block {
+    border: 1px solid var(--rule-thin); border-left: 8px solid var(--yellow);
+    padding: 16px; margin-bottom: 16px;
   }
-  .btn-save:hover { background: var(--purple-dark); border-color: var(--purple-dark); }
+  .rec-block .form-group:last-child { margin-bottom: 0; }
+  .rec-hint { font-size: 11.5px; color: var(--ink-mid); line-height: 1.5; margin-top: 5px; }
+  .rec-sub { display: none; }
+  .rec-sub.show { display: block; }
+  .check-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-mid); min-height: 24px; }
+  .check-row input { accent-color: var(--blue); width: 16px; height: 16px; }
 
+  /* ---------- toast ---------- */
   .toast {
-    position: fixed;
-    bottom: 28px;
-    right: 28px;
-    background: var(--purple);
-    color: var(--yellow);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 12px 20px;
-    z-index: 200;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.2s, transform 0.2s;
-    pointer-events: none;
-    border-radius: 2px;
-    box-shadow: 0 4px 20px rgba(91,45,142,0.25);
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--ink); color: var(--paper);
+    font-size: 12.5px; padding: 12px 18px; z-index: 200;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.15s, transform 0.15s; pointer-events: none;
+    border-left: 8px solid var(--yellow);
   }
   .toast.show { opacity: 1; transform: translateY(0); }
 
+  /* ---------- footer ---------- */
   footer {
-    margin-top: 48px;
-    padding-top: 16px;
-    border-top: 1.5px solid var(--border-light);
-    color: var(--text-dim);
-    font-size: 11px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+    margin-top: 40px; padding-top: 14px;
+    border-top: 4px solid var(--rule);
+    color: var(--ink-mid); font-size: 11.5px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px; flex-wrap: wrap;
   }
-
-  /* GitHub sync */
   #syncStatus {
-    cursor: pointer;
-    transition: color 0.15s;
-    font-size: 11px;
-    flex-shrink: 0;
+    cursor: pointer; font-size: 11.5px; background: none; border: none;
+    font: inherit; color: var(--ink-mid); padding: 4px 6px; min-height: 24px;
+    text-transform: lowercase; letter-spacing: 0.04em;
   }
-  #syncStatus:hover { color: var(--purple); }
+  #syncStatus:hover { color: var(--ink); background: var(--wash); }
 
+  /* ---------- sync modal ---------- */
   .sync-modal-note {
-    font-size: 12px;
-    color: var(--text-dim);
-    line-height: 1.6;
-    margin-bottom: 20px;
-    padding: 10px 14px;
-    background: var(--purple-light);
-    border-radius: 2px;
+    font-size: 12.5px; color: var(--ink-mid); line-height: 1.6;
+    margin-bottom: 20px; padding: 12px 14px;
+    background: var(--wash); border-left: 8px solid var(--blue);
   }
-  .sync-modal-note strong { color: var(--purple); }
-  .token-hint {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 5px;
-    line-height: 1.5;
-  }
-  .token-hint a { color: var(--purple); }
-  .btn-danger {
-    background: none;
-    border: 1.5px solid var(--border);
-    color: var(--hot);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 9px 20px;
-    cursor: pointer;
-    transition: all 0.15s;
-    border-radius: 2px;
-    margin-right: auto;
-  }
-  .btn-danger:hover { border-color: var(--hot); background: var(--hot-bg); }
+  .sync-modal-note strong { color: var(--ink); }
+  .token-hint { font-size: 11.5px; color: var(--ink-mid); margin-top: 6px; line-height: 1.5; }
+  .token-hint a { color: var(--blue-ink); }
 
-  /* Backup & restore */
-  .backup-block {
-    border-top: 1.5px solid var(--border-light);
-    margin-top: 22px; padding-top: 18px;
-  }
+  .backup-block { border-top: 1px solid var(--rule); margin-top: 24px; padding-top: 18px; }
   .backup-title {
-    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
-    text-transform: uppercase; color: var(--text-mid); margin-bottom: 8px;
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.14em;
+    text-transform: lowercase; color: var(--ink); margin-bottom: 8px;
   }
-  .backup-hint { font-size: 11px; color: var(--text-dim); line-height: 1.55; margin-bottom: 12px; }
-  .backup-hint strong { color: var(--purple); }
+  .backup-hint { font-size: 11.5px; color: var(--ink-mid); line-height: 1.55; margin-bottom: 12px; }
+  .backup-hint strong { color: var(--ink); }
   .backup-hint:empty { margin: 0; }
   .backup-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-  .backup-row .tool-btn { flex: 0 0 auto; }
-  .backup-row .tool-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .backup-row .tool-btn:disabled:hover { border-color: var(--border); color: var(--text-dim); background: none; }
-  #backupStatus.ok { color: var(--cool); }
-  #backupStatus.err { color: var(--hot); }
-  #backupStatus.busy { color: var(--warm); }
+  .backup-row .tool-btn { margin-right: 0; }
+  .backup-row .tool-btn:disabled { color: var(--ink-muted); border-color: var(--rule-thin); cursor: not-allowed; }
+  .backup-row .tool-btn:disabled:hover { background: var(--paper); }
+  #backupStatus.ok { color: var(--blue-ink); }
+  #backupStatus.err { color: var(--red-ink); }
+  #backupStatus.busy { color: var(--yellow-ink); }
 
-  /* ===== Recurrence ===== */
-  .rec-glyph {
-    font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
-    color: var(--purple); background: var(--purple-light);
-    border: 1.5px solid var(--purple); border-radius: 2px;
-    padding: 2px 7px; white-space: nowrap;
-  }
-  .lead-flag {
-    font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--warm); border: 1.5px solid var(--warm); background: var(--warm-bg);
-    padding: 2px 7px; border-radius: 2px;
-  }
-  .approx { color: var(--text-dim); font-style: normal; }
-
-  /* Locked rows never read as actionable, whatever the date says */
-  .call-card.locked { opacity: 0.5; background: var(--surface-2); border-left-color: var(--text-dim) !important; }
-  .call-card.locked .countdown-days { color: var(--text-dim) !important; font-size: 19px; }
-  .call-card.locked .call-tag,
-  .call-card.locked .lead-flag { color: var(--text-dim) !important; border-color: var(--text-dim) !important; background: none !important; }
-  .lock-note {
-    font-size: 11px; color: var(--text-mid); font-weight: 500;
-    border-left: 2px solid var(--text-dim); padding-left: 8px; margin-top: 4px; line-height: 1.5;
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
   }
 
-  .call-fit { font-size: 12px; color: var(--text-mid); line-height: 1.5; }
-  .call-fit b { font-weight: 600; color: var(--purple); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
-
-  details.call-history { margin-top: 5px; }
-  details.call-history summary {
-    cursor: pointer; font-size: 11px; color: var(--text-dim);
-    letter-spacing: 0.05em; list-style: none; display: inline-block;
-    border-bottom: 1px dotted var(--border);
-  }
-  details.call-history summary::-webkit-details-marker { display: none; }
-  details.call-history summary:hover { color: var(--purple); }
-  .history-rows { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
-  .history-row { font-size: 11px; color: var(--text-mid); display: flex; gap: 10px; }
-  .history-row .h-cycle { min-width: 96px; color: var(--text-dim); }
-  .history-row .h-out { font-weight: 600; }
-  .h-out.applied { color: var(--applied); }
-  .h-out.skipped { color: var(--text-dim); }
-  .h-out.accepted { color: var(--cool); }
-  .h-out.rejected { color: var(--hot); }
-
-  .filter-btn[data-filter="recurring"].active { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
-
-  /* Recurrence block in the modal */
-  .rec-block {
-    border: 1.5px solid var(--border-light); border-left: 3px solid var(--purple);
-    background: var(--bg); padding: 14px 16px; margin-bottom: 16px; border-radius: 2px;
-  }
-  .rec-block .form-group:last-child { margin-bottom: 0; }
-  .rec-hint { font-size: 11px; color: var(--text-dim); line-height: 1.5; margin-top: 5px; }
-  .rec-sub { display: none; }
-  .rec-sub.show { display: block; }
-  .check-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-mid); }
-  .check-row input { accent-color: var(--purple); width: 15px; height: 15px; }
-  .modal { max-height: 90vh; overflow-y: auto; }
-
-  @media (max-width: 720px) {
-    .header-bar { flex-direction: column; align-items: flex-start; gap: 18px; padding: 24px 20px; }
-    .main { padding: 24px 20px 40px; }
-    .call-card { grid-template-columns: 60px 1fr; }
+  /* Narrow fallback. The tool is used on desktop; this only keeps
+     the layout from breaking if the window is dragged small. */
+  @media (max-width: 760px) {
+    .header-bar { padding: 24px 20px 14px; }
+    .main { padding: 20px 20px 40px; }
+    .stats { gap: 16px; }
+    .call-card { grid-template-columns: 72px 1fr; }
     .call-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; opacity: 1; }
     .setup-bar { flex-direction: column; }
     .setup-divider { display: none; }
@@ -613,120 +506,125 @@
 </head>
 <body>
 
-<div class="header-bar">
+<header class="header-bar">
   <div class="header-left">
-    <h1>Open Calls</h1>
-    <p>Aldo Scarpitta — residencies, grants, exhibitions</p>
+    <div class="logo">
+      <svg class="logo-mark" viewBox="0 0 32 32" role="img" aria-label="Open Calls"><rect width="32" height="32" fill="#0D0D0D"/><rect x="16" y="16" width="16" height="16" fill="#FFFFFF"/><circle cx="8" cy="8" r="8" fill="#1B4DA6"/><rect x="16" y="0" width="16" height="16" fill="#E2231A"/><polygon points="8,16 16,32 0,32" fill="#F5C400"/><path d="M28.24 26.85 A4.9 4.9 0 1 1 24.0 19.5" fill="none" stroke="#0D0D0D" stroke-width="2.8" stroke-linecap="round"/><polygon points="26.8,19.5 23.5,21.5 23.5,17.5" fill="#0D0D0D"/></svg>
+      <div class="logo-type">
+        <h1>open calls</h1>
+        <p>aldo scarpitta — residencies, grants, exhibitions</p>
+      </div>
+    </div>
   </div>
   <div class="stats">
-    <div class="stat-item"><span class="stat-number" id="stat-interested">0</span><span class="stat-label">Interested</span></div>
-    <div class="stat-item"><span class="stat-number" id="stat-curious">0</span><span class="stat-label">Curious</span></div>
-    <div class="stat-item"><span class="stat-number" id="stat-observe">0</span><span class="stat-label">Observe</span></div>
-    <div class="stat-item"><span class="stat-number" id="stat-recurring">0</span><span class="stat-label">↻ Recurring</span></div>
+    <div class="stat-item"><span class="stat-number" id="stat-interested">0</span><span class="stat-label"><i class="mark mark-square" aria-hidden="true"></i>interested</span></div>
+    <div class="stat-item"><span class="stat-number" id="stat-curious">0</span><span class="stat-label"><i class="mark mark-triangle" aria-hidden="true"></i>curious</span></div>
+    <div class="stat-item"><span class="stat-number" id="stat-observe">0</span><span class="stat-label"><i class="mark mark-circle" aria-hidden="true"></i>observe</span></div>
+    <div class="stat-item"><span class="stat-number" id="stat-recurring">0</span><span class="stat-label">↻ recurring</span></div>
   </div>
-</div>
+</header>
 
-<div class="main">
+<main class="main">
 
   <div class="setup-bar" id="setupBar">
     <div class="setup-step">
-      <span class="step-num">Step 1</span>
+      <span class="step-num">step 1</span>
       <span class="step-title">Show the bookmarks toolbar in Firefox</span>
       <span class="step-hint">View → Toolbars → Bookmarks Toolbar → Always Show</span>
     </div>
     <div class="setup-divider"></div>
     <div class="setup-step">
-      <span class="step-num">Step 2</span>
+      <span class="step-num">step 2</span>
       <span class="step-title">Drag this button to your toolbar</span>
       <a class="bookmarklet-link" id="bookmarkletLink" href="#" onclick="return false;">☆ + Open Call</a>
       <span class="step-hint">Drag it — don't click it here.</span>
     </div>
     <div class="setup-divider"></div>
     <div class="setup-step">
-      <span class="step-num">Step 3</span>
+      <span class="step-num">step 3</span>
       <span class="step-title">Done. From now on:</span>
-      <span class="step-hint">Find a call online → click <strong style="color:var(--text)">+ Open Call</strong> → add deadline → Save.</span>
+      <span class="step-hint">Find a call online → click <strong>+ open call</strong> → add deadline → Save.</span>
     </div>
-    <button class="dismiss-btn" id="dismissSetup">Dismiss ✕</button>
+    <button class="dismiss-btn" id="dismissSetup">dismiss ✕</button>
   </div>
 
-  <div class="toolbar">
-    <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="interested">Interested</button>
-    <button class="filter-btn" data-filter="curious">Curious</button>
-    <button class="filter-btn" data-filter="observe">Observe</button>
-    <button class="filter-btn" data-filter="applied">Applied</button>
-    <button class="filter-btn" data-filter="recurring">↻ Recurring</button>
+  <nav class="toolbar" aria-label="Filters and actions">
+    <button class="filter-btn active" data-filter="all">all</button>
+    <button class="filter-btn" data-filter="interested">interested</button>
+    <button class="filter-btn" data-filter="curious">curious</button>
+    <button class="filter-btn" data-filter="observe">observe</button>
+    <button class="filter-btn" data-filter="applied">applied</button>
+    <button class="filter-btn" data-filter="recurring">↻ recurring</button>
     <div class="toolbar-right">
-      <button class="tool-btn setup-toggle" id="showSetup" style="display:none">⚙ Setup</button>
-      <button class="tool-btn sync-btn" id="openSyncModal">↑ GitHub</button>
-      <button class="tool-btn add-btn" id="openAdd">+ Add Call</button>
+      <button class="tool-btn setup-toggle" id="showSetup" style="display:none">⚙ setup</button>
+      <button class="tool-btn sync-btn" id="openSyncModal">↑ github</button>
+      <button class="tool-btn add-btn" id="openAdd">+ add call</button>
     </div>
-  </div>
+  </nav>
 
   <div class="calls-list" id="callsList"></div>
-  <div class="empty-state" id="emptyState">No calls in this category.</div>
+  <div class="empty-state" id="emptyState" role="status">No calls match this filter.</div>
 
   <footer>
     <span id="footerDate"></span>
-    <span id="syncStatus" title="Click to configure GitHub sync"></span>
+    <button type="button" id="syncStatus" aria-live="polite" title="Configure GitHub sync"></button>
     <span>data saved locally · free, no account needed</span>
   </footer>
 
-</div>
+</main>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <!-- Add / Edit call modal -->
 <div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <h2 id="modalTitle">Add Open Call</h2>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 id="modalTitle">add open call</h2>
     <p class="modal-subtitle" id="modalSubtitle"></p>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Title *</label>
+        <label class="form-label" for="fieldTitle">title *</label>
         <input class="form-input" id="fieldTitle" type="text" placeholder="Residency / Grant name">
       </div>
       <div class="form-group">
-        <label class="form-label">Organisation</label>
+        <label class="form-label" for="fieldOrg">organisation</label>
         <input class="form-input" id="fieldOrg" type="text" placeholder="Institution or venue">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Deadline *</label>
+        <label class="form-label" for="fieldDeadline">deadline *</label>
         <input class="form-input" id="fieldDeadline" type="date">
       </div>
       <div class="form-group">
-        <label class="form-label">Status</label>
+        <label class="form-label" for="fieldStatus">status</label>
         <select class="form-select" id="fieldStatus">
-          <option value="interested">🔴 Interested</option>
-          <option value="curious">🟡 Curious</option>
-          <option value="observe">🟢 Observe</option>
-          <option value="applied">✅ Applied</option>
+          <option value="interested">■ interested</option>
+          <option value="curious">▲ curious</option>
+          <option value="observe">● observe</option>
+          <option value="applied">— applied</option>
         </select>
       </div>
     </div>
     <div class="rec-block">
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Recurrence</label>
+          <label class="form-label" for="fieldRecType">recurrence</label>
           <select class="form-select" id="fieldRecType">
             <option value="">— one-off —</option>
-            <option value="annual-fixed">↻ Annual (fixed date)</option>
-            <option value="rolling">↻ Rolling (interval)</option>
-            <option value="window">↻ Window (opens → closes)</option>
-            <option value="multi-year">↻ Multi-year</option>
+            <option value="annual-fixed">↻ annual (fixed date)</option>
+            <option value="rolling">↻ rolling (interval)</option>
+            <option value="window">↻ window (opens → closes)</option>
+            <option value="multi-year">↻ multi-year</option>
           </select>
         </div>
         <div class="form-group rec-sub" id="subPattern">
-          <label class="form-label">Pattern label</label>
+          <label class="form-label" for="fieldRecPattern">pattern label</label>
           <input class="form-input" id="fieldRecPattern" type="text" placeholder="e.g. ~15 Sep · ~6wk · biennial">
         </div>
       </div>
       <div class="form-row rec-sub" id="subWindow">
         <div class="form-group">
-          <label class="form-label">Opens</label>
+          <label class="form-label" for="fieldOpensDate">opens</label>
           <input class="form-input" id="fieldOpensDate" type="date">
           <p class="rec-hint">Sorts on <em>opens</em> until that date passes, then on the deadline above (= closes).</p>
         </div>
@@ -734,7 +632,7 @@
       </div>
       <div class="form-row rec-sub" id="subRolling">
         <div class="form-group">
-          <label class="form-label">Interval (days)</label>
+          <label class="form-label" for="fieldIntervalDays">interval (days)</label>
           <input class="form-input" id="fieldIntervalDays" type="number" min="1" placeholder="42">
           <p class="rec-hint">Next date = last application + interval. Leave the deadline blank to compute it.</p>
         </div>
@@ -742,61 +640,61 @@
       </div>
       <div class="form-row rec-sub" id="subMulti">
         <div class="form-group">
-          <label class="form-label">Year step</label>
+          <label class="form-label" for="fieldStepYears">year step</label>
           <input class="form-input" id="fieldStepYears" type="number" min="1" placeholder="2">
         </div>
         <div class="form-group"></div>
       </div>
       <div class="form-group rec-sub" id="subApprox">
-        <label class="check-row"><input type="checkbox" id="fieldApprox"> Date is approximate — cycle not announced yet (shows as <b>~</b>)</label>
+        <label class="check-row"><input type="checkbox" id="fieldApprox"> date is approximate — cycle not announced yet (shows as <b>~</b>)</label>
       </div>
     </div>
 
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Locked until</label>
+        <label class="form-label" for="fieldLockedUntil">locked until</label>
         <input class="form-input" id="fieldLockedUntil" type="date">
       </div>
       <div class="form-group">
-        <label class="form-label">Lock reason</label>
+        <label class="form-label" for="fieldLockNote">lock reason</label>
         <input class="form-input" id="fieldLockNote" type="text" placeholder="e.g. one grant per person to 2028">
       </div>
     </div>
 
     <div class="form-group">
-      <label class="form-label">Fit</label>
+      <label class="form-label" for="fieldFit">fit</label>
       <input class="form-input" id="fieldFit" type="text" placeholder="Why this suits the work — read next cycle instead of re-evaluating cold">
     </div>
 
     <div class="form-group">
-      <label class="form-label">URL</label>
+      <label class="form-label" for="fieldUrl">url</label>
       <input class="form-input" id="fieldUrl" type="url" placeholder="https://...">
     </div>
     <div class="form-group">
-      <label class="form-label">Notes</label>
+      <label class="form-label" for="fieldNotes">notes</label>
       <textarea class="form-textarea" id="fieldNotes" placeholder="Budget, requirements, ideas..."></textarea>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" id="closeModal">Cancel</button>
-      <button class="btn-save" id="saveCall">Save</button>
+      <button class="btn-cancel" id="closeModal">cancel</button>
+      <button class="btn-save" id="saveCall">save</button>
     </div>
   </div>
 </div>
 
 <!-- GitHub sync config modal -->
 <div class="modal-overlay" id="syncModalOverlay">
-  <div class="modal" style="max-width:460px">
-    <h2>GitHub Sync</h2>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="syncModalTitle" style="max-width:460px">
+    <h2 id="syncModalTitle">github sync</h2>
     <p class="modal-subtitle" style="color:var(--text-dim);margin-bottom:16px">Calls are written to <code>calls.json</code> in your repo on every save.</p>
     <div class="sync-modal-note">
       When configured, every time you add, edit, or delete a call, the page silently commits <strong>calls.json</strong> to your GitHub repository. GitHub Pages then serves it at <strong>aldoweb.xyz/calls.json</strong> — readable by the weekly Cowork automation.
     </div>
     <div class="form-group">
-      <label class="form-label">Repository <span style="font-weight:400;text-transform:none;letter-spacing:0">(username/repo)</span></label>
+      <label class="form-label" for="ghRepo">Repository <span style="font-weight:400;text-transform:none;letter-spacing:0">(username/repo)</span></label>
       <input class="form-input" id="ghRepo" type="text" placeholder="e.g. aldoscarpitta/aldoweb.xyz">
     </div>
     <div class="form-group">
-      <label class="form-label">Personal Access Token</label>
+      <label class="form-label" for="ghToken">personal access token</label>
       <input class="form-input" id="ghToken" type="password" placeholder="ghp_…" autocomplete="off">
       <p class="token-hint">
         Create one at <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> →
@@ -805,26 +703,26 @@
       </p>
     </div>
     <div class="backup-block">
-      <div class="backup-title">Backup &amp; restore</div>
+      <div class="backup-title">backup &amp; restore</div>
       <p class="backup-hint">
         The download is the same file that gets committed as <strong>calls.json</strong> — every call, recurring
         or not, with its recurrence rule and cycle history. Either restore <em>replaces</em> the whole list;
         neither pushes to GitHub on its own.
       </p>
       <div class="backup-row">
-        <button class="tool-btn" id="downloadBackup">↓ Download JSON</button>
-        <button class="tool-btn" id="restoreFromFile">↑ Restore from file</button>
-        <button class="tool-btn" id="restoreFromGh">⟲ Restore from GitHub</button>
-        <button class="tool-btn" id="undoRestore" style="display:none">↩ Undo restore</button>
+        <button class="tool-btn" id="downloadBackup">↓ download json</button>
+        <button class="tool-btn" id="restoreFromFile">↑ restore from file</button>
+        <button class="tool-btn" id="restoreFromGh">⟲ restore from github</button>
+        <button class="tool-btn" id="undoRestore" style="display:none">↩ undo restore</button>
       </div>
       <input type="file" id="backupFileInput" accept="application/json,.json" style="display:none">
-      <p class="backup-hint" id="backupStatus"></p>
+      <p class="backup-hint" id="backupStatus" role="status" aria-live="polite"></p>
     </div>
 
     <div class="modal-actions">
-      <button class="btn-danger" id="disconnectGh" style="display:none">Disconnect</button>
-      <button class="btn-cancel" id="closeSyncModal">Cancel</button>
-      <button class="btn-save" id="saveSyncConfig">Save &amp; Sync Now</button>
+      <button class="btn-danger" id="disconnectGh" style="display:none">disconnect</button>
+      <button class="btn-cancel" id="closeSyncModal">cancel</button>
+      <button class="btn-save" id="saveSyncConfig">save &amp; sync now</button>
     </div>
   </div>
 </div>
@@ -1080,11 +978,25 @@ function esc(s){
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
+// Kandinsky's 1923 correspondence: red square, yellow triangle, blue circle.
+// Used so relevance is readable without relying on hue alone.
+const MARK = { interested:'mark-square', curious:'mark-triangle', observe:'mark-circle', applied:'mark-bar' };
+function markFor(status){ return MARK[status] || 'mark-bar'; }
+
 function glyphFor(c){
   const r=c.recurs; if(!r) return '';
   const p=(r.pattern||'').trim();
   if(p) return '↻ '+p;
   return '↻ '+({'annual-fixed':'annual','rolling':'rolling','window':'window','multi-year':'multi-year'}[r.type]||'recurring');
+}
+
+// Firefox truncates tab labels hard once the strip is crowded, so the
+// only characters reliably visible are the first few. Anything useful
+// has to go in front of the word, not after it.
+const BASE_TITLE = 'open calls';
+function updateTabTitle(){
+  const due = calls.filter(hasLeadFlag).length;
+  document.title = due ? '(' + due + ') ' + BASE_TITLE : BASE_TITLE;
 }
 
 function renderCalls(){
@@ -1152,7 +1064,7 @@ function renderCalls(){
         <div class="call-meta">
           ${call.org?`<span class="call-org">${esc(call.org)}</span>`:''}
           ${dateLine}
-          <span class="call-tag ${esc(status)}">${esc(status)}</span>
+          <span class="call-tag ${esc(status)}"><i class="mark ${markFor(status)}" aria-hidden="true"></i>${esc(status)}</span>
           ${isRecurring(call)?`<span class="rec-glyph">${esc(glyphFor(call))}</span>`:''}
           ${hasLeadFlag(call)?`<span class="lead-flag">lead time</span>`:''}
         </div>
@@ -1172,6 +1084,7 @@ function renderCalls(){
   });
 
   empty.style.display=visible===0?'block':'none';
+  updateTabTitle();
   // Locked rows are excluded from the counts — they are not actionable.
   const live=calls.filter(c=>!isLocked(c));
   document.getElementById('stat-interested').textContent=live.filter(c=>c.status==='interested').length;
@@ -1181,6 +1094,56 @@ function renderCalls(){
 }
 
 const $=id=>document.getElementById(id);
+
+// ---------------------------------------------------------------
+// Modal focus management
+// Opening moves focus into the dialog, Tab is trapped inside it,
+// Escape closes it, and focus returns to whatever opened it.
+// Without this, a keyboard user tabs from the dialog straight into
+// the page behind it, which is still rendered and still focusable.
+// ---------------------------------------------------------------
+let lastFocused = null;
+
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([type="hidden"]):not([disabled]),'
+                + ' select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
+
+function focusablesIn(el){
+  return [...el.querySelectorAll(FOCUSABLE)].filter(n => n.offsetParent !== null);
+}
+
+function openModal(id){
+  lastFocused = document.activeElement;
+  const ov = $(id);
+  ov.classList.add('open');
+  const f = focusablesIn(ov);
+  if(f.length) setTimeout(()=>f[0].focus(), 0);
+}
+
+function closeModal(id){
+  const ov = $(id);
+  if(!ov || !ov.classList.contains('open')) return;
+  ov.classList.remove('open');
+  if(lastFocused && document.contains(lastFocused)) lastFocused.focus();
+  lastFocused = null;
+}
+
+function topOpenModal(){
+  const open = [...document.querySelectorAll('.modal-overlay.open')];
+  return open[open.length-1] || null;
+}
+
+document.addEventListener('keydown', e=>{
+  const ov = topOpenModal();
+  if(!ov) return;
+  if(e.key === 'Escape'){ e.preventDefault(); closeModal(ov.id); return; }
+  if(e.key !== 'Tab') return;
+  const f = focusablesIn(ov);
+  if(!f.length) return;
+  const first = f[0], last = f[f.length-1];
+  if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+});
+
 
 function syncRecFields(){
   const t=$('fieldRecType').value;
@@ -1209,7 +1172,7 @@ function fillModal(c, pre){
   $('fieldStepYears').value=r.stepYears||'';
   $('fieldApprox').checked=!!c.dateApprox;
   syncRecFields();
-  $('modalOverlay').classList.add('open');
+  openModal('modalOverlay');
 }
 
 function openAddModal(pre={}){
@@ -1290,7 +1253,7 @@ function saveCallFromModal(){
   calls.forEach(normalise);
   rollDueCalls();
   saveData(); renderCalls();
-  $('modalOverlay').classList.remove('open');
+  closeModal('modalOverlay');
   showToast(editingId?'Call updated':'Call saved');
 }
 
@@ -1348,9 +1311,9 @@ function showToast(msg){
 document.getElementById('dismissSetup').addEventListener('click',()=>{ localStorage.setItem('oc_setup_dismissed','1'); updateSetupBar(); });
 document.getElementById('showSetup').addEventListener('click',()=>{ localStorage.removeItem('oc_setup_dismissed'); updateSetupBar(); });
 document.getElementById('openAdd').addEventListener('click',()=>openAddModal());
-document.getElementById('closeModal').addEventListener('click',()=>document.getElementById('modalOverlay').classList.remove('open'));
+document.getElementById('closeModal').addEventListener('click',()=>closeModal('modalOverlay'));
 document.getElementById('saveCall').addEventListener('click',saveCallFromModal);
-document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');});
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeModal('modalOverlay');});
 document.getElementById('fieldRecType').addEventListener('change', syncRecFields);
 document.querySelectorAll('.filter-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -1588,7 +1551,7 @@ function openSyncModal(){
   // A stale snapshot from an earlier restore stays usable, but the message resets.
   backupStatus(readKey(BACKUP_KEY) ? 'A pre-restore snapshot is stored — “↩ Undo restore” will put it back.' : '', '');
   document.getElementById('undoRestore').style.display = readKey(BACKUP_KEY) ? 'inline-block' : 'none';
-  document.getElementById('syncModalOverlay').classList.add('open');
+  openModal('syncModalOverlay');
 }
 
 document.getElementById('downloadBackup').addEventListener('click', downloadBackupFile);
@@ -1606,11 +1569,11 @@ document.getElementById('openSyncModal').addEventListener('click', openSyncModal
 document.getElementById('syncStatus').addEventListener('click', openSyncModal);
 
 document.getElementById('closeSyncModal').addEventListener('click', ()=>{
-  document.getElementById('syncModalOverlay').classList.remove('open');
+  closeModal('syncModalOverlay');
 });
 document.getElementById('syncModalOverlay').addEventListener('click', e=>{
   if(e.target===document.getElementById('syncModalOverlay'))
-    document.getElementById('syncModalOverlay').classList.remove('open');
+    closeModal('syncModalOverlay');
 });
 
 document.getElementById('saveSyncConfig').addEventListener('click', ()=>{
@@ -1624,7 +1587,7 @@ document.getElementById('saveSyncConfig').addEventListener('click', ()=>{
     ghSet('token', tokenInput);
     ghClear('sha'); // reset SHA when token changes
   }
-  document.getElementById('syncModalOverlay').classList.remove('open');
+  closeModal('syncModalOverlay');
   document.getElementById('openSyncModal').classList.add('connected');
   syncToGitHub();
 });
@@ -1632,7 +1595,7 @@ document.getElementById('saveSyncConfig').addEventListener('click', ()=>{
 document.getElementById('disconnectGh').addEventListener('click', ()=>{
   if(!confirm('Disconnect GitHub sync? Your calls remain in localStorage.')) return;
   ['repo','token','sha'].forEach(k => ghClear(k));
-  document.getElementById('syncModalOverlay').classList.remove('open');
+  closeModal('syncModalOverlay');
   document.getElementById('openSyncModal').classList.remove('connected');
   updateSyncStatus('↑ github not connected', 'idle');
 });
