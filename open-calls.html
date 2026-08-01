@@ -522,6 +522,26 @@
   }
   .btn-danger:hover { border-color: var(--hot); background: var(--hot-bg); }
 
+  /* Backup & restore */
+  .backup-block {
+    border-top: 1.5px solid var(--border-light);
+    margin-top: 22px; padding-top: 18px;
+  }
+  .backup-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-mid); margin-bottom: 8px;
+  }
+  .backup-hint { font-size: 11px; color: var(--text-dim); line-height: 1.55; margin-bottom: 12px; }
+  .backup-hint strong { color: var(--purple); }
+  .backup-hint:empty { margin: 0; }
+  .backup-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .backup-row .tool-btn { flex: 0 0 auto; }
+  .backup-row .tool-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .backup-row .tool-btn:disabled:hover { border-color: var(--border); color: var(--text-dim); background: none; }
+  #backupStatus.ok { color: var(--cool); }
+  #backupStatus.err { color: var(--hot); }
+  #backupStatus.busy { color: var(--warm); }
+
   /* ===== Recurrence ===== */
   .rec-glyph {
     font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
@@ -639,7 +659,6 @@
     <button class="filter-btn" data-filter="recurring">↻ Recurring</button>
     <div class="toolbar-right">
       <button class="tool-btn setup-toggle" id="showSetup" style="display:none">⚙ Setup</button>
-      <button class="tool-btn" id="seedRecurring" title="Add the seven recurring calls — skips any already present">↻ Seed</button>
       <button class="tool-btn sync-btn" id="openSyncModal">↑ GitHub</button>
       <button class="tool-btn add-btn" id="openAdd">+ Add Call</button>
     </div>
@@ -785,6 +804,23 @@
         The token is stored only in this browser's localStorage.
       </p>
     </div>
+    <div class="backup-block">
+      <div class="backup-title">Backup &amp; restore</div>
+      <p class="backup-hint">
+        The download is the same file that gets committed as <strong>calls.json</strong> — every call, recurring
+        or not, with its recurrence rule and cycle history. Either restore <em>replaces</em> the whole list;
+        neither pushes to GitHub on its own.
+      </p>
+      <div class="backup-row">
+        <button class="tool-btn" id="downloadBackup">↓ Download JSON</button>
+        <button class="tool-btn" id="restoreFromFile">↑ Restore from file</button>
+        <button class="tool-btn" id="restoreFromGh">⟲ Restore from GitHub</button>
+        <button class="tool-btn" id="undoRestore" style="display:none">↩ Undo restore</button>
+      </div>
+      <input type="file" id="backupFileInput" accept="application/json,.json" style="display:none">
+      <p class="backup-hint" id="backupStatus"></p>
+    </div>
+
     <div class="modal-actions">
       <button class="btn-danger" id="disconnectGh" style="display:none">Disconnect</button>
       <button class="btn-cancel" id="closeSyncModal">Cancel</button>
@@ -804,7 +840,9 @@ const DEFAULT_CALLS = [
   { id:4, title:"Dysographies — Gallery Outreach", org:"30+ galleries across Europe", deadline:"2026-09-01", status:"observe", url:"", notes:"Top targets: Galerie Bigaignon, Galerie Minimal Berlin, STILL Fotografia Milan, Matèria Rome." }
 ];
 
-// Recurring seed set — added on a fresh install, or on demand via "↻ Seed" (idempotent by title).
+// Recurring seed set — applied ONLY on a fresh install (empty storage).
+// There is no manual trigger: once the list is live, seeding again would
+// resurrect these stale defaults over rows that have since been edited.
 const RECURRING_SEED = [
   { title:"Q-O2 Brussels — residency", org:"Q-O2 werkplaats, Brussels", deadline:"2026-09-15", status:"observe",
     recurs:{type:'annual-fixed',pattern:'~15 Sep'}, dateApprox:true,
@@ -1025,17 +1063,6 @@ function loadData(){
 function saveLocal(){ localStorage.setItem(LS_KEY, JSON.stringify(calls)); }
 function saveData(){ saveLocal(); syncToGitHub(); }
 
-function seedRecurring(){
-  const have=new Set(calls.map(c=>(c.title||'').toLowerCase().trim()));
-  let added=0;
-  RECURRING_SEED.forEach((s,i)=>{
-    if(have.has(s.title.toLowerCase().trim())) return;
-    calls.push(normalise({id:Date.now()+i, ...JSON.parse(JSON.stringify(s))}));
-    added++;
-  });
-  if(added){ rollDueCalls(); saveData(); renderCalls(); showToast(added+' recurring call'+(added===1?'':'s')+' added'); }
-  else showToast('All seed calls already present');
-}
 
 function checkBookmarkletParams(){
   const p=new URLSearchParams(location.search);
@@ -1325,7 +1352,6 @@ document.getElementById('closeModal').addEventListener('click',()=>document.getE
 document.getElementById('saveCall').addEventListener('click',saveCallFromModal);
 document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))document.getElementById('modalOverlay').classList.remove('open');});
 document.getElementById('fieldRecType').addEventListener('change', syncRecFields);
-document.getElementById('seedRecurring').addEventListener('click', seedRecurring);
 document.querySelectorAll('.filter-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -1359,6 +1385,147 @@ function toBase64Unicode(str){
   // Unicode-safe base64 encoding
   return btoa(unescape(encodeURIComponent(str)));
 }
+function fromBase64Unicode(b64){
+  // GitHub returns base64 wrapped across lines — strip whitespace before decoding.
+  return decodeURIComponent(escape(atob(String(b64).replace(/\s/g,''))));
+}
+
+// ---------------------------------------------------------------
+// Backup & restore
+// One payload builder, so the downloaded file and the committed
+// calls.json are byte-identical and interchangeable in either direction.
+// ---------------------------------------------------------------
+const BACKUP_KEY = LS_KEY + '_prerestore';
+
+function buildPayload(){
+  return { schema: 3, updated: new Date().toISOString(), calls: calls };
+}
+
+function backupStatus(msg, state){
+  const el = document.getElementById('backupStatus');
+  if(!el) return;
+  el.textContent = msg || '';
+  el.className = 'backup-hint' + (state ? ' ' + state : '');
+}
+
+function downloadBackupFile(){
+  const text = JSON.stringify(buildPayload(), null, 2);
+  const blob = new Blob([text], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'calls-' + todayISO() + '.json';
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 0);
+  const rec = calls.filter(isRecurring).length;
+  backupStatus('Downloaded ' + calls.length + ' calls (' + rec + ' recurring).', 'ok');
+  showToast('Backup downloaded');
+}
+
+// Accepts either the wrapped payload {schema, updated, calls:[…]} or a bare array.
+// Throws a readable message rather than returning null, so every caller reports
+// the same reason to the user.
+function parseBackup(text){
+  let data;
+  try { data = JSON.parse(text); }
+  catch(e){ throw new Error('Not valid JSON.'); }
+  const arr = Array.isArray(data) ? data
+            : (data && Array.isArray(data.calls) ? data.calls : null);
+  if(!arr) throw new Error('No "calls" array found in that file.');
+  const clean = arr.filter(c => c && typeof c === 'object' && String(c.title||'').trim());
+  if(!clean.length) throw new Error('That file contains no usable calls.');
+  return clean;
+}
+
+function applyRestore(rows, source){
+  const incomingRec = rows.filter(c => c && c.recurs && c.recurs.type).length;
+  const ok = confirm(
+    'Restore from ' + source + '?\n\n' +
+    'Replace the current ' + calls.length + ' call' + (calls.length===1?'':'s') +
+    ' with ' + rows.length + ' from the backup (' + incomingRec + ' recurring).\n\n' +
+    'This overwrites the list. The current data is kept in this browser as a one-step undo.'
+  );
+  if(!ok){ backupStatus('Restore cancelled — nothing changed.', ''); return false; }
+
+  // Snapshot before overwriting, so a wrong restore is recoverable.
+  try { localStorage.setItem(BACKUP_KEY, JSON.stringify(calls)); } catch(e){}
+
+  // Reassign ids: a backup may carry duplicates, or rows saved without one.
+  const seen = new Set();
+  let n = Date.now();
+  calls = rows.map(c => {
+    const copy = normalise({ ...c });
+    let id = Number(copy.id);
+    if(!Number.isFinite(id) || seen.has(id)) id = n++;
+    seen.add(id); copy.id = id;
+    return copy;
+  });
+
+  rollDueCalls();
+  saveLocal();                      // deliberately NOT saveData() — see note below
+  renderCalls();
+  const undoBtn = document.getElementById('undoRestore');
+  if(undoBtn) undoBtn.style.display = 'inline-block';   // snapshot now exists
+  const rec = calls.filter(isRecurring).length;
+  backupStatus('Restored ' + calls.length + ' calls (' + rec + ' recurring) from ' + source +
+               '. Not pushed to GitHub — press "Save & Sync Now" if the repo should match.', 'ok');
+  showToast('Restored ' + calls.length + ' calls');
+  return true;
+}
+
+function undoRestore(){
+  const snap = readKey(BACKUP_KEY);
+  if(!snap){ backupStatus('No pre-restore snapshot available.', 'err'); return; }
+  if(!confirm('Undo the last restore and put back the previous ' + snap.length + ' calls?')) return;
+  calls = snap.map(c => normalise({ ...c }));
+  rollDueCalls(); saveLocal(); renderCalls();
+  localStorage.removeItem(BACKUP_KEY);
+  const undoBtn = document.getElementById('undoRestore');
+  if(undoBtn) undoBtn.style.display = 'none';
+  backupStatus('Reverted to the pre-restore list.', 'ok');
+  showToast('Restore undone');
+}
+
+function handleBackupFile(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const rows = parseBackup(String(reader.result));
+      applyRestore(rows, 'file "' + file.name + '"');
+    } catch(e){
+      backupStatus('Could not restore: ' + e.message, 'err');
+    }
+  };
+  reader.onerror = () => backupStatus('Could not read that file.', 'err');
+  reader.readAsText(file);
+}
+
+async function restoreFromGitHub(){
+  if(!isGhConfigured()){ backupStatus('Connect a repository and token first.', 'err'); return; }
+  const repo = ghGet('repo'), token = ghGet('token');
+  backupStatus('Fetching calls.json from ' + repo + '…', 'busy');
+  try {
+    const r = await fetch('https://api.github.com/repos/'+repo+'/contents/calls.json', {
+      headers: { 'Authorization': 'token ' + token }
+    });
+    if(!r.ok){
+      const err = await r.json().catch(()=>({}));
+      backupStatus(r.status === 404
+        ? 'No calls.json in that repository yet — nothing to restore from.'
+        : 'GitHub error: ' + (err.message || r.status), 'err');
+      return;
+    }
+    const d = await r.json();
+    const rows = parseBackup(fromBase64Unicode(d.content));
+    if(applyRestore(rows, 'GitHub (' + repo + ')')){
+      // The fetched sha is current; caching it avoids a needless conflict retry
+      // on the next push.
+      if(d.sha) ghSet('sha', d.sha);
+    }
+  } catch(e){
+    backupStatus('Could not restore from GitHub: ' + (e.message || 'network error'), 'err');
+  }
+}
 
 async function syncToGitHub(){
   if(!isGhConfigured()) return;
@@ -1379,11 +1546,7 @@ async function syncToGitHub(){
     } catch(e){}
   }
 
-  const payload = {
-    schema: 3,
-    updated: new Date().toISOString(),
-    calls: calls
-  };
+  const payload = buildPayload();
   const content = toBase64Unicode(JSON.stringify(payload, null, 2));
   const body = { message: 'Open calls update · ' + new Date().toISOString().split('T')[0], content };
   if(sha) body.sha = sha;
@@ -1417,8 +1580,27 @@ function openSyncModal(){
   document.getElementById('ghRepo').value = repo;
   document.getElementById('ghToken').value = ghGet('token') ? '••••••••••••••••' : '';
   document.getElementById('disconnectGh').style.display = repo ? 'block' : 'none';
+  const ghBtn = document.getElementById('restoreFromGh');
+  ghBtn.disabled = !isGhConfigured();
+  ghBtn.title = isGhConfigured()
+    ? 'Fetch calls.json from the repository and replace the local list'
+    : 'Connect a repository and token first';
+  // A stale snapshot from an earlier restore stays usable, but the message resets.
+  backupStatus(readKey(BACKUP_KEY) ? 'A pre-restore snapshot is stored — “↩ Undo restore” will put it back.' : '', '');
+  document.getElementById('undoRestore').style.display = readKey(BACKUP_KEY) ? 'inline-block' : 'none';
   document.getElementById('syncModalOverlay').classList.add('open');
 }
+
+document.getElementById('downloadBackup').addEventListener('click', downloadBackupFile);
+document.getElementById('restoreFromFile').addEventListener('click', ()=>{
+  document.getElementById('backupFileInput').click();
+});
+document.getElementById('backupFileInput').addEventListener('change', e=>{
+  handleBackupFile(e.target.files && e.target.files[0]);
+  e.target.value = '';   // allow re-selecting the same file after a failed parse
+});
+document.getElementById('restoreFromGh').addEventListener('click', restoreFromGitHub);
+document.getElementById('undoRestore').addEventListener('click', undoRestore);
 
 document.getElementById('openSyncModal').addEventListener('click', openSyncModal);
 document.getElementById('syncStatus').addEventListener('click', openSyncModal);
