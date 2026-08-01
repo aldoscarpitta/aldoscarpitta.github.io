@@ -1,22 +1,22 @@
 {
   "schema": 3,
-  "updated": "2026-08-01T00:00:38.631Z",
+  "updated": "2026-08-01T00:01:19.217Z",
   "calls": [
     {
       "id": 4,
       "title": "Dysographies — Gallery Outreach",
       "org": "30+ galleries across Europe",
       "deadline": "2026-09-01",
-      "status": "observe",
+      "status": "curious",
       "url": "",
       "notes": "Top targets: Galerie Bigaignon, Galerie Minimal Berlin, STILL Fotografia Milan, Matèria Rome.",
       "history": [],
       "recurs": {
-        "type": "multi-year",
+        "type": "window",
         "pattern": "",
-        "stepYears": 1
+        "opensDate": "2026-07-30"
       },
-      "lockedUntil": null,
+      "lockedUntil": "2026-12-31",
       "lockNote": "",
       "fit": "",
       "dateApprox": true
