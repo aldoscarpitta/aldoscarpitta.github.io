@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-01T00:01:49.984Z",
+  "updated": "2026-08-01T00:01:56.198Z",
   "calls": [
     {
       "id": 4,
@@ -204,7 +204,7 @@
       "title": "Q-O2 Brussels — residency",
       "org": "Q-O2 werkplaats, Brussels",
       "deadline": "2026-09-15",
-      "status": "observe",
+      "status": "interested",
       "recurs": {
         "type": "annual-fixed",
         "pattern": "~15 Sep"
@@ -214,7 +214,8 @@
       "notes": "Fee-free + subsistence.",
       "history": [],
       "lockedUntil": null,
-      "lockNote": ""
+      "lockNote": "",
+      "url": ""
     },
     {
       "id": 1785542185026,
