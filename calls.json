@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-10T11:04:41.063Z",
+  "updated": "2026-08-10T11:05:27.572Z",
   "calls": [
     {
       "id": 4,
@@ -98,21 +98,6 @@
       "deadline": "2026-08-05",
       "status": "curious",
       "url": "https://form.jotform.com/251661955490363",
-      "notes": "",
-      "history": [],
-      "recurs": null,
-      "lockedUntil": null,
-      "lockNote": "",
-      "fit": "",
-      "dateApprox": false
-    },
-    {
-      "id": 1783024960738,
-      "title": "SONOHR Radio & Podcast Festival",
-      "org": "",
-      "deadline": "2026-08-02",
-      "status": "interested",
-      "url": "https://wp.sonohr.ch/callforworks2027/",
       "notes": "",
       "history": [],
       "recurs": null,
