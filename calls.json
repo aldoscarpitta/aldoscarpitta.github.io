@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-10T11:05:27.572Z",
+  "updated": "2026-08-10T11:05:31.142Z",
   "calls": [
     {
       "id": 4,
@@ -83,21 +83,6 @@
       "deadline": "2026-12-30",
       "status": "curious",
       "url": "https://on-the-move.org/news/a4-residency-art-center-international-residency-2027-china",
-      "notes": "",
-      "history": [],
-      "recurs": null,
-      "lockedUntil": null,
-      "lockNote": "",
-      "fit": "",
-      "dateApprox": false
-    },
-    {
-      "id": 1782647280672,
-      "title": "Call for room designs / installations / performances - ZW FESTIVAL 5.0 2026",
-      "org": "",
-      "deadline": "2026-08-05",
-      "status": "curious",
-      "url": "https://form.jotform.com/251661955490363",
       "notes": "",
       "history": [],
       "recurs": null,
