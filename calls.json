@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-10T11:05:31.142Z",
+  "updated": "2026-08-11T10:23:53.815Z",
   "calls": [
     {
       "id": 4,
@@ -123,21 +123,6 @@
       "lockNote": "",
       "fit": "",
       "dateApprox": true
-    },
-    {
-      "id": 1783026186982,
-      "title": "OPEN CALL – TEATRO GARIBALDI • Fondazione Studio Rizoma",
-      "org": "",
-      "deadline": "2026-08-09",
-      "status": "interested",
-      "url": "https://studiorizoma.org/editorial/open-call-teatro-garibaldi/",
-      "notes": "",
-      "history": [],
-      "recurs": null,
-      "lockedUntil": null,
-      "lockNote": "",
-      "fit": "",
-      "dateApprox": false
     },
     {
       "id": 1783027543356,
