@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-11T20:01:55.292Z",
+  "updated": "2026-08-11T20:02:11.134Z",
   "calls": [
     {
       "id": 4,
@@ -336,6 +336,21 @@
       "deadline": "2026-08-31",
       "status": "curious",
       "url": "https://on-the-move.org/news/officine-caos-differenti-sensazioni-20262027-emerging-performing-artists-italy",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1786478531133,
+      "title": "Scuola Piccola Zattere: Fellowship for Artists and Cultural Practitioners 2027 (Italy) | On the Move",
+      "org": "",
+      "deadline": "2026-09-04",
+      "status": "interested",
+      "url": "https://on-the-move.org/news/scuola-piccola-zattere-fellowship-artists-and-cultural-practitioners-2027-italy",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
