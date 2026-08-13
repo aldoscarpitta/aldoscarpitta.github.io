@@ -66,6 +66,37 @@
   button:focus-visible { outline: 1px solid #000; outline-offset: 2px; }
 
   #status { color: #000; }
+
+  .filter { margin-top: 10px; }
+
+  /* identical to the tempo slider in life.html: a hairline track and a
+     square handle, so the one non-text control on the site reads the
+     same way in both pieces */
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: none;
+    width: 300px;
+    height: 14px;
+    vertical-align: middle;
+    cursor: pointer;
+    margin: 0;
+  }
+  input[type=range]:focus { outline: none; }
+  input[type=range]:focus-visible { outline: 1px solid #000; outline-offset: 3px; }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 1px; background: #000;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 9px; height: 13px; background: #000; border: 0; border-radius: 0;
+    margin-top: -6px;
+  }
+  input[type=range]::-moz-range-track { height: 1px; background: #000; }
+  input[type=range]::-moz-range-thumb {
+    width: 9px; height: 13px; background: #000; border: 0; border-radius: 0;
+  }
+  .filter span { margin-left: 14px; }
 </style>
 </head>
 <body>
@@ -80,6 +111,13 @@
 
   <div class="controls">
     <button id="primary" onclick="primary()">start</button><button onclick="resetGame()">reset</button><button id="snd" onclick="toggleSound()">mute</button><span id="status">score 0 &middot; lives 3</span>
+  </div>
+
+  <div class="filter">
+    <input id="filt" type="range" min="-100" max="100" step="1" value="0"
+           aria-label="filter: lowpass to the left, highpass to the right, centre is off"
+           oninput="setFilter(this.value)">
+    <span id="filtv">no filter</span>
   </div>
 
 </div>
@@ -156,6 +194,82 @@ var PAN_WIDTH = 0.55;                          /* 0 = mono; column maps left to 
 var HIGH_TILT_DB = -2.0;                       /* per octave, so high bells don't dominate */
 var MAX_VOICES = 32;
 
+/* ---------------------------------------------------------------
+   FILTER
+
+   One slider, -100..+100, centre off. Left closes a lowpass from the
+   top, right opens a highpass from the bottom. Two BiquadFilterNodes
+   sit in the master chain permanently and are parked out of band at
+   the centre, so nothing is ever connected or disconnected while
+   notes are ringing. Measured cost of the parked pair over all 70
+   bricks: -0.007 dB. Both are 12 dB/octave at Q = 1/sqrt(2), which
+   has no resonant peak, so the filter can only ever remove energy.
+
+   The endpoints are measured against hang-drum.wav, not chosen. The
+   sample is bass-heavy -- half its magnitude is below 391 Hz and 90%
+   below 1162 Hz -- so the two directions are not symmetric:
+
+     lowpass  20000 -> 140 Hz   nothing audible happens above ~1.4 kHz
+     highpass 20 -> 1200 Hz     past 1200 Hz the sound stops changing
+                                and only gets quieter
+
+   Because pitch runs diagonally across the wall (row 6 col 0 is G2,
+   row 0 col 9 is A4), the filter does not attenuate the wall evenly:
+   at full left the bottom-left corner survives 19 dB louder than the
+   top-right, and at full right that reverses. The slider therefore
+   changes WHICH bricks are audible, not just how bright the whole
+   thing is. That is the reason it belongs in this piece.
+
+   TAPER. A plain exponential sweep wastes half its travel: with the
+   lowpass at 10 kHz there is nothing to remove. fc = A*(B/A)^(t^p)
+   with p < 1 spends the travel where the sound actually changes.
+   p was chosen so that the spread across the 70 bricks grows roughly
+   linearly with slider position (measured at 9 equal steps):
+
+     lowpass  p=0.25   0.0  0.4  1.7  4.3  7.7 11.1 14.1 16.8 19.1 dB
+     highpass p=0.60   0.0  0.6  3.7  8.1 12.5 16.1 18.4 19.7 20.4 dB
+
+   MAKEUP. Without compensation the right half of the slider is a
+   fader, not a filter: a 1200 Hz highpass costs 26 dB of loudness.
+   FILT_*_DB below is measured, not modelled -- 16 offline renders of
+   9 to 24 overlapping voices (random and contiguous brick runs) at
+   each corner frequency, taking the SMALLEST makeup any render
+   needed, so the filter can never push the master hotter than it
+   already is at centre. Worst residual peak across all settings was
+   -2.00 dBFS against -1.92 dBFS at centre, i.e. the existing gain
+   staging and the limiter behaviour are unchanged.
+
+   Note this had to be measured on the swarm, not on single notes: a
+   heavily lowpassed voice is nearly a sine, and eight of them sum
+   coherently. Single-note peaks said the lowpass needed 8.9 dB; the
+   swarm needed 3.2.
+
+   SLEW. The corner frequencies and the makeup gain are two halves of
+   one setting, and if they separate the makeup is briefly applied to
+   an open filter. Clicking the track jumps the slider instantly;
+   measured overshoot in that case is +5.6 dB. Both are therefore
+   driven from a single glided position that moves no faster than
+   FILT_SLEW, which bounds the error at +0.54 dB.
+   --------------------------------------------------------------- */
+
+var FILT_LP_TOP = 20000;              /* parked: transparent, and above Nyquist-clamp on any real device */
+var FILT_LP_BOT = 140;
+var FILT_HP_BOT = 20;                 /* parked */
+var FILT_HP_TOP = 1200;
+var FILT_TAPER_LP = 0.25;
+var FILT_TAPER_HP = 0.60;
+var FILT_Q = Math.SQRT1_2;            /* 0.7071, no resonant peak */
+var FILT_DEAD = 3;                    /* slider units either side that read as centre */
+var FILT_SLEW = 600;                  /* slider units per second; full travel in 0.33 s */
+var FILT_TICK = 20;                   /* ms, control-rate glide */
+var FILT_SMOOTH = 0.010;              /* AudioParam time constant */
+
+/* measured makeup, dB, against ascending corner frequency */
+var FILT_LP_FC = [140,  165,  200,  280,  420,  700, 1400, 4000, 20000];
+var FILT_LP_DB = [3.16, 2.33, 1.41, 0.45, 0.06, 0,    0,    0,    0];
+var FILT_HP_FC = [20, 70, 140,  240,  380,  560,  780,   980,   1200];
+var FILT_HP_DB = [0,  0,  0.85, 3.11, 5.40, 8.53, 12.74, 15.68, 18.35];
+
 /* tangram palette, cool at the top to pale at the bottom */
 var ROW_COLORS = [
   '#73bcc3',  /* teal */
@@ -172,6 +286,8 @@ var ctx = canvas.getContext('2d');
 var msgEl = document.getElementById('msg');
 var statusEl = document.getElementById('status');
 var primaryEl = document.getElementById('primary');
+var filtEl = document.getElementById('filt');
+var filtvEl = document.getElementById('filtv');
 
 var dpr = Math.min(window.devicePixelRatio || 1, 3);
 canvas.width = W * dpr;
@@ -219,7 +335,9 @@ function buildBricks() {
 /* ---------------- sound ---------------- */
 
 var actx = null, abuf = null, master = null;
+var lpf = null, hpf = null, makeup = null;
 var voices = 0, soundOn = true;
+var filtPos = 0, filtTarget = 0;      /* slider units; filtPos glides toward filtTarget */
 
 function initAudio() {
   if (actx) {
@@ -233,17 +351,39 @@ function initAudio() {
   master = actx.createGain();
   master.gain.value = MASTER_GAIN;
 
-  /* A dense swarm sums well past 0 dBFS. This is a soft limiter, not a
-     colouring compressor -- to bypass it, connect master straight to
-     actx.destination and delete the two lines below. */
+  /* master -> lowpass -> highpass -> makeup -> limiter -> out.
+     The two filters are parked out of band at centre and are never
+     reconnected, so moving the slider cannot click. The limiter is a
+     soft limiter, not a colouring compressor -- to bypass it, connect
+     makeup straight to actx.destination and delete the six lines that
+     build `lim`. */
+  lpf = actx.createBiquadFilter();
+  lpf.type = 'lowpass';
+  lpf.frequency.value = FILT_LP_TOP;
+  lpf.Q.value = FILT_Q;
+
+  hpf = actx.createBiquadFilter();
+  hpf.type = 'highpass';
+  hpf.frequency.value = FILT_HP_BOT;
+  hpf.Q.value = FILT_Q;
+
+  makeup = actx.createGain();
+  makeup.gain.value = 1;
+
   var lim = actx.createDynamicsCompressor();
   lim.threshold.value = -4;
   lim.knee.value = 8;
   lim.ratio.value = 8;
   lim.attack.value = 0.005;
   lim.release.value = 0.25;
-  master.connect(lim);
+
+  master.connect(lpf);
+  lpf.connect(hpf);
+  hpf.connect(makeup);
+  makeup.connect(lim);
   lim.connect(actx.destination);
+
+  applyFilter();   /* adopt whatever the slider already reads */
 
   fetch(AUDIO_FILE).then(function (res) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -291,6 +431,78 @@ function playBrick(b) {
     try { g.disconnect(); } catch (e) {}
   };
   s.start();
+}
+
+/* ---------------- filter ---------------- */
+
+/* corner frequencies for a slider position. At centre both sit at
+   their parked ends and the pair is transparent. */
+function filtCorners(v) {
+  var t = Math.abs(v) / 100;
+  var lp = FILT_LP_TOP, hp = FILT_HP_BOT;
+  if (v < 0) {
+    lp = FILT_LP_TOP * Math.pow(FILT_LP_BOT / FILT_LP_TOP, Math.pow(t, FILT_TAPER_LP));
+  } else if (v > 0) {
+    hp = FILT_HP_BOT * Math.pow(FILT_HP_TOP / FILT_HP_BOT, Math.pow(t, FILT_TAPER_HP));
+  }
+  return { lp: lp, hp: hp };
+}
+
+/* linear interpolation of the measured makeup tables in log frequency */
+function filtMakeupDb(fc, fcs, dbs) {
+  var n = fcs.length;
+  if (fc <= fcs[0]) return dbs[0];
+  if (fc >= fcs[n - 1]) return dbs[n - 1];
+  var x = Math.log(fc);
+  for (var i = 1; i < n; i++) {
+    if (fc <= fcs[i]) {
+      var a = Math.log(fcs[i - 1]), b = Math.log(fcs[i]);
+      var u = (x - a) / (b - a);
+      return dbs[i - 1] + u * (dbs[i] - dbs[i - 1]);
+    }
+  }
+  return dbs[n - 1];
+}
+
+/* Both corners and the makeup gain are written from the same glided
+   position, so they can never disagree about which setting they are on. */
+function applyFilter() {
+  if (!actx || !lpf) return;
+  var c = filtCorners(filtPos);
+  var db = filtMakeupDb(c.lp, FILT_LP_FC, FILT_LP_DB) +
+           filtMakeupDb(c.hp, FILT_HP_FC, FILT_HP_DB);
+  var now = actx.currentTime;
+  try {
+    lpf.frequency.setTargetAtTime(c.lp, now, FILT_SMOOTH);
+    hpf.frequency.setTargetAtTime(c.hp, now, FILT_SMOOTH);
+    makeup.gain.setTargetAtTime(Math.pow(10, db / 20), now, FILT_SMOOTH);
+  } catch (e) {
+    lpf.frequency.value = c.lp;
+    hpf.frequency.value = c.hp;
+    makeup.gain.value = Math.pow(10, db / 20);
+  }
+}
+
+function filtTick() {
+  if (filtPos === filtTarget) return;
+  var d = filtTarget - filtPos;
+  var step = FILT_SLEW * (FILT_TICK / 1000);
+  filtPos = (Math.abs(d) <= step) ? filtTarget : filtPos + (d > 0 ? step : -step);
+  applyFilter();
+}
+
+function setFilter(v) {
+  initAudio();
+  var n = parseFloat(v);
+  if (!isFinite(n)) n = 0;
+  if (n < -100) n = -100;
+  if (n > 100) n = 100;
+  if (Math.abs(n) <= FILT_DEAD) n = 0;   /* detent, so centre is findable by hand */
+  filtTarget = n;
+  var c = filtCorners(n);
+  filtvEl.textContent = (n === 0) ? 'no filter'
+    : (n < 0 ? 'lowpass ' + Math.round(c.lp) + ' Hz'
+             : 'highpass ' + Math.round(c.hp) + ' Hz');
 }
 
 function toggleSound() {
@@ -578,12 +790,17 @@ canvas.addEventListener('pointercancel', function () { pointerDown = false; });
 
 document.addEventListener('keydown', function (e) {
   initAudio();
+  /* with the slider focused the arrow keys belong to it, not to the
+     paddle -- otherwise preventDefault below eats them and the filter
+     cannot be moved from the keyboard at all */
+  var ae = document.activeElement;
+  if (ae && ae.tagName === 'INPUT') return;
   if (e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
   else if (e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
   else if (e.key === ' ' || e.key === 'Spacebar') {
     /* let the browser handle Space when a control has focus, or the
        button fires and this handler toggles it straight back */
-    if (document.activeElement && document.activeElement.tagName === 'BUTTON') return;
+    if (ae && ae.tagName === 'BUTTON') return;
     e.preventDefault();
     primary();
   }
@@ -610,6 +827,8 @@ document.addEventListener('visibilitychange', function () {
 /* ---------------- go ---------------- */
 
 resetGame();
+setFilter(filtEl.value);
+setInterval(filtTick, FILT_TICK);
 requestAnimationFrame(frame);
 </script>
 </body>
