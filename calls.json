@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-14T14:18:38.388Z",
+  "updated": "2026-08-14T14:19:02.752Z",
   "calls": [
     {
       "id": 4,
@@ -366,6 +366,21 @@
       "deadline": "2026-08-30",
       "status": "observe",
       "url": "https://on-the-move.org/news/european-cultural-foundation-archives-academic-and-artistic-research-fellowships-italy",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1786717142750,
+      "title": "PACT Residenzen – pact-zollverein",
+      "org": "",
+      "deadline": "2026-08-28",
+      "status": "interested",
+      "url": "https://www.pact-zollverein.de/en/fields-of-work/artists-centre/residencies",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
