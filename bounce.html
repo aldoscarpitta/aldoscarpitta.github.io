@@ -270,6 +270,82 @@ var FILT_LP_DB = [3.16, 2.33, 1.41, 0.45, 0.06, 0,    0,    0,    0];
 var FILT_HP_FC = [20, 70, 140,  240,  380,  560,  780,   980,   1200];
 var FILT_HP_DB = [0,  0,  0.85, 3.11, 5.40, 8.53, 12.74, 15.68, 18.35];
 
+/* ---------------------------------------------------------------
+   RELEASE
+
+   The right half of the slider also shortens each note. The left
+   half and the centre do not: a sample cannot be made to ring for
+   longer than it was recorded, so the lowpass side keeps the natural
+   decay and the constants below never apply there.
+
+   This is not redundant with the filter. Measured decay of the
+   sample to -45 dB:
+
+     full band     1.49 s
+     highpass  600 Hz   2.25 s
+     highpass 1200 Hz   2.18 s
+
+   Highpassing makes the sound decay SLOWER, not faster -- it removes
+   the loud low body, and what is left is the quiet metallic tail,
+   which relative to its own reduced peak rings half a second longer.
+   So the highpass on its own makes the piece wash out. The release
+   is what turns the right half into a dry percussive instrument
+   rather than a thin sustained one.
+
+   Each note takes its release at the moment it is struck, from the
+   glided slider position, and keeps it -- moving the slider changes
+   the timbre of notes already ringing (the filter is on the master)
+   but not their length (the envelope is on the voice). That is the
+   right split: the filter is the room, the envelope is the strike.
+
+   LENGTH. Audible length is scaled geometrically with slider
+   position, which is perceptually even because duration is judged
+   logarithmically:  length = natural * REL_MIN^t.  The natural
+   length is REL_T45 divided by the brick's playbackRate, so the
+   "big bells ring long" property of 00-system.md section 8 survives:
+   at full right the wall still runs 240 ms at the bottom-left corner
+   down to 54 ms at the top-right, rather than flattening to one
+   length.
+
+     slider    0    12    25    37    50    62    75    87   100
+     G2      3.00  2.22  1.60  1.18  0.85  0.63  0.45  0.33  0.24 s
+     G3      1.49  1.10  0.79  0.59  0.42  0.31  0.22  0.17  0.12 s
+     A4      0.67  0.49  0.36  0.26  0.19  0.14  0.10  0.07  0.05 s
+
+   SHAPE. The sample's own decay is close to exponential -- straight
+   to within 2.1 dB rms between -6 and -45 dB -- so an added
+   exponential composes with it predictably, and the time constant
+   that lands the compound decay on -45 dB at the target length has a
+   closed form. At REL_MIN^0 = 1 that time constant is infinite,
+   which is why the centre is exactly the unmodified behaviour and
+   there is no step at the detent edge.
+
+   LEVEL. Shorter notes are quieter, and most of that is wanted: at
+   full right the loudness is 14 dB down, of which about 11 dB is
+   simply 12.5x less duration. What should NOT drop is the strike, so
+   REL_MK_DB restores the peak. It is small -- under 3 dB -- because
+   the peak is the attack transient and the envelope barely touches
+   it until the time constant gets very short. Measured the same way
+   as the filter makeup, and applied per voice rather than on the
+   master, so each note is compensated for its own envelope and a
+   note still ringing from an earlier setting is not.
+
+   Verified that the two makeups may be added: filter loss and
+   envelope loss are additive in dB to within 0.5 dB over most of the
+   travel, +3.3 dB at the extreme, and since both tables take the
+   smallest value any render needed, the pair never over-compensates.
+   Measured residual peak across the whole right travel: 0.2 to 6.0
+   dB BELOW the centre peak, never above.
+   --------------------------------------------------------------- */
+
+var REL_MIN = 0.08;                   /* audible length at full right, as a fraction of natural */
+var REL_T45 = 1.490;                  /* seconds to -45 dB at playbackRate 1.0, measured */
+var REL_BYPASS = 0.995;               /* above this, no envelope at all */
+
+/* measured peak makeup for the envelope alone, dB, against ascending length fraction */
+var REL_MK_FRAC = [0.08, 0.11, 0.15, 0.21, 0.28, 0.39, 0.53, 0.74, 1.0];
+var REL_MK_DB   = [2.94, 1.80, 1.06, 0.55, 0.28, 0.10, 0.01, 0,    0];
+
 /* tangram palette, cool at the top to pale at the bottom */
 var ROW_COLORS = [
   '#73bcc3',  /* teal */
@@ -408,12 +484,16 @@ function playBrick(b) {
   if (!soundOn || !abuf || !actx || voices >= MAX_VOICES) return;
   if (actx.state === 'suspended') actx.resume();
 
+  var t0 = actx.currentTime;
+  var frac = relFrac(filtPos);          /* taken at the strike and kept */
+
   var s = actx.createBufferSource();
   s.buffer = abuf;
   s.playbackRate.value = b.rate;
 
   var g = actx.createGain();
-  g.gain.value = b.gain;
+  var lvl = b.gain * Math.pow(10, filtMakeupDb(frac, REL_MK_FRAC, REL_MK_DB) / 20);
+  g.gain.setValueAtTime(lvl, t0);
 
   if (actx.createStereoPanner) {
     var p = actx.createStereoPanner();
@@ -430,7 +510,18 @@ function playBrick(b) {
     voices--;
     try { g.disconnect(); } catch (e) {}
   };
-  s.start();
+  s.start(t0);
+
+  if (frac < REL_BYPASS) {
+    /* nat = length of the sample's own decay to -45 dB at this pitch.
+       tau is the added exponential that lands the compound decay on
+       -45 dB at nat*frac; stop at -60 dB, which is 4/3 of that, so
+       the source is released without a click. */
+    var nat = REL_T45 / b.rate;
+    var tau = 8.686 * nat * frac / (45 * (1 - frac));
+    g.gain.setTargetAtTime(0, t0, tau);
+    s.stop(t0 + Math.min(nat * frac * 4 / 3, abuf.duration / b.rate));
+  }
 }
 
 /* ---------------- filter ---------------- */
@@ -448,7 +539,17 @@ function filtCorners(v) {
   return { lp: lp, hp: hp };
 }
 
-/* linear interpolation of the measured makeup tables in log frequency */
+/* audible note length as a fraction of the natural one. Only the
+   highpass half shortens; the lowpass half and the centre are 1. */
+function relFrac(v) {
+  return v > 0 ? Math.pow(REL_MIN, Math.abs(v) / 100) : 1;
+}
+
+/* Linear interpolation of a measured makeup table, in the log of the
+   index. Used for both: the two filter tables are indexed by corner
+   frequency, the release table by length fraction. Both of those are
+   geometric in slider position, so interpolating in the log makes the
+   makeup linear in slider position between measured points. */
 function filtMakeupDb(fc, fcs, dbs) {
   var n = fcs.length;
   if (fc <= fcs[0]) return dbs[0];
