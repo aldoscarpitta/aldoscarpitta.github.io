@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-16T11:59:12.642Z",
+  "updated": "2026-08-16T11:59:16.917Z",
   "calls": [
     {
       "id": 4,
@@ -45,21 +45,6 @@
       "lockNote": "",
       "fit": "",
       "dateApprox": true
-    },
-    {
-      "id": 1782644697773,
-      "title": "Nutrimenti_habitat creativo 2026 – Associazione Demetra",
-      "org": "",
-      "deadline": "2026-08-14",
-      "status": "interested",
-      "url": "https://www.associazionedemetra.it/nutrimenti_habitat-creativo-2026/",
-      "notes": "",
-      "history": [],
-      "recurs": null,
-      "lockedUntil": null,
-      "lockNote": "",
-      "fit": "",
-      "dateApprox": false
     },
     {
       "id": 1782644904484,
