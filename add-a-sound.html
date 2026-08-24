@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#131316">
+<title>Add a sound</title>
+<style>
+:root{
+  --rack:#131316; --panel:#22242a; --rule:#3a3e46; --engrave:#8b8f97;
+  --signal:#e6e2d7; --live:#c9b264; --ok:#6a94a6; --bad:#b8563f;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--rack);color:var(--signal);
+  font:16px/1.55 ui-sans-serif,system-ui,"Helvetica Neue",sans-serif;
+  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+.wrap{max-width:520px;margin:0 auto;padding:34px 22px 60px;
+  padding-bottom:calc(60px + env(safe-area-inset-bottom))}
+h1{font:600 19px/1.3 ui-sans-serif,system-ui;letter-spacing:.18em;
+  text-transform:uppercase;margin:0 0 6px}
+.sub{color:var(--engrave);font-size:14px;margin:0 0 28px}
+
+/* one big target: a phone in a dark room, held one-handed */
+#rec{width:100%;border:1px solid var(--rule);background:var(--panel);
+  color:var(--signal);border-radius:3px;padding:30px 18px;text-align:center;
+  cursor:pointer;font:inherit;transition:border-color .15s,background .15s}
+#rec:active{background:#2c2f36}
+#rec.on{border-color:var(--bad);background:#b8563f18}
+#rec b{display:block;font-size:19px;font-weight:600;margin-bottom:3px}
+#rec span{color:var(--engrave);font-size:13px}
+#dot{display:inline-block;width:9px;height:9px;border-radius:50%;
+  background:var(--bad);margin-right:8px;vertical-align:1px}
+#dot[hidden]{display:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+#rec.on #dot{animation:pulse 1.1s infinite}
+
+.or{text-align:center;color:var(--engrave);font-size:12px;letter-spacing:.14em;
+  text-transform:uppercase;margin:20px 0 12px}
+.pick{display:block;width:100%;border:1px dashed var(--rule);border-radius:3px;
+  padding:16px;text-align:center;color:var(--engrave);font-size:14px;cursor:pointer}
+
+#review{margin-top:22px;display:none}
+audio{width:100%;margin-bottom:12px}
+.row{display:flex;gap:10px}
+button.act{flex:1;font:600 14px/1 ui-sans-serif,system-ui;letter-spacing:.06em;
+  border-radius:3px;padding:15px 12px;cursor:pointer;border:1px solid var(--rule);
+  background:var(--panel);color:var(--signal)}
+button.act.go{background:#3a3423;border-color:var(--live);color:var(--live)}
+button.act:disabled{opacity:.45}
+
+#msg{margin-top:20px;font-size:14px;min-height:22px}
+#msg.good{color:var(--ok)} #msg.bad{color:var(--bad)}
+.note{margin-top:34px;color:var(--engrave);font-size:12.5px;line-height:1.65;
+  border-top:1px solid var(--rule);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Add a sound</h1>
+  <p class="sub">Record anything at all. It joins the piece playing in this room.</p>
+
+  <button id="rec"><b><span id="dot" hidden></span><span id="reclabel">Record</span></b>
+    <span id="rechint">Press once to start, again to stop</span></button>
+
+  <div class="or">or</div>
+  <label class="pick" for="file">Choose a sound already on your phone</label>
+  <input type="file" id="file" accept="audio/*" hidden>
+
+  <div id="review">
+    <audio id="prev" controls preload="metadata"></audio>
+    <div class="row">
+      <button class="act" id="again">Try again</button>
+      <button class="act go" id="send">Send it</button>
+    </div>
+  </div>
+
+  <div id="msg"></div>
+
+  <p class="note">Everything is listened to before it reaches the speakers, so
+    there may be a few minutes between sending and hearing it. Once it arrives
+    it stays — quietly, further and further back, for as long as the piece runs.</p>
+</div>
+
+<script>
+/* ------------------------------------------------------------------
+   Two things to set, then this file goes on your site as-is.
+
+   ENDPOINT  where the drop box lives.
+   MODE      'appsscript' if the drop box is the Google Apps Script
+             (which it is, on GitHub Pages - that cannot run PHP),
+             'php' if you are hosting soundscape-dropbox.php somewhere.
+
+   Both must be https if this page is https, or phone browsers refuse.
+   ------------------------------------------------------------------ */
+const ENDPOINT = 'https://script.google.com/macros/s/PASTE-YOUR-DEPLOYMENT-ID/exec';
+const MODE = 'appsscript';
+
+const $=s=>document.querySelector(s);
+let media=null, chunks=[], blob=null, blobName='sound.webm';
+
+function msg(t,cls){ const m=$('#msg'); m.textContent=t; m.className=cls||''; }
+function showReview(b,name){
+  blob=b; blobName=name;
+  $('#prev').src=URL.createObjectURL(b);
+  $('#review').style.display='block';
+  msg('');
+}
+
+/* ---- recording ---- */
+// MIME support differs: Safari gives mp4, Chrome/Firefox webm. Let the browser
+// pick what it can actually produce; the server converts whatever arrives.
+function pickType(){
+  for(const t of ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac'])
+    if(window.MediaRecorder && MediaRecorder.isTypeSupported(t)) return t;
+  return '';
+}
+$('#rec').addEventListener('click', async ()=>{
+  if(media && media.state==='recording'){ media.stop(); return; }
+  if(!navigator.mediaDevices || !window.MediaRecorder){
+    msg('This browser cannot record. Use "Choose a sound" instead.','bad'); return;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const type=pickType();
+    media=new MediaRecorder(stream, type?{mimeType:type}:undefined);
+    chunks=[];
+    media.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
+    media.onstop=()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      const mt=media.mimeType||type||'audio/webm';
+      const ext=mt.includes('mp4')||mt.includes('aac')?'m4a':'webm';
+      showReview(new Blob(chunks,{type:mt}), 'recording.'+ext);
+      $('#rec').classList.remove('on'); $('#dot').hidden=true;
+      $('#reclabel').textContent='Record'; $('#rechint').textContent='Press once to start, again to stop';
+    };
+    media.start();
+    $('#rec').classList.add('on'); $('#dot').hidden=false;
+    $('#reclabel').textContent='Recording — press to stop';
+    $('#rechint').textContent='Take as long as you like';
+    $('#review').style.display='none'; msg('');
+  }catch(e){
+    msg('Microphone not allowed. Check your browser settings, or choose a file.','bad');
+  }
+});
+
+$('#file').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(f) showReview(f, f.name);
+});
+$('#again').addEventListener('click', ()=>{
+  $('#review').style.display='none'; blob=null; msg('');
+});
+
+/* ---- sending ---- */
+$('#send').addEventListener('click', async ()=>{
+  if(!blob) return;
+  const capMB = (MODE==='appsscript') ? 12 : 60;
+  if(blob.size > capMB*1024*1024){
+    msg(`That is too large — keep it under ${capMB} MB, or record a shorter one.`,'bad');
+    return;
+  }
+  $('#send').disabled=true; $('#again').disabled=true; msg('Sending…');
+  try{
+    let r;
+    if(MODE==='appsscript'){
+      // Apps Script cannot read multipart uploads, and a JSON content-type
+      // would trigger a CORS preflight it does not answer. A plain-text body
+      // carrying JSON avoids both.
+      const b64=await new Promise((res,rej)=>{
+        const fr=new FileReader();
+        fr.onload=()=>res(String(fr.result).split(',')[1]);
+        fr.onerror=()=>rej(new Error('could not read that file'));
+        fr.readAsDataURL(blob);
+      });
+      r=await fetch(ENDPOINT,{method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({name:blobName,data:b64})});
+    } else {
+      const fd=new FormData(); fd.append('files', blob, blobName);
+      r=await fetch(ENDPOINT,{method:'POST',body:fd});
+    }
+    const d=await r.json();
+    if(!d.ok){ msg(d.error||'That did not go through.','bad'); }
+    else{
+      msg('Sent. Listen for it.','good');
+      $('#review').style.display='none'; blob=null;
+    }
+  }catch(e){ msg('Could not send — check your connection and try again.','bad'); }
+  $('#send').disabled=false; $('#again').disabled=false;
+});
+</script>
+</body>
+</html>
