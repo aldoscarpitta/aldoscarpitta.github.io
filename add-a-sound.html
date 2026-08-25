@@ -153,6 +153,13 @@ $('#again').addEventListener('click', ()=>{
 /* ---- sending ---- */
 $('#send').addEventListener('click', async ()=>{
   if(!blob) return;
+  if(ENDPOINT.indexOf('PASTE-YOUR-DEPLOYMENT-ID')>=0){
+    msg('This page has not been pointed at a drop box yet — set ENDPOINT.','bad'); return;
+  }
+  if(location.protocol==='file:'){
+    msg('Open this page from your website, not as a file on your computer — '
+      +'browsers block uploads from local files.','bad'); return;
+  }
   const capMB = (MODE==='appsscript') ? 12 : 60;
   if(blob.size > capMB*1024*1024){
     msg(`That is too large — keep it under ${capMB} MB, or record a shorter one.`,'bad');
@@ -178,13 +185,51 @@ $('#send').addEventListener('click', async ()=>{
       const fd=new FormData(); fd.append('files', blob, blobName);
       r=await fetch(ENDPOINT,{method:'POST',body:fd});
     }
+    if(!r.ok){ msg('The drop box answered with an error ('+r.status+').','bad');
+               $('#send').disabled=false; $('#again').disabled=false; return; }
     const d=await r.json();
     if(!d.ok){ msg(d.error||'That did not go through.','bad'); }
     else{
       msg('Sent. Listen for it.','good');
       $('#review').style.display='none'; blob=null;
     }
-  }catch(e){ msg('Could not send — check your connection and try again.','bad'); }
+  }catch(e){
+    // The request may well have ARRIVED and only the reply been unreadable:
+    // that is what happens when a drop box does not send CORS headers. Retry
+    // in a mode that sends but cannot read, and say so honestly rather than
+    // telling someone it failed when their sound is already there.
+    if(MODE==='appsscript' && e && /fetch/i.test(String(e.message||e))){
+      try{
+        const b64=await new Promise((res,rej)=>{
+          const fr=new FileReader();
+          fr.onload=()=>res(String(fr.result).split(',')[1]);
+          fr.onerror=()=>rej(new Error('could not read that file'));
+          fr.readAsDataURL(blob);
+        });
+        await fetch(ENDPOINT,{method:'POST',mode:'no-cors',
+          headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body:JSON.stringify({name:blobName,data:b64})});
+        msg('Sent. No confirmation came back, but it should have arrived — '
+          +'please do not send it twice.','good');
+        $('#review').style.display='none'; blob=null;
+        $('#send').disabled=false; $('#again').disabled=false;
+        return;
+      }catch(e2){ /* fall through to the specific messages below */ }
+    }
+    // "check your connection" hid every real cause. Name them instead.
+    if(location.protocol==='file:'){
+      msg('This page has to be opened from a web address, not from a file on '
+        +'your computer. Put it on your site and open it from there.','bad');
+    } else if(ENDPOINT.indexOf('PASTE-YOUR-DEPLOYMENT-ID')>=0){
+      msg('This page has not been pointed at a drop box yet — ENDPOINT is '
+        +'still the placeholder.','bad');
+    } else if(location.protocol==='https:' && ENDPOINT.startsWith('http://')){
+      msg('The drop box address must be https, because this page is.','bad');
+    } else {
+      msg('Could not reach the drop box: '+(e && e.message ? e.message : e)
+        +'  ('+ENDPOINT.slice(0,60)+'…)','bad');
+    }
+  }
   $('#send').disabled=false; $('#again').disabled=false;
 });
 </script>
