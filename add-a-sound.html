@@ -1,84 +1,101 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#131316">
-<title>Add a sound</title>
+<meta name="theme-color" content="#efe9dd">
+<title>Aggiungi un suono</title>
 <style>
 :root{
-  --rack:#131316; --panel:#22242a; --rule:#3a3e46; --engrave:#8b8f97;
-  --signal:#e6e2d7; --live:#c9b264; --ok:#6a94a6; --bad:#b8563f;
+  /* Drawn from the photograph itself: warm stone, cool fold, deep ink.
+     Ink measures 6.7:1 against the darkest 1% of the image and 11:1 against
+     its median, so body text is readable directly on the picture. Slate is
+     only 4.4:1 at worst, so it is used solely on the veiled panels. */
+  --ink:#241f1a; --slate:#35404b; --stone:#6f665e;
+  --veil:rgba(255,253,247,.74); --veil-line:rgba(36,31,26,.18);
+  --live:#8f4433;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--rack);color:var(--signal);
+html,body{margin:0;min-height:100%;color:var(--ink);
   font:16px/1.55 ui-sans-serif,system-ui,"Helvetica Neue",sans-serif;
-  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
-.wrap{max-width:520px;margin:0 auto;padding:34px 22px 60px;
+  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+  background:#efe9dd}
+/* A real element, not a pseudo-element with a negative z-index: the body
+   background propagates to the canvas and the two fight. This also avoids
+   background-attachment:fixed, which stutters on iOS. */
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:url("add-a-sound-background.jpg") center/cover no-repeat #efe9dd}
+.wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:34px 22px 60px;
   padding-bottom:calc(60px + env(safe-area-inset-bottom))}
-h1{font:600 19px/1.3 ui-sans-serif,system-ui;letter-spacing:.18em;
-  text-transform:uppercase;margin:0 0 6px}
-.sub{color:var(--engrave);font-size:14px;margin:0 0 28px}
+h1{font:600 19px/1.3 ui-sans-serif,system-ui;letter-spacing:.2em;
+  text-transform:uppercase;margin:0 0 8px}
+.sub{color:var(--ink);opacity:.72;font-size:14.5px;margin:0 0 26px;max-width:34ch}
 
-/* one big target: a phone in a dark room, held one-handed */
-#rec{width:100%;border:1px solid var(--rule);background:var(--panel);
-  color:var(--signal);border-radius:3px;padding:30px 18px;text-align:center;
-  cursor:pointer;font:inherit;transition:border-color .15s,background .15s}
-#rec:active{background:#2c2f36}
-#rec.on{border-color:var(--bad);background:#b8563f18}
+/* the one big target, as a card lifted off the stone */
+#rec{width:100%;border:1px solid var(--veil-line);background:var(--veil);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  color:var(--ink);border-radius:2px;padding:30px 18px;text-align:center;
+  cursor:pointer;font:inherit;transition:background .15s,border-color .15s}
+#rec:active{background:rgba(255,253,247,.9)}
+#rec.on{border-color:var(--live);background:rgba(255,250,246,.88)}
 #rec b{display:block;font-size:19px;font-weight:600;margin-bottom:3px}
-#rec span{color:var(--engrave);font-size:13px}
+#rec span{color:var(--stone);font-size:13px}
 #dot{display:inline-block;width:9px;height:9px;border-radius:50%;
-  background:var(--bad);margin-right:8px;vertical-align:1px}
+  background:var(--live);margin-right:8px;vertical-align:1px}
 #dot[hidden]{display:none}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
 #rec.on #dot{animation:pulse 1.1s infinite}
 
-.or{text-align:center;color:var(--engrave);font-size:12px;letter-spacing:.14em;
+.or{text-align:center;color:var(--stone);font-size:12px;letter-spacing:.16em;
   text-transform:uppercase;margin:20px 0 12px}
-.pick{display:block;width:100%;border:1px dashed var(--rule);border-radius:3px;
-  padding:16px;text-align:center;color:var(--engrave);font-size:14px;cursor:pointer}
+.pick{display:block;width:100%;border:1px dashed var(--veil-line);
+  background:rgba(255,253,247,.42);border-radius:2px;padding:16px;
+  text-align:center;color:var(--ink);font-size:14px;cursor:pointer}
 
-#review{margin-top:22px;display:none}
+#review{margin-top:22px;display:none;background:var(--veil);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  border:1px solid var(--veil-line);border-radius:2px;padding:14px}
 audio{width:100%;margin-bottom:12px}
 .row{display:flex;gap:10px}
 button.act{flex:1;font:600 14px/1 ui-sans-serif,system-ui;letter-spacing:.06em;
-  border-radius:3px;padding:15px 12px;cursor:pointer;border:1px solid var(--rule);
-  background:var(--panel);color:var(--signal)}
-button.act.go{background:#3a3423;border-color:var(--live);color:var(--live)}
+  border-radius:2px;padding:15px 12px;cursor:pointer;
+  border:1px solid var(--slate);background:transparent;color:var(--slate)}
+/* the send button is the only filled thing on the page, so it reads first */
+button.act.go{background:var(--ink);border-color:var(--ink);color:#fbf6ea}
 button.act:disabled{opacity:.45}
 
-#msg{margin-top:20px;font-size:14px;min-height:22px}
-#msg.good{color:var(--ok)} #msg.bad{color:var(--bad)}
-.note{margin-top:34px;color:var(--engrave);font-size:12.5px;line-height:1.65;
-  border-top:1px solid var(--rule);padding-top:16px}
+#msg{margin-top:20px;font-size:14.5px;min-height:22px;font-weight:500}
+#msg.good{color:#3d5a4a} #msg.bad{color:#8f4433}
+.note{margin-top:34px;color:var(--ink);opacity:.66;font-size:12.5px;
+  line-height:1.7;border-top:1px solid var(--veil-line);padding-top:16px}
 </style>
 </head>
 <body>
+<div id="bg" aria-hidden="true"></div>
 <div class="wrap">
-  <h1>Add a sound</h1>
-  <p class="sub">Record anything at all. It joins the piece playing in the room.</p>
+  <h1>Aggiungi un suono</h1>
+  <p class="sub">Registra qualsiasi cosa. Entrerà nel brano che sta suonando in questa sala.</p>
 
-  <button id="rec"><b><span id="dot" hidden></span><span id="reclabel">Record</span></b>
-    <span id="rechint">Press once to start, again to stop</span></button>
+  <button id="rec"><b><span id="dot" hidden></span><span id="reclabel">Registra</span></b>
+    <span id="rechint">Premi una volta per iniziare, di nuovo per fermare</span></button>
 
-  <div class="or">or</div>
-  <label class="pick" for="file">Choose a sound already on your phone</label>
+  <div class="or">oppure</div>
+  <label class="pick" for="file">Scegli un suono che hai già sul telefono</label>
   <input type="file" id="file" accept="audio/*" hidden>
 
   <div id="review">
     <audio id="prev" controls preload="metadata"></audio>
     <div class="row">
-      <button class="act" id="again">Try again</button>
-      <button class="act go" id="send">Send it</button>
+      <button class="act" id="again">Riprova</button>
+      <button class="act go" id="send">Invia</button>
     </div>
   </div>
 
   <div id="msg"></div>
 
-  <p class="note">Everything is listened to before it reaches the speakers, so
-    there may be a few minutes between sending and hearing it. Once it arrives
-    it stays — quietly, further and further back, for as long as the piece runs.</p>
+  <p class="note">Ogni suono viene ascoltato prima di arrivare agli altoparlanti,
+    perciò possono passare alcuni minuti fra l'invio e l'ascolto. Una volta
+    arrivato resta: piano, sempre più sullo sfondo, per tutta la durata del brano.</p>
 </div>
 
 <script>
@@ -92,7 +109,7 @@ button.act:disabled{opacity:.45}
 
    Both must be https if this page is https, or phone browsers refuse.
    ------------------------------------------------------------------ */
-const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyTPlyYUB9et8M0FH_KSoU0UnAr1NPe1NWbmI4WC0Wiiu_sVusUs4uhuVeNZSD2_ZDwLw/exec';
+const ENDPOINT = 'https://script.google.com/macros/s/PASTE-YOUR-DEPLOYMENT-ID/exec';
 const MODE = 'appsscript';
 
 const $=s=>document.querySelector(s);
@@ -117,7 +134,7 @@ function pickType(){
 $('#rec').addEventListener('click', async ()=>{
   if(media && media.state==='recording'){ media.stop(); return; }
   if(!navigator.mediaDevices || !window.MediaRecorder){
-    msg('This browser cannot record. Use "Choose a sound" instead.','bad'); return;
+    msg('Questo browser non può registrare. Usa «Scegli un suono».','bad'); return;
   }
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
@@ -131,15 +148,15 @@ $('#rec').addEventListener('click', async ()=>{
       const ext=mt.includes('mp4')||mt.includes('aac')?'m4a':'webm';
       showReview(new Blob(chunks,{type:mt}), 'recording.'+ext);
       $('#rec').classList.remove('on'); $('#dot').hidden=true;
-      $('#reclabel').textContent='Record'; $('#rechint').textContent='Press once to start, again to stop';
+      $('#reclabel').textContent='Registra'; $('#rechint').textContent='Premi una volta per iniziare, di nuovo per fermare';
     };
     media.start();
     $('#rec').classList.add('on'); $('#dot').hidden=false;
-    $('#reclabel').textContent='Recording — press to stop';
-    $('#rechint').textContent='Take as long as you like';
+    $('#reclabel').textContent='Sto registrando — premi per fermare';
+    $('#rechint').textContent='Prenditi tutto il tempo che vuoi';
     $('#review').style.display='none'; msg('');
   }catch(e){
-    msg('Microphone not allowed. Check your browser settings, or choose a file.','bad');
+    msg('Microfono non consentito. Controlla le impostazioni del browser, oppure scegli un file.','bad');
   }
 });
 
@@ -154,18 +171,18 @@ $('#again').addEventListener('click', ()=>{
 $('#send').addEventListener('click', async ()=>{
   if(!blob) return;
   if(ENDPOINT.indexOf('PASTE-YOUR-DEPLOYMENT-ID')>=0){
-    msg('This page has not been pointed at a drop box yet — set ENDPOINT.','bad'); return;
+    msg('Questa pagina non è ancora collegata: manca ENDPOINT.','bad'); return;
   }
   if(location.protocol==='file:'){
-    msg('Open this page from your website, not as a file on your computer — '
-      +'browsers block uploads from local files.','bad'); return;
+    msg('Apri questa pagina dal sito, non come file sul computer: '
+      +'i browser bloccano gli invii dai file locali.','bad'); return;
   }
   const capMB = (MODE==='appsscript') ? 12 : 60;
   if(blob.size > capMB*1024*1024){
-    msg(`That is too large — keep it under ${capMB} MB, or record a shorter one.`,'bad');
+    msg(`Troppo grande — resta sotto i ${capMB} MB, oppure registra qualcosa di più breve.`,'bad');
     return;
   }
-  $('#send').disabled=true; $('#again').disabled=true; msg('Sending…');
+  $('#send').disabled=true; $('#again').disabled=true; msg('Invio in corso…');
   try{
     let r;
     if(MODE==='appsscript'){
@@ -175,7 +192,7 @@ $('#send').addEventListener('click', async ()=>{
       const b64=await new Promise((res,rej)=>{
         const fr=new FileReader();
         fr.onload=()=>res(String(fr.result).split(',')[1]);
-        fr.onerror=()=>rej(new Error('could not read that file'));
+        fr.onerror=()=>rej(new Error('impossibile leggere il file'));
         fr.readAsDataURL(blob);
       });
       r=await fetch(ENDPOINT,{method:'POST',
@@ -185,12 +202,12 @@ $('#send').addEventListener('click', async ()=>{
       const fd=new FormData(); fd.append('files', blob, blobName);
       r=await fetch(ENDPOINT,{method:'POST',body:fd});
     }
-    if(!r.ok){ msg('The drop box answered with an error ('+r.status+').','bad');
+    if(!r.ok){ msg('Il server ha risposto con un errore ('+r.status+').','bad');
                $('#send').disabled=false; $('#again').disabled=false; return; }
     const d=await r.json();
-    if(!d.ok){ msg(d.error||'That did not go through.','bad'); }
+    if(!d.ok){ msg(d.error||'Non è andato a buon fine.','bad'); }
     else{
-      msg('Sent. Listen for it.','good');
+      msg('Inviato. Resta in ascolto.','good');
       $('#review').style.display='none'; blob=null;
     }
   }catch(e){
@@ -203,14 +220,14 @@ $('#send').addEventListener('click', async ()=>{
         const b64=await new Promise((res,rej)=>{
           const fr=new FileReader();
           fr.onload=()=>res(String(fr.result).split(',')[1]);
-          fr.onerror=()=>rej(new Error('could not read that file'));
+          fr.onerror=()=>rej(new Error('impossibile leggere il file'));
           fr.readAsDataURL(blob);
         });
         await fetch(ENDPOINT,{method:'POST',mode:'no-cors',
           headers:{'Content-Type':'text/plain;charset=utf-8'},
           body:JSON.stringify({name:blobName,data:b64})});
-        msg('Sent. No confirmation came back, but it should have arrived — '
-          +'please do not send it twice.','good');
+        msg('Inviato. Non è arrivata conferma, ma dovrebbe essere arrivato: '
+          +'per favore non inviarlo due volte.','good');
         $('#review').style.display='none'; blob=null;
         $('#send').disabled=false; $('#again').disabled=false;
         return;
@@ -218,15 +235,15 @@ $('#send').addEventListener('click', async ()=>{
     }
     // "check your connection" hid every real cause. Name them instead.
     if(location.protocol==='file:'){
-      msg('This page has to be opened from a web address, not from a file on '
-        +'your computer. Put it on your site and open it from there.','bad');
+      msg('Questa pagina va aperta da un indirizzo web, non da un file sul '
+        +'computer. Mettila sul sito e aprila da lì.','bad');
     } else if(ENDPOINT.indexOf('PASTE-YOUR-DEPLOYMENT-ID')>=0){
-      msg('This page has not been pointed at a drop box yet — ENDPOINT is '
-        +'still the placeholder.','bad');
+      msg('Questa pagina non è ancora collegata: ENDPOINT non è stato '
+        +'impostato.','bad');
     } else if(location.protocol==='https:' && ENDPOINT.startsWith('http://')){
-      msg('The drop box address must be https, because this page is.','bad');
+      msg('L\'indirizzo del server deve essere https, come questa pagina.','bad');
     } else {
-      msg('Could not reach the drop box: '+(e && e.message ? e.message : e)
+      msg('Impossibile raggiungere il server: '+(e && e.message ? e.message : e)
         +'  ('+ENDPOINT.slice(0,60)+'…)','bad');
     }
   }
