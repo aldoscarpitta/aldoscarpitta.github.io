@@ -11,13 +11,15 @@
      Ink measures 6.7:1 against the darkest 1% of the image and 11:1 against
      its median, so body text is readable directly on the picture. Slate is
      only 4.4:1 at worst, so it is used solely on the veiled panels. */
-  --ink:#241f1a; --slate:#35404b; --stone:#6f665e;
-  --veil:rgba(255,253,247,.74); --veil-line:rgba(36,31,26,.18);
-  --live:#8f4433;
+  --ink:#14100d; --slate:#1f2a33; --stone:#4a423b;
+  --face:"Avenir Next","Avenir Next LT Pro",Avenir,"Nunito Sans",
+         ui-sans-serif,system-ui,"Helvetica Neue",sans-serif;
+  --veil:rgba(255,253,247,.78); --veil-line:rgba(20,16,13,.24);
+  --live:#7a3527;
 }
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;color:var(--ink);
-  font:16px/1.55 ui-sans-serif,system-ui,"Helvetica Neue",sans-serif;
+  font:16.5px/1.55 var(--face);
   -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
   background:#efe9dd}
 /* A real element, not a pseudo-element with a negative z-index: the body
@@ -27,46 +29,48 @@ html,body{margin:0;min-height:100%;color:var(--ink);
   background:url("add-a-sound-background.jpg") center/cover no-repeat #efe9dd}
 .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:34px 22px 60px;
   padding-bottom:calc(60px + env(safe-area-inset-bottom))}
-h1{font:600 19px/1.3 ui-sans-serif,system-ui;letter-spacing:.2em;
+h1{font:600 19px/1.3 var(--face);letter-spacing:.2em;
   text-transform:uppercase;margin:0 0 8px}
-.sub{color:var(--ink);opacity:.72;font-size:14.5px;margin:0 0 26px;max-width:34ch}
+.sub{color:var(--ink);opacity:.86;font-size:15px;margin:0 0 26px;max-width:34ch}
 
 /* the one big target, as a card lifted off the stone */
-#rec{width:100%;border:1px solid var(--veil-line);background:var(--veil);
+#rec{width:100%;border:1px solid rgba(20,16,13,.30);background:var(--veil);
   -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
   color:var(--ink);border-radius:2px;padding:30px 18px;text-align:center;
   cursor:pointer;font:inherit;transition:background .15s,border-color .15s}
 #rec:active{background:rgba(255,253,247,.9)}
 #rec.on{border-color:var(--live);background:rgba(255,250,246,.88)}
-#rec b{display:block;font-size:19px;font-weight:600;margin-bottom:3px}
-#rec span{color:var(--stone);font-size:13px}
+#rec b{display:block;font-size:20px;font-weight:600;margin-bottom:4px}
+#rec span{color:var(--stone);font-size:13.5px}
 #dot{display:inline-block;width:9px;height:9px;border-radius:50%;
   background:var(--live);margin-right:8px;vertical-align:1px}
 #dot[hidden]{display:none}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
 #rec.on #dot{animation:pulse 1.1s infinite}
 
-.or{text-align:center;color:var(--stone);font-size:12px;letter-spacing:.16em;
+.or{text-align:center;color:var(--stone);font-size:12px;letter-spacing:.18em;
   text-transform:uppercase;margin:20px 0 12px}
-.pick{display:block;width:100%;border:1px dashed var(--veil-line);
-  background:rgba(255,253,247,.42);border-radius:2px;padding:16px;
-  text-align:center;color:var(--ink);font-size:14px;cursor:pointer}
+.pick{display:block;width:100%;border:1px dashed rgba(20,16,13,.34);
+  background:rgba(255,253,247,.52);border-radius:2px;padding:16px;
+  text-align:center;color:var(--ink);font:500 14.5px/1.4 var(--face);
+  cursor:pointer}
 
 #review{margin-top:22px;display:none;background:var(--veil);
   -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
   border:1px solid var(--veil-line);border-radius:2px;padding:14px}
 audio{width:100%;margin-bottom:12px}
 .row{display:flex;gap:10px}
-button.act{flex:1;font:600 14px/1 ui-sans-serif,system-ui;letter-spacing:.06em;
-  border-radius:2px;padding:15px 12px;cursor:pointer;
-  border:1px solid var(--slate);background:transparent;color:var(--slate)}
+button.act{flex:1;font:600 14.5px/1 var(--face);letter-spacing:.06em;
+  border-radius:2px;padding:16px 12px;cursor:pointer;
+  border:1.5px solid var(--slate);background:rgba(255,253,247,.5);
+  color:var(--slate)}
 /* the send button is the only filled thing on the page, so it reads first */
 button.act.go{background:var(--ink);border-color:var(--ink);color:#fbf6ea}
 button.act:disabled{opacity:.45}
 
-#msg{margin-top:20px;font-size:14.5px;min-height:22px;font-weight:500}
-#msg.good{color:#3d5a4a} #msg.bad{color:#8f4433}
-.note{margin-top:34px;color:var(--ink);opacity:.66;font-size:12.5px;
+#msg{margin-top:20px;font-size:15px;min-height:22px;font-weight:600}
+#msg.good{color:#2c4638} #msg.bad{color:#7a3527}
+.note{margin-top:34px;color:var(--ink);opacity:.8;font-size:13px;
   line-height:1.7;border-top:1px solid var(--veil-line);padding-top:16px}
 </style>
 </head>
@@ -109,13 +113,25 @@ button.act:disabled{opacity:.45}
 
    Both must be https if this page is https, or phone browsers refuse.
    ------------------------------------------------------------------ */
-const ENDPOINT = 'https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnRWiqbCDWPe2aXgN4j0s7pBTa54qxlnXUHJwtwyro9LJVKIDcGxnTCdrrDhWHOWDghxAmXh67mvMlePIGow-tDD0EvSWmuABIuEwLvqOzSrxhmczpiLlUrFvj9i4tjCH62EtN4--OneSDPH7JUkWqaQ75NR9LU8Z81piBw94Us1SbOse-6GXvm8eb0kR_zaBJ37DyIiw1rs1stLo8MmfTPHfZork-N2HM1iJT8Qe4xcao1aTK5HRlZPzemKsYxbC5mnZD9CxeaUDowGC3455tas7yOLxA&lib=MWiK2A7dHOlB7IeB3bsaT7c8pQPc0lI5r';
+const ENDPOINT = 'https://script.google.com/macros/s/PASTE-YOUR-DEPLOYMENT-ID/exec';
 const MODE = 'appsscript';
 
 const $=s=>document.querySelector(s);
 let media=null, chunks=[], blob=null, blobName='sound.webm';
 
 function msg(t,cls){ const m=$('#msg'); m.textContent=t; m.className=cls||''; }
+
+// Contributors get one calm sentence, never a technical one. The detail goes
+// to the browser console always, and onto the screen only with ?debug=1 in
+// the address — that is for you, standing next to the machine.
+const DEBUG = new URLSearchParams(location.search).has('debug');
+function fail(e, extra){
+  const detail = [extra, (e && e.message) ? e.message : (e || ''),
+                  'endpoint ' + ENDPOINT].filter(Boolean).join(' — ');
+  try{ console.error('[add-a-sound]', detail); }catch(_){}
+  msg(DEBUG ? ('DEBUG: ' + detail)
+            : 'Non è stato possibile inviare. Riprova fra un momento.', 'bad');
+}
 function showReview(b,name){
   blob=b; blobName=name;
   $('#prev').src=URL.createObjectURL(b);
@@ -171,18 +187,22 @@ $('#again').addEventListener('click', ()=>{
 $('#send').addEventListener('click', async ()=>{
   if(!blob) return;
   if(ENDPOINT.indexOf('PASTE-YOUR-DEPLOYMENT-ID')>=0){
-    msg('Questa pagina non è ancora collegata: manca ENDPOINT.','bad'); return;
-  }
+    fail(null,'ENDPOINT is still the placeholder'); return; }
   if(location.protocol==='file:'){
-    msg('Apri questa pagina dal sito, non come file sul computer: '
-      +'i browser bloccano gli invii dai file locali.','bad'); return;
-  }
+    fail(null,'page opened from file:// — browsers block uploads there'); return; }
+  if(location.protocol==='https:' && ENDPOINT.startsWith('http://')){
+    fail(null,'page is https but ENDPOINT is http'); return; }
   const capMB = (MODE==='appsscript') ? 12 : 60;
   if(blob.size > capMB*1024*1024){
     msg(`Troppo grande — resta sotto i ${capMB} MB, oppure registra qualcosa di più breve.`,'bad');
     return;
   }
   $('#send').disabled=true; $('#again').disabled=true; msg('Invio in corso…');
+  // A request that never settles leaves someone staring at "Invio in corso…"
+  // with the buttons dead. Anything unresolved after this is a failure they
+  // can retry.
+  const ctl = new AbortController();
+  const timer = setTimeout(()=>ctl.abort(), 45000);
   try{
     let r;
     if(MODE==='appsscript'){
@@ -192,61 +212,35 @@ $('#send').addEventListener('click', async ()=>{
       const b64=await new Promise((res,rej)=>{
         const fr=new FileReader();
         fr.onload=()=>res(String(fr.result).split(',')[1]);
-        fr.onerror=()=>rej(new Error('impossibile leggere il file'));
+        fr.onerror=()=>rej(new Error('could not read the recording'));
         fr.readAsDataURL(blob);
       });
-      r=await fetch(ENDPOINT,{method:'POST',
+      r=await fetch(ENDPOINT,{method:'POST',signal:ctl.signal,
         headers:{'Content-Type':'text/plain;charset=utf-8'},
         body:JSON.stringify({name:blobName,data:b64})});
     } else {
       const fd=new FormData(); fd.append('files', blob, blobName);
-      r=await fetch(ENDPOINT,{method:'POST',body:fd});
+      r=await fetch(ENDPOINT,{method:'POST',body:fd,signal:ctl.signal});
     }
-    if(!r.ok){ msg('Il server ha risposto con un errore ('+r.status+').','bad');
-               $('#send').disabled=false; $('#again').disabled=false; return; }
-    const d=await r.json();
-    if(!d.ok){ msg(d.error||'Non è andato a buon fine.','bad'); }
-    else{
-      msg('Inviato. Resta in ascolto.','good');
-      $('#review').style.display='none'; blob=null;
+    if(!r.ok){ fail(null,'drop box returned HTTP '+r.status); }
+    else {
+      const d=await r.json();
+      if(!d.ok) fail(null, d.error || 'drop box replied ok:false');
+      else{
+        msg('Inviato. Resta in ascolto.','good');
+        $('#review').style.display='none'; blob=null;
+      }
     }
   }catch(e){
-    // The request may well have ARRIVED and only the reply been unreadable:
-    // that is what happens when a drop box does not send CORS headers. Retry
-    // in a mode that sends but cannot read, and say so honestly rather than
-    // telling someone it failed when their sound is already there.
-    if(MODE==='appsscript' && e && /fetch/i.test(String(e.message||e))){
-      try{
-        const b64=await new Promise((res,rej)=>{
-          const fr=new FileReader();
-          fr.onload=()=>res(String(fr.result).split(',')[1]);
-          fr.onerror=()=>rej(new Error('impossibile leggere il file'));
-          fr.readAsDataURL(blob);
-        });
-        await fetch(ENDPOINT,{method:'POST',mode:'no-cors',
-          headers:{'Content-Type':'text/plain;charset=utf-8'},
-          body:JSON.stringify({name:blobName,data:b64})});
-        msg('Inviato. Non è arrivata conferma, ma dovrebbe essere arrivato: '
-          +'per favore non inviarlo due volte.','good');
-        $('#review').style.display='none'; blob=null;
-        $('#send').disabled=false; $('#again').disabled=false;
-        return;
-      }catch(e2){ /* fall through to the specific messages below */ }
-    }
-    // "check your connection" hid every real cause. Name them instead.
-    if(location.protocol==='file:'){
-      msg('Questa pagina va aperta da un indirizzo web, non da un file sul '
-        +'computer. Mettila sul sito e aprila da lì.','bad');
-    } else if(ENDPOINT.indexOf('PASTE-YOUR-DEPLOYMENT-ID')>=0){
-      msg('Questa pagina non è ancora collegata: ENDPOINT non è stato '
-        +'impostato.','bad');
-    } else if(location.protocol==='https:' && ENDPOINT.startsWith('http://')){
-      msg('L\'indirizzo del server deve essere https, come questa pagina.','bad');
-    } else {
-      msg('Impossibile raggiungere il server: '+(e && e.message ? e.message : e)
-        +'  ('+ENDPOINT.slice(0,60)+'…)','bad');
-    }
+    // No fallback that claims success. The previous version retried in a
+    // send-only mode and told people it had probably arrived; when the
+    // request had in fact never been delivered that was simply untrue, and
+    // it invited duplicates. If delivery cannot be confirmed, it did not
+    // happen as far as the contributor is concerned.
+    if(e && e.name==='AbortError') fail(null,'no answer after 45 s');
+    else fail(e,'could not reach the drop box');
   }
+  clearTimeout(timer);
   $('#send').disabled=false; $('#again').disabled=false;
 });
 </script>
