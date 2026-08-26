@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drop box check</title>
+<style>
+:root{--ink:#14100d;--ok:#2c5c42;--bad:#8f3527;--warn:#8a6a1f;--line:#d8d2c6}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f0e8;color:var(--ink);
+  font:15px/1.55 ui-sans-serif,system-ui,"Helvetica Neue",sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:28px 20px 60px}
+h1{font:600 15px/1 ui-sans-serif;letter-spacing:.18em;text-transform:uppercase;margin:0 0 4px}
+p.sub{color:#5a5149;font-size:13.5px;margin:0 0 22px}
+label{display:block;font:600 11px/1 ui-sans-serif;letter-spacing:.12em;
+  text-transform:uppercase;color:#5a5149;margin:14px 0 6px}
+input{width:100%;padding:11px;border:1px solid var(--line);border-radius:2px;
+  font:12px/1.4 ui-monospace,Menlo,monospace;background:#fffdf8;color:var(--ink)}
+button{margin-top:14px;padding:14px 20px;border:0;border-radius:2px;
+  background:var(--ink);color:#fbf6ea;font:600 14px/1 ui-sans-serif;
+  letter-spacing:.05em;cursor:pointer}
+button:disabled{opacity:.5}
+.step{border-top:1px solid var(--line);padding:12px 0;display:flex;gap:10px;
+  align-items:flex-start}
+.mark{width:1.4em;flex:none;font-weight:700}
+.step b{display:block;font-size:14px;margin-bottom:2px}
+.step span{font-size:13px;color:#4a423b}
+.ok .mark{color:var(--ok)} .bad .mark{color:var(--bad)} .warn .mark{color:var(--warn)}
+#verdict{margin-top:22px;padding:14px;border-radius:2px;font-size:14px;
+  background:#fffdf8;border:1px solid var(--line)}
+#verdict b{display:block;margin-bottom:6px}
+code{font:12px/1.4 ui-monospace,Menlo,monospace;background:#eae4d8;padding:1px 4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Drop box check</h1>
+  <p class="sub">For you, not for contributors. Paste the /exec address and press
+    Run. Each step says what it proved, and the verdict says what to change.</p>
+
+  <label for="ep">The /exec address</label>
+  <input id="ep" spellcheck="false"
+         placeholder="https://script.google.com/macros/s/…/exec">
+  <label for="key">Key (optional — only needed for the last step)</label>
+  <input id="key" spellcheck="false" placeholder="the key inside the script">
+  <button id="run">Run the checks</button>
+
+  <div id="steps"></div>
+  <div id="verdict" hidden></div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const steps=$('#steps');
+function step(cls, title, detail){
+  const d=document.createElement('div');
+  d.className='step '+cls;
+  d.innerHTML=`<span class="mark">${cls==='ok'?'✓':cls==='bad'?'✕':'!'}</span>`
+    +`<span><b>${title}</b><span>${detail}</span></span>`;
+  steps.appendChild(d);
+}
+function verdict(html){ const v=$('#verdict'); v.hidden=false; v.innerHTML=html; }
+
+$('#ep').value = localStorage.getItem('ep') || '';
+$('#key').value = localStorage.getItem('key') || '';
+
+$('#run').addEventListener('click', async ()=>{
+  const ep=$('#ep').value.trim(), key=$('#key').value.trim();
+  steps.innerHTML=''; $('#verdict').hidden=true;
+  $('#run').disabled=true;
+  try{ localStorage.setItem('ep',ep); localStorage.setItem('key',key); }catch(_){}
+
+  // ---- 1. does it even look like the right address -------------------
+  // localhost is allowed so this tool can be tested against a local stub;
+  // a real deployment is always https.
+  const local = /^https?:\/\/(127\.0\.0\.1|localhost)[:\/]/i.test(ep);
+  if(!local && !/^https:\/\//i.test(ep)){
+    step('bad','The address is not https','A page served over https cannot talk to an http address.');
+    verdict('<b>Fix the address first.</b>Use the Web app URL from Deploy → Manage deployments.');
+    $('#run').disabled=false; return;
+  }
+  if(ep.includes('script.google.com') && !ep.replace(/\/$/,'').endsWith('/exec')){
+    step('bad','That is not the /exec address',
+      ep.includes('/dev') ? 'The /dev address only works while you are signed in — it can never work for the public.'
+                          : 'The Web app URL ends in /exec.');
+    verdict('<b>Use the /exec address.</b>Deploy → Manage deployments → copy the Web app URL.');
+    $('#run').disabled=false; return;
+  }
+  step('ok','The address looks right','Ends in /exec and is https.');
+
+  // ---- 2. reachable at all, ignoring CORS ----------------------------
+  let reachable=false;
+  try{
+    await fetch(ep+'?ping=1', {mode:'no-cors', cache:'no-store'});
+    reachable=true;
+    step('ok','Something answers at that address',
+      'The request completed. This says nothing yet about whether it will let a browser read the reply.');
+  }catch(e){
+    step('bad','Nothing answers at that address', String(e.message||e));
+    verdict('<b>The address is wrong, or the deployment was deleted.</b>'
+      +'Re-copy the Web app URL from Deploy → Manage deployments.');
+    $('#run').disabled=false; return;
+  }
+
+  // ---- 3. the one that actually matters: a readable cross-origin GET --
+  let ping=null;
+  try{
+    const r=await fetch(ep+'?ping=1', {cache:'no-store'});
+    ping=await r.json();
+    step('ok','A browser can read its replies',
+      'Cross-origin requests are allowed. This is the step that fails when a deployment is not public.');
+  }catch(e){
+    step('bad','A browser is not allowed to read its replies', String(e.message||e));
+    verdict('<b>Almost certainly: the deployment is not public.</b>'
+      +'Apps Script then redirects to a Google sign-in page, which a browser '
+      +'refuses to read, so the upload never lands.<br><br>'
+      +'Deploy → Manage deployments → pencil → <b>Who has access: Anyone</b> '
+      +'→ Deploy. Then open the /exec address in a <b>private window</b>: if it '
+      +'asks you to sign in, it is still not public.');
+    $('#run').disabled=false; return;
+  }
+
+  // ---- 4. is it our script, and is the key set -----------------------
+  if(ping && ping.status){
+    step('ok','It is the soundscape drop box', 'It answered: '+JSON.stringify(ping));
+    if(ping.key_still_default)
+      step('warn','The key is still the placeholder',
+        'It will work, but anyone could read the uploads. Paste the current script in and deploy a new version.');
+  } else {
+    step('warn','It answered, but not like our script',
+      'Reply was '+JSON.stringify(ping)+'. You may be running an older version — paste the current soundscape-dropbox.gs in and deploy a new version.');
+  }
+
+  // ---- 5. a real upload, one byte ------------------------------------
+  try{
+    const r=await fetch(ep, {method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({name:'check.wav', data:'UklGRg=='})});
+    const d=await r.json();
+    if(d && d.ok) step('ok','A test upload was accepted',
+      'A one-byte file called check.wav is now in the Drive folder — discard it in the queue.');
+    else step('bad','The upload was refused', JSON.stringify(d));
+  }catch(e){
+    step('bad','The upload itself failed', String(e.message||e));
+    verdict('<b>Reading worked but posting did not.</b>Unusual. Send me this page’s console output.');
+    $('#run').disabled=false; return;
+  }
+
+  // ---- 6. can the console collect ------------------------------------
+  if(key){
+    try{
+      const r=await fetch(ep+'?list=1&key='+encodeURIComponent(key), {cache:'no-store'});
+      const d=await r.json();
+      if(d && d.ok) step('ok','The key is accepted', (d.items||[]).length+' file(s) waiting to be collected.');
+      else step('bad','The key was refused',
+        'The console will not be able to collect. Make the key here match the one in the script exactly.');
+    }catch(e){ step('bad','Could not check the key', String(e.message||e)); }
+  } else {
+    step('warn','Key not checked','Paste the key above to test collection as well.');
+  }
+
+  // never end on a green verdict if any step actually failed
+  if(steps.querySelector('.bad')){
+    verdict('<b>Something above failed.</b>Read the first red line — it is the '
+      +'one that matters; the rest follow from it.');
+    $('#run').disabled=false; return;
+  }
+  verdict('<b>The drop box is working.</b>If a phone still fails, the phone is '
+    +'on a network that blocks it, or the page on your site is an older copy — '
+    +'re-upload <code>add-a-sound.html</code> and check its ENDPOINT matches '
+    +'the address you just tested.');
+  $('#run').disabled=false;
+});
+</script>
+</body>
+</html>
