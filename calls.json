@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-28T11:11:25.809Z",
+  "updated": "2026-08-28T11:11:33.740Z",
   "calls": [
     {
       "id": 4,
@@ -414,6 +414,21 @@
       "deadline": "2026-09-07",
       "status": "interested",
       "url": "https://sonar.es/en/news/knowcase-open-call-2027",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1787915493739,
+      "title": "Open Call 2026 Program — Sonic Territories 2026",
+      "org": "",
+      "deadline": "2026-09-16",
+      "status": "interested",
+      "url": "https://2026.sonic-territories.at/open-call-2026-program",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
