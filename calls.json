@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-28T11:12:29.774Z",
+  "updated": "2026-08-28T11:12:38.221Z",
   "calls": [
     {
       "id": 4,
@@ -429,6 +429,21 @@
       "deadline": "2026-09-16",
       "status": "interested",
       "url": "https://2026.sonic-territories.at/open-call-2026-program",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1787915558220,
+      "title": "Resynthesising the Traditional 2027 | CTM Festival",
+      "org": "",
+      "deadline": "2026-09-28",
+      "status": "observe",
+      "url": "https://www.ctm-festival.de/festival-2027/open-calls/resynthesising-the-traditional-2027",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
