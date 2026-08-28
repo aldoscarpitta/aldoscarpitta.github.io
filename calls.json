@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-28T11:16:50.690Z",
+  "updated": "2026-08-28T11:16:59.230Z",
   "calls": [
     {
       "id": 4,
@@ -444,6 +444,21 @@
       "deadline": "2026-09-28",
       "status": "observe",
       "url": "https://www.ctm-festival.de/festival-2027/open-calls/resynthesising-the-traditional-2027",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1787915819229,
+      "title": "Open Call | Research Camping 2026 - Shifting Bodies - Lavanderia a Vapore",
+      "org": "",
+      "deadline": "2026-09-10",
+      "status": "interested",
+      "url": "https://www.lavanderiaavapore.eu/2026/07/27/open-call-research-camping-2026-shifting-bodies/",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
