@@ -1,4 +1,90 @@
-User-agent: *
+# aldoweb.xyz
+# Reservation of rights under Art. 4(3) Directive (EU) 2019/790
+# and D.Lgs. 177/2021 (Italy). Text and data mining, including the
+# training of AI models, is expressly reserved and not permitted.
+# Contact: aldo.scarpitta@gmail.com
+
+# --- AI training crawlers: blocked ---
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: omgili
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+User-agent: cohere-ai
+Disallow: /
+
+User-agent: AI2Bot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: PanguBot
+Disallow: /
+
+User-agent: Scrapy
+Disallow: /
+
+# --- AI search / citation crawlers: allowed (keeps you findable) ---
+User-agent: OAI-SearchBot
 Allow: /
 
-Sitemap: https://aldoweb.xyz/sitemap.xml
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+# --- Ordinary search engines: allowed ---
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# --- Everything else ---
+User-agent: *
+Allow: /
