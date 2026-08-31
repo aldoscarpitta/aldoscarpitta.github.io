@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-31T00:31:06.757Z",
+  "updated": "2026-08-31T19:53:57.014Z",
   "calls": [
     {
       "id": 4,
@@ -297,24 +297,6 @@
       "lockNote": "",
       "dateApprox": false,
       "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1786478427434,
-      "title": "officine CAOS: Differenti Sensazioni 2026/2027 for Emerging Performing Artists (Italy) | On the Move",
-      "org": "",
-      "deadline": "2026-08-31",
-      "status": "curious",
-      "url": "https://on-the-move.org/news/officine-caos-differenti-sensazioni-20262027-emerging-performing-artists-italy",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": {
-        "type": "annual-fixed",
-        "pattern": ""
-      },
       "history": []
     },
     {
