@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-31T00:22:53.066Z",
+  "updated": "2026-08-31T00:27:07.466Z",
   "calls": [
     {
       "id": 4,
@@ -326,7 +326,10 @@
       "lockedUntil": null,
       "lockNote": "",
       "dateApprox": false,
-      "recurs": null,
+      "recurs": {
+        "type": "annual-fixed",
+        "pattern": ""
+      },
       "history": []
     },
     {
