@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-31T00:30:08.430Z",
+  "updated": "2026-08-31T00:31:06.757Z",
   "calls": [
     {
       "id": 4,
@@ -45,21 +45,6 @@
       "lockNote": "",
       "fit": "",
       "dateApprox": true
-    },
-    {
-      "id": 1782644904484,
-      "title": "Residency Program | BASIS Vinschgau Venosta",
-      "org": "",
-      "deadline": "2026-08-31",
-      "status": "curious",
-      "url": "https://basis.space/en/projects-basis/residency-program/",
-      "notes": "",
-      "history": [],
-      "recurs": null,
-      "lockedUntil": null,
-      "lockNote": "",
-      "fit": "",
-      "dateApprox": false
     },
     {
       "id": 1782646063210,
