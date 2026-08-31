@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-08-31T00:19:44.261Z",
+  "updated": "2026-08-31T00:22:23.875Z",
   "calls": [
     {
       "id": 4,
@@ -348,7 +348,7 @@
       "id": 1786478576133,
       "title": "European Cultural Foundation: Archives Academic and Artistic Research Fellowships (Italy) | On the Move",
       "org": "",
-      "deadline": "2026-08-30",
+      "deadline": "2027-08-30",
       "status": "observe",
       "url": "https://on-the-move.org/news/european-cultural-foundation-archives-academic-and-artistic-research-fellowships-italy",
       "notes": "",
@@ -356,8 +356,17 @@
       "lockedUntil": null,
       "lockNote": "",
       "dateApprox": false,
-      "recurs": null,
-      "history": []
+      "recurs": {
+        "type": "annual-fixed",
+        "pattern": ""
+      },
+      "history": [
+        {
+          "cycle": "2026-08-30",
+          "dateApplied": null,
+          "outcome": "skipped"
+        }
+      ]
     },
     {
       "id": 1786717142750,
