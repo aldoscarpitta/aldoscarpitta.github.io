@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-05T11:04:18.772Z",
+  "updated": "2026-09-05T21:56:13.784Z",
   "calls": [
     {
       "id": 4,
@@ -453,21 +453,6 @@
       "deadline": "2026-09-07",
       "status": "curious",
       "url": "https://careof.org/news/open-call-artevisione-2026",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1787916530798,
-      "title": "Degenerativa Bologna | Call for artists",
-      "org": "",
-      "deadline": "2026-09-05",
-      "status": "curious",
-      "url": "https://docs.google.com/forms/d/e/1FAIpQLSeMNNPJKwide9ONbhUuzFbUadkxw6Ke0m9c8uW6yHP98PVvnw/viewform",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
