@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-06T11:58:23.893Z",
+  "updated": "2026-09-06T11:59:36.823Z",
   "calls": [
     {
       "id": 4,
@@ -423,21 +423,6 @@
       "deadline": "2026-09-27",
       "status": "curious",
       "url": "https://apply.refline.ch/655298/4554/pub/en/index.html",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1787916079016,
-      "title": "Open call ArteVisione 2026 · Careof",
-      "org": "",
-      "deadline": "2026-09-07",
-      "status": "curious",
-      "url": "https://careof.org/news/open-call-artevisione-2026",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
