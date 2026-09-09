@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-09T08:45:33.157Z",
+  "updated": "2026-09-09T08:46:03.508Z",
   "calls": [
     {
       "id": 4,
@@ -348,21 +348,6 @@
       "deadline": "2026-09-30",
       "status": "curious",
       "url": "https://www.iktsite.org/news/tokyo-biennale-social-dive",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1787915392141,
-      "title": "Sónar 2027 - Sónar+D and Fundación Cotec launch an Open Call worth €100,000 to develop an installation in the centre of Madrid",
-      "org": "",
-      "deadline": "2026-09-07",
-      "status": "interested",
-      "url": "https://sonar.es/en/news/knowcase-open-call-2027",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
