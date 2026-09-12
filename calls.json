@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-12T11:17:27.799Z",
+  "updated": "2026-09-12T11:17:35.216Z",
   "calls": [
     {
       "id": 4,
@@ -423,6 +423,21 @@
       "deadline": "2026-09-19",
       "status": "interested",
       "url": "https://www.gamtorino.it/en/evento/ricognizioni/",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1789211855215,
+      "title": "Artists and Companies call – Torino Fringe Festival 2027 – Torino Fringe Festival",
+      "org": "",
+      "deadline": "2026-10-05",
+      "status": "interested",
+      "url": "https://www.tofringe.it/call-2027-eng/",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
