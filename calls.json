@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-16T21:00:38.974Z",
+  "updated": "2026-09-16T21:00:44.890Z",
   "calls": [
     {
       "id": 4,
@@ -330,21 +330,6 @@
       "deadline": "2026-09-30",
       "status": "curious",
       "url": "https://www.iktsite.org/news/tokyo-biennale-social-dive",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1787915493739,
-      "title": "Open Call 2026 Program — Sonic Territories 2026",
-      "org": "",
-      "deadline": "2026-09-16",
-      "status": "interested",
-      "url": "https://2026.sonic-territories.at/open-call-2026-program",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
