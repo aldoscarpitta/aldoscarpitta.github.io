@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-14T21:02:47.030Z",
+  "updated": "2026-09-16T21:00:38.974Z",
   "calls": [
     {
       "id": 4,
@@ -123,24 +123,6 @@
       "lockNote": "",
       "fit": "",
       "dateApprox": false
-    },
-    {
-      "id": 1785542185025,
-      "title": "Q-O2 Brussels — residency",
-      "org": "Q-O2 werkplaats, Brussels",
-      "deadline": "2026-09-15",
-      "status": "interested",
-      "recurs": {
-        "type": "annual-fixed",
-        "pattern": "~15 Sep"
-      },
-      "dateApprox": true,
-      "fit": "Fee-free + subsistence. Workspace for experimental music and sound art — direct fit for contact-piano/eurorack.",
-      "notes": "Fee-free + subsistence.",
-      "history": [],
-      "lockedUntil": null,
-      "lockNote": "",
-      "url": ""
     },
     {
       "id": 1785542185026,
