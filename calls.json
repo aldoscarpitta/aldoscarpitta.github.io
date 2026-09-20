@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-20T13:55:28.359Z",
+  "updated": "2026-09-20T13:55:32.386Z",
   "calls": [
     {
       "id": 4,
@@ -360,21 +360,6 @@
       "deadline": "2026-09-27",
       "status": "curious",
       "url": "https://apply.refline.ch/655298/4554/pub/en/index.html",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1789211749188,
-      "title": "Open Call for the Athens Epidaurus Festival 2027 Artistic Programme - Athens Epidaurus Festival",
-      "org": "",
-      "deadline": "2026-09-19",
-      "status": "curious",
-      "url": "https://aefestival.gr/call-2027/?lang=en",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
