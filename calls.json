@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-22T00:21:14.478Z",
+  "updated": "2026-09-22T00:21:19.039Z",
   "calls": [
     {
       "id": 4,
@@ -249,21 +249,6 @@
         "pattern": "",
         "opensDate": null
       },
-      "history": []
-    },
-    {
-      "id": 1786444234490,
-      "title": "BEAST FEaST 2027",
-      "org": "",
-      "deadline": "2026-09-21",
-      "status": "observe",
-      "url": "https://app.onlinesurveys.jisc.ac.uk/s/bham/beast-feast-2027-submissions",
-      "notes": "No $",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
       "history": []
     },
     {
