@@ -113,8 +113,18 @@ button.act:disabled{opacity:.45}
 
    Both must be https if this page is https, or phone browsers refuse.
    ------------------------------------------------------------------ */
-const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyTPlyYUB9et8M0FH_KSoU0UnAr1NPe1NWbmI4WC0Wiiu_sVusUs4uhuVeNZSD2_ZDwLw/exec';
+const ENDPOINT = 'https://script.google.com/macros/s/PASTE-YOUR-DEPLOYMENT-ID/exec';
 const MODE = 'appsscript';
+
+/* Which installation this page feeds, taken from the address:
+     .../add-a-sound.html?room=florence
+   One page therefore serves every installation — nobody needs to edit or
+   host their own copy, they just use their own link. The console builds
+   that link and its QR code for you. Without ?room= it falls back to
+   'default'. */
+const DEPLOY = (new URLSearchParams(location.search).get('room') || 'default')
+  .toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40)
+  || 'default';
 
 const $=s=>document.querySelector(s);
 let media=null, chunks=[], blob=null, blobName='sound.webm';
@@ -183,6 +193,57 @@ $('#again').addEventListener('click', ()=>{
   $('#review').style.display='none'; blob=null; msg('');
 });
 
+/* ---- a route that CORS cannot block ---- */
+// JSONP: a <script> tag, so no cross-origin restriction applies.
+function jsonp(params, ms){
+  return new Promise((res,rej)=>{
+    const cb='ss'+Math.random().toString(36).slice(2,10);
+    const sc=document.createElement('script');
+    const t=setTimeout(()=>{ cleanup(); rej(new Error('jsonp timeout')); }, ms||12000);
+    function cleanup(){ clearTimeout(t); delete window[cb];
+                        if(sc.parentNode) sc.parentNode.removeChild(sc); }
+    window[cb]=d=>{ cleanup(); res(d); };
+    sc.onerror=()=>{ cleanup(); rej(new Error('jsonp blocked')); };
+    const sep = ENDPOINT.indexOf('?')>=0 ? '&' : '?';
+    sc.src = ENDPOINT + sep + params + '&callback=' + cb;
+    document.body.appendChild(sc);
+  });
+}
+async function dropCount(){
+  const d = await jsonp('ping=1');
+  if(!d || d.ok!==true) throw new Error('drop box unhappy');
+  return Number(d.waiting || 0);
+}
+async function waitForRise(before, tries){
+  for(let i=0;i<(tries||10);i++){
+    await new Promise(r=>setTimeout(r,1500));
+    try{ if(await dropCount() > before) return true; }catch(_){}
+  }
+  return false;
+}
+async function postViaForm(b, name, before){
+  const b64 = await new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>res(String(fr.result).split(',')[1]);
+    fr.onerror=()=>rej(new Error('could not read the recording'));
+    fr.readAsDataURL(b);
+  });
+  const frame=document.createElement('iframe');
+  frame.name='ss_sink_'+Date.now(); frame.style.display='none';
+  document.body.appendChild(frame);
+  const f=document.createElement('form');
+  f.method='POST'; f.action=ENDPOINT; f.target=frame.name;
+  f.enctype='application/x-www-form-urlencoded';
+  for(const [k,v] of [['name',name],['data',b64]]){
+    const i=document.createElement('input');
+    i.type='hidden'; i.name=k; i.value=v; f.appendChild(i);
+  }
+  document.body.appendChild(f); f.submit();
+  const rose = await waitForRise(before, 10);
+  f.remove(); frame.remove();
+  return rose;
+}
+
 /* ---- sending ---- */
 $('#send').addEventListener('click', async ()=>{
   if(!blob) return;
@@ -203,6 +264,12 @@ $('#send').addEventListener('click', async ()=>{
   // can retry.
   const ctl = new AbortController();
   const timer = setTimeout(()=>ctl.abort(), 45000);
+  // Count what the drop box holds BEFORE anything is sent. A fetch blocked by
+  // CORS still delivers the request -- the browser simply refuses to let us
+  // read the reply -- so a baseline taken afterwards is already too late and
+  // makes a successful send look like a failure.
+  let before = null;
+  if(MODE==='appsscript'){ try{ before = await dropCount(); }catch(_){ before = null; } }
   try{
     let r;
     if(MODE==='appsscript'){
@@ -217,7 +284,7 @@ $('#send').addEventListener('click', async ()=>{
       });
       r=await fetch(ENDPOINT,{method:'POST',signal:ctl.signal,
         headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body:JSON.stringify({name:blobName,data:b64})});
+        body:JSON.stringify({name:blobName,deploy:DEPLOY,data:b64})});
     } else {
       const fd=new FormData(); fd.append('files', blob, blobName);
       r=await fetch(ENDPOINT,{method:'POST',body:fd,signal:ctl.signal});
@@ -232,6 +299,32 @@ $('#send').addEventListener('click', async ()=>{
       }
     }
   }catch(e){
+    // fetch failed. That is usually CORS: the browser sent nothing, or sent
+    // it and could not read the reply, and it cannot tell you which. So fall
+    // back to a plain form post into a hidden iframe -- forms are not subject
+    // to CORS at all -- and then CONFIRM by asking the drop box how many
+    // sounds it holds, over JSONP, which is also not subject to CORS.
+    // Nothing is claimed unless that count actually goes up.
+    if(MODE==='appsscript' && before !== null){
+      try{
+        // Did the blocked fetch deliver it anyway? Ask before resending, or
+        // the same recording arrives twice.
+        let ok = await waitForRise(before, 3);
+        if(!ok) ok = await postViaForm(blob, blobName, before);
+        clearTimeout(timer);
+        if(ok){
+          msg('Inviato. Resta in ascolto.','good');
+          $('#review').style.display='none'; blob=null;
+          $('#send').disabled=false; $('#again').disabled=false;
+          return;
+        }
+        fail(null,'form fallback: the drop box count did not change');
+        $('#send').disabled=false; $('#again').disabled=false;
+        return;
+      }catch(e2){ fail(e2,'form fallback failed'); 
+                  clearTimeout(timer);
+                  $('#send').disabled=false; $('#again').disabled=false; return; }
+    }
     // No fallback that claims success. The previous version retried in a
     // send-only mode and told people it had probably arrived; when the
     // request had in fact never been delivered that was simply untrue, and
