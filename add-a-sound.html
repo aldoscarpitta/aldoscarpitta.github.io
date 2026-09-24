@@ -26,7 +26,7 @@ html,body{margin:0;min-height:100%;color:var(--ink);
    background propagates to the canvas and the two fight. This also avoids
    background-attachment:fixed, which stutters on iOS. */
 #bg{position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:url("add-a-sound-image.png") center/cover no-repeat #efe9dd}
+  background:url("add-a-sound-background.jpg") center/cover no-repeat #efe9dd}
 .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:34px 22px 60px;
   padding-bottom:calc(60px + env(safe-area-inset-bottom))}
 h1{font:600 19px/1.3 var(--face);letter-spacing:.2em;
@@ -244,6 +244,39 @@ async function postViaForm(b, name, before){
   return rose;
 }
 
+/* ---- converting ---- */
+// Every phone records in its own format: Chrome and Android give WebM, which
+// a Mac cannot read without ffmpeg -- and ffmpeg is exactly what a recipient
+// of this software will not have. So the browser decodes whatever it
+// recorded and sends a plain WAV that every Mac reads. Mono at 32 kHz keeps
+// a minute of sound around 3.8 MB, well inside the upload limit.
+const WAV_RATE = 32000;
+async function toWav(blob){
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  const ac = new Ctx();
+  const buf = await new Promise((res,rej)=>{
+    blob.arrayBuffer().then(ab=>{
+      const p = ac.decodeAudioData(ab, res, rej);
+      if(p && p.then) p.then(res, rej);
+    }, rej);
+  });
+  try{ ac.close(); }catch(_){}
+  const frames = Math.ceil(buf.duration * WAV_RATE);
+  const off = new OfflineAudioContext(1, Math.max(1,frames), WAV_RATE);
+  const src = off.createBufferSource(); src.buffer = buf;
+  src.connect(off.destination); src.start();
+  const out = (await off.startRendering()).getChannelData(0);
+  const n = out.length, bytes = 44 + n*2, v = new DataView(new ArrayBuffer(bytes));
+  const w = (o,str)=>{ for(let i=0;i<str.length;i++) v.setUint8(o+i,str.charCodeAt(i)); };
+  w(0,'RIFF'); v.setUint32(4,bytes-8,true); w(8,'WAVE'); w(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,WAV_RATE,true); v.setUint32(28,WAV_RATE*2,true);
+  v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,'data'); v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){ const x=Math.max(-1,Math.min(1,out[i]));
+    v.setInt16(44+i*2, x<0 ? x*0x8000 : x*0x7FFF, true); }
+  return new Blob([v], {type:'audio/wav'});
+}
+
 /* ---- sending ---- */
 $('#send').addEventListener('click', async ()=>{
   if(!blob) return;
@@ -272,6 +305,15 @@ $('#send').addEventListener('click', async ()=>{
   if(MODE==='appsscript'){ try{ before = await dropCount(); }catch(_){ before = null; } }
   try{
     let r;
+    // Convert before sending. If this browser cannot decode what it recorded
+    // (very old ones), send the original rather than nothing.
+    let sendBlob = blob, sendName = blobName;
+    try{
+      sendBlob = await toWav(blob);
+      sendName = blobName.replace(/\.[A-Za-z0-9]+$/, '') + '.wav';
+    }catch(convErr){
+      console.warn('[add-a-sound] could not convert, sending original', convErr);
+    }
     if(MODE==='appsscript'){
       // Apps Script cannot read multipart uploads, and a JSON content-type
       // would trigger a CORS preflight it does not answer. A plain-text body
@@ -280,13 +322,13 @@ $('#send').addEventListener('click', async ()=>{
         const fr=new FileReader();
         fr.onload=()=>res(String(fr.result).split(',')[1]);
         fr.onerror=()=>rej(new Error('could not read the recording'));
-        fr.readAsDataURL(blob);
+        fr.readAsDataURL(sendBlob);
       });
       r=await fetch(ENDPOINT,{method:'POST',signal:ctl.signal,
         headers:{'Content-Type':'text/plain;charset=utf-8'},
-        body:JSON.stringify({name:blobName,deploy:DEPLOY,data:b64})});
+        body:JSON.stringify({name:sendName,deploy:DEPLOY,data:b64})});
     } else {
-      const fd=new FormData(); fd.append('files', blob, blobName);
+      const fd=new FormData(); fd.append('files', sendBlob, sendName);
       r=await fetch(ENDPOINT,{method:'POST',body:fd,signal:ctl.signal});
     }
     if(!r.ok){ fail(null,'drop box returned HTTP '+r.status); }
