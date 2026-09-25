@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#efe9dd">
+<title>Aggiungi un suono</title>
+<style>
+:root{
+  /* Drawn from the photograph itself: warm stone, cool fold, deep ink.
+     Ink measures 6.7:1 against the darkest 1% of the image and 11:1 against
+     its median, so body text is readable directly on the picture. Slate is
+     only 4.4:1 at worst, so it is used solely on the veiled panels. */
+  --ink:#14100d; --slate:#1f2a33; --stone:#4a423b;
+  --face:"Avenir Next","Avenir Next LT Pro",Avenir,"Nunito Sans",
+         ui-sans-serif,system-ui,"Helvetica Neue",sans-serif;
+  --veil:rgba(255,253,247,.78); --veil-line:rgba(20,16,13,.24);
+  --live:#7a3527;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;color:var(--ink);
+  font:16.5px/1.55 var(--face);
+  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+  background:#efe9dd}
+/* A real element, not a pseudo-element with a negative z-index: the body
+   background propagates to the canvas and the two fight. This also avoids
+   background-attachment:fixed, which stutters on iOS. */
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:url("add-a-sound-background.jpg") center/cover no-repeat #efe9dd}
+.wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:34px 22px 60px;
+  padding-bottom:calc(60px + env(safe-area-inset-bottom))}
+h1{font:600 19px/1.3 var(--face);letter-spacing:.2em;
+  text-transform:uppercase;margin:0 0 8px}
+.sub{color:var(--ink);opacity:.86;font-size:15px;margin:0 0 26px;max-width:34ch}
+
+/* the one big target, as a card lifted off the stone */
+#rec{width:100%;border:1px solid rgba(20,16,13,.30);background:var(--veil);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  color:var(--ink);border-radius:2px;padding:30px 18px;text-align:center;
+  cursor:pointer;font:inherit;transition:background .15s,border-color .15s}
+#rec:active{background:rgba(255,253,247,.9)}
+#rec.on{border-color:var(--live);background:rgba(255,250,246,.88)}
+#rec b{display:block;font-size:20px;font-weight:600;margin-bottom:4px}
+#rec span{color:var(--stone);font-size:13.5px}
+#dot{display:inline-block;width:9px;height:9px;border-radius:50%;
+  background:var(--live);margin-right:8px;vertical-align:1px}
+#dot[hidden]{display:none}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+#rec.on #dot{animation:pulse 1.1s infinite}
+
+.or{text-align:center;color:var(--stone);font-size:12px;letter-spacing:.18em;
+  text-transform:uppercase;margin:20px 0 12px}
+.pick{display:block;width:100%;border:1px dashed rgba(20,16,13,.34);
+  background:rgba(255,253,247,.52);border-radius:2px;padding:16px;
+  text-align:center;color:var(--ink);font:500 14.5px/1.4 var(--face);
+  cursor:pointer}
+
+#review{margin-top:22px;display:none;background:var(--veil);
+  -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+  border:1px solid var(--veil-line);border-radius:2px;padding:14px}
+audio{width:100%;margin-bottom:12px}
+.row{display:flex;gap:10px}
+button.act{flex:1;font:600 14.5px/1 var(--face);letter-spacing:.06em;
+  border-radius:2px;padding:16px 12px;cursor:pointer;
+  border:1.5px solid var(--slate);background:rgba(255,253,247,.5);
+  color:var(--slate)}
+/* the send button is the only filled thing on the page, so it reads first */
+button.act.go{background:var(--ink);border-color:var(--ink);color:#fbf6ea}
+button.act:disabled{opacity:.45}
+
+#msg{margin-top:20px;font-size:15px;min-height:22px;font-weight:600}
+#msg.good{color:#2c4638} #msg.bad{color:#7a3527}
+.note{margin-top:34px;color:var(--ink);opacity:.8;font-size:13px;
+  line-height:1.7;border-top:1px solid var(--veil-line);padding-top:16px}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"></div>
+<div class="wrap">
+  <h1>Aggiungi un suono</h1>
+  <p class="sub">Registra qualsiasi cosa. Entrerà nel brano che sta suonando in questa sala.</p>
+
+  <button id="rec"><b><span id="dot" hidden></span><span id="reclabel">Registra</span></b>
+    <span id="rechint">Premi una volta per iniziare, di nuovo per fermare</span></button>
+
+  <div class="or">oppure</div>
+  <label class="pick" for="file">Scegli un suono che hai già sul telefono</label>
+  <input type="file" id="file" accept="audio/*" hidden>
+
+  <div id="review">
+    <audio id="prev" controls preload="metadata"></audio>
+    <div class="row">
+      <button class="act" id="again">Riprova</button>
+      <button class="act go" id="send">Invia</button>
+    </div>
+  </div>
+
+  <div id="msg"></div>
+
+  <p class="note">Ogni suono viene ascoltato prima di arrivare agli altoparlanti,
+    perciò possono passare alcuni minuti fra l'invio e l'ascolto. Una volta
+    arrivato resta: piano, sempre più sullo sfondo, per tutta la durata del brano.</p>
+</div>
+
+<script>
+/* ------------------------------------------------------------------
+   Two things to set, then this file goes on your site as-is.
+
+   ENDPOINT  where the drop box lives.
+   MODE      'appsscript' if the drop box is the Google Apps Script
+             (which it is, on GitHub Pages - that cannot run PHP),
+             'php' if you are hosting soundscape-dropbox.php somewhere.
+
+   Both must be https if this page is https, or phone browsers refuse.
+   ------------------------------------------------------------------ */
+const ENDPOINT = 'https://script.google.com/macros/s/PASTE-YOUR-DEPLOYMENT-ID/exec';
+const MODE = 'appsscript';
+
+/* Which installation this page feeds, taken from the address:
+     .../add-a-sound.html?room=florence
+   One page therefore serves every installation — nobody needs to edit or
+   host their own copy, they just use their own link. The console builds
+   that link and its QR code for you. Without ?room= it falls back to
+   'default'. */
+const DEPLOY = (new URLSearchParams(location.search).get('room') || 'default')
+  .toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40)
+  || 'default';
+
+const $=s=>document.querySelector(s);
+let media=null, chunks=[], blob=null, blobName='sound.webm';
+
+function msg(t,cls){ const m=$('#msg'); m.textContent=t; m.className=cls||''; }
+
+// Contributors get one calm sentence, never a technical one. The detail goes
+// to the browser console always, and onto the screen only with ?debug=1 in
+// the address — that is for you, standing next to the machine.
+const DEBUG = new URLSearchParams(location.search).has('debug');
+function fail(e, extra){
+  const detail = [extra, (e && e.message) ? e.message : (e || ''),
+                  'endpoint ' + ENDPOINT].filter(Boolean).join(' — ');
+  try{ console.error('[add-a-sound]', detail); }catch(_){}
+  msg(DEBUG ? ('DEBUG: ' + detail)
+            : 'Non è stato possibile inviare. Riprova fra un momento.', 'bad');
+}
+function showReview(b,name){
+  blob=b; blobName=name;
+  $('#prev').src=URL.createObjectURL(b);
+  $('#review').style.display='block';
+  msg('');
+}
+
+/* ---- recording ---- */
+// MIME support differs: Safari gives mp4, Chrome/Firefox webm. Let the browser
+// pick what it can actually produce; the server converts whatever arrives.
+function pickType(){
+  for(const t of ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac'])
+    if(window.MediaRecorder && MediaRecorder.isTypeSupported(t)) return t;
+  return '';
+}
+$('#rec').addEventListener('click', async ()=>{
+  if(media && media.state==='recording'){ media.stop(); return; }
+  if(!navigator.mediaDevices || !window.MediaRecorder){
+    msg('Questo browser non può registrare. Usa «Scegli un suono».','bad'); return;
+  }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const type=pickType();
+    media=new MediaRecorder(stream, type?{mimeType:type}:undefined);
+    chunks=[];
+    media.ondataavailable=e=>{ if(e.data.size) chunks.push(e.data); };
+    media.onstop=()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      const mt=media.mimeType||type||'audio/webm';
+      const ext=mt.includes('mp4')||mt.includes('aac')?'m4a':'webm';
+      showReview(new Blob(chunks,{type:mt}), 'recording.'+ext);
+      $('#rec').classList.remove('on'); $('#dot').hidden=true;
+      $('#reclabel').textContent='Registra'; $('#rechint').textContent='Premi una volta per iniziare, di nuovo per fermare';
+    };
+    media.start();
+    $('#rec').classList.add('on'); $('#dot').hidden=false;
+    $('#reclabel').textContent='Sto registrando — premi per fermare';
+    $('#rechint').textContent='Prenditi tutto il tempo che vuoi';
+    $('#review').style.display='none'; msg('');
+  }catch(e){
+    msg('Microfono non consentito. Controlla le impostazioni del browser, oppure scegli un file.','bad');
+  }
+});
+
+$('#file').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(f) showReview(f, f.name);
+});
+$('#again').addEventListener('click', ()=>{
+  $('#review').style.display='none'; blob=null; msg('');
+});
+
+/* ---- a route that CORS cannot block ---- */
+// JSONP: a <script> tag, so no cross-origin restriction applies.
+function jsonp(params, ms){
+  return new Promise((res,rej)=>{
+    const cb='ss'+Math.random().toString(36).slice(2,10);
+    const sc=document.createElement('script');
+    const t=setTimeout(()=>{ cleanup(); rej(new Error('jsonp timeout')); }, ms||12000);
+    function cleanup(){ clearTimeout(t); delete window[cb];
+                        if(sc.parentNode) sc.parentNode.removeChild(sc); }
+    window[cb]=d=>{ cleanup(); res(d); };
+    sc.onerror=()=>{ cleanup(); rej(new Error('jsonp blocked')); };
+    const sep = ENDPOINT.indexOf('?')>=0 ? '&' : '?';
+    sc.src = ENDPOINT + sep + params + '&callback=' + cb;
+    document.body.appendChild(sc);
+  });
+}
+async function dropCount(){
+  const d = await jsonp('ping=1');
+  if(!d || d.ok!==true) throw new Error('drop box unhappy');
+  return Number(d.waiting || 0);
+}
+async function waitForRise(before, tries){
+  for(let i=0;i<(tries||10);i++){
+    await new Promise(r=>setTimeout(r,1500));
+    try{ if(await dropCount() > before) return true; }catch(_){}
+  }
+  return false;
+}
+async function postViaForm(b, name, before){
+  const b64 = await new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>res(String(fr.result).split(',')[1]);
+    fr.onerror=()=>rej(new Error('could not read the recording'));
+    fr.readAsDataURL(b);
+  });
+  const frame=document.createElement('iframe');
+  frame.name='ss_sink_'+Date.now(); frame.style.display='none';
+  document.body.appendChild(frame);
+  const f=document.createElement('form');
+  f.method='POST'; f.action=ENDPOINT; f.target=frame.name;
+  f.enctype='application/x-www-form-urlencoded';
+  for(const [k,v] of [['name',name],['data',b64]]){
+    const i=document.createElement('input');
+    i.type='hidden'; i.name=k; i.value=v; f.appendChild(i);
+  }
+  document.body.appendChild(f); f.submit();
+  const rose = await waitForRise(before, 10);
+  f.remove(); frame.remove();
+  return rose;
+}
+
+/* ---- converting ---- */
+// Every phone records in its own format: Chrome and Android give WebM, which
+// a Mac cannot read without ffmpeg -- and ffmpeg is exactly what a recipient
+// of this software will not have. So the browser decodes whatever it
+// recorded and sends a plain WAV that every Mac reads. Mono at 32 kHz keeps
+// a minute of sound around 3.8 MB, well inside the upload limit.
+const WAV_RATE = 32000;
+async function toWav(blob){
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  const ac = new Ctx();
+  const buf = await new Promise((res,rej)=>{
+    blob.arrayBuffer().then(ab=>{
+      const p = ac.decodeAudioData(ab, res, rej);
+      if(p && p.then) p.then(res, rej);
+    }, rej);
+  });
+  try{ ac.close(); }catch(_){}
+  const frames = Math.ceil(buf.duration * WAV_RATE);
+  const off = new OfflineAudioContext(1, Math.max(1,frames), WAV_RATE);
+  const src = off.createBufferSource(); src.buffer = buf;
+  src.connect(off.destination); src.start();
+  const out = (await off.startRendering()).getChannelData(0);
+  const n = out.length, bytes = 44 + n*2, v = new DataView(new ArrayBuffer(bytes));
+  const w = (o,str)=>{ for(let i=0;i<str.length;i++) v.setUint8(o+i,str.charCodeAt(i)); };
+  w(0,'RIFF'); v.setUint32(4,bytes-8,true); w(8,'WAVE'); w(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,WAV_RATE,true); v.setUint32(28,WAV_RATE*2,true);
+  v.setUint16(32,2,true); v.setUint16(34,16,true); w(36,'data'); v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){ const x=Math.max(-1,Math.min(1,out[i]));
+    v.setInt16(44+i*2, x<0 ? x*0x8000 : x*0x7FFF, true); }
+  return new Blob([v], {type:'audio/wav'});
+}
+
+/* ---- sending ---- */
+$('#send').addEventListener('click', async ()=>{
+  if(!blob) return;
+  if(ENDPOINT.indexOf('PASTE-YOUR-DEPLOYMENT-ID')>=0){
+    fail(null,'ENDPOINT is still the placeholder'); return; }
+  if(location.protocol==='file:'){
+    fail(null,'page opened from file:// — browsers block uploads there'); return; }
+  if(location.protocol==='https:' && ENDPOINT.startsWith('http://')){
+    fail(null,'page is https but ENDPOINT is http'); return; }
+  const capMB = (MODE==='appsscript') ? 12 : 60;
+  if(blob.size > capMB*1024*1024){
+    msg(`Troppo grande — resta sotto i ${capMB} MB, oppure registra qualcosa di più breve.`,'bad');
+    return;
+  }
+  $('#send').disabled=true; $('#again').disabled=true; msg('Invio in corso…');
+  // A request that never settles leaves someone staring at "Invio in corso…"
+  // with the buttons dead. Anything unresolved after this is a failure they
+  // can retry.
+  const ctl = new AbortController();
+  const timer = setTimeout(()=>ctl.abort(), 45000);
+  // Count what the drop box holds BEFORE anything is sent. A fetch blocked by
+  // CORS still delivers the request -- the browser simply refuses to let us
+  // read the reply -- so a baseline taken afterwards is already too late and
+  // makes a successful send look like a failure.
+  let before = null;
+  if(MODE==='appsscript'){ try{ before = await dropCount(); }catch(_){ before = null; } }
+  try{
+    let r;
+    // Convert before sending. If this browser cannot decode what it recorded
+    // (very old ones), send the original rather than nothing.
+    let sendBlob = blob, sendName = blobName;
+    try{
+      sendBlob = await toWav(blob);
+      sendName = blobName.replace(/\.[A-Za-z0-9]+$/, '') + '.wav';
+    }catch(convErr){
+      console.warn('[add-a-sound] could not convert, sending original', convErr);
+    }
+    if(MODE==='appsscript'){
+      // Apps Script cannot read multipart uploads, and a JSON content-type
+      // would trigger a CORS preflight it does not answer. A plain-text body
+      // carrying JSON avoids both.
+      const b64=await new Promise((res,rej)=>{
+        const fr=new FileReader();
+        fr.onload=()=>res(String(fr.result).split(',')[1]);
+        fr.onerror=()=>rej(new Error('could not read the recording'));
+        fr.readAsDataURL(sendBlob);
+      });
+      r=await fetch(ENDPOINT,{method:'POST',signal:ctl.signal,
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body:JSON.stringify({name:sendName,deploy:DEPLOY,data:b64})});
+    } else {
+      const fd=new FormData(); fd.append('files', sendBlob, sendName);
+      r=await fetch(ENDPOINT,{method:'POST',body:fd,signal:ctl.signal});
+    }
+    if(!r.ok){ fail(null,'drop box returned HTTP '+r.status); }
+    else {
+      const d=await r.json();
+      if(!d.ok) fail(null, d.error || 'drop box replied ok:false');
+      else{
+        msg('Inviato. Resta in ascolto.','good');
+        $('#review').style.display='none'; blob=null;
+      }
+    }
+  }catch(e){
+    // fetch failed. That is usually CORS: the browser sent nothing, or sent
+    // it and could not read the reply, and it cannot tell you which. So fall
+    // back to a plain form post into a hidden iframe -- forms are not subject
+    // to CORS at all -- and then CONFIRM by asking the drop box how many
+    // sounds it holds, over JSONP, which is also not subject to CORS.
+    // Nothing is claimed unless that count actually goes up.
+    if(MODE==='appsscript' && before !== null){
+      try{
+        // Did the blocked fetch deliver it anyway? Ask before resending, or
+        // the same recording arrives twice.
+        let ok = await waitForRise(before, 3);
+        if(!ok) ok = await postViaForm(blob, blobName, before);
+        clearTimeout(timer);
+        if(ok){
+          msg('Inviato. Resta in ascolto.','good');
+          $('#review').style.display='none'; blob=null;
+          $('#send').disabled=false; $('#again').disabled=false;
+          return;
+        }
+        fail(null,'form fallback: the drop box count did not change');
+        $('#send').disabled=false; $('#again').disabled=false;
+        return;
+      }catch(e2){ fail(e2,'form fallback failed'); 
+                  clearTimeout(timer);
+                  $('#send').disabled=false; $('#again').disabled=false; return; }
+    }
+    // No fallback that claims success. The previous version retried in a
+    // send-only mode and told people it had probably arrived; when the
+    // request had in fact never been delivered that was simply untrue, and
+    // it invited duplicates. If delivery cannot be confirmed, it did not
+    // happen as far as the contributor is concerned.
+    if(e && e.name==='AbortError') fail(null,'no answer after 45 s');
+    else fail(e,'could not reach the drop box');
+  }
+  clearTimeout(timer);
+  $('#send').disabled=false; $('#again').disabled=false;
+});
+</script>
+</body>
+</html>
