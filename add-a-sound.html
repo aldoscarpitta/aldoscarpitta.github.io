@@ -113,7 +113,7 @@ button.act:disabled{opacity:.45}
 
    Both must be https if this page is https, or phone browsers refuse.
    ------------------------------------------------------------------ */
-const ENDPOINT = 'https://script.google.com/macros/s/PASTE-YOUR-DEPLOYMENT-ID/exec';
+const ENDPOINT = 'https://script.google.com/macros/s/AKfycbyTPlyYUB9et8M0FH_KSoU0UnAr1NPe1NWbmI4WC0Wiiu_sVusUs4uhuVeNZSD2_ZDwLw/exec';
 const MODE = 'appsscript';
 
 /* Which installation this page feeds, taken from the address:
@@ -142,11 +142,44 @@ function fail(e, extra){
   msg(DEBUG ? ('DEBUG: ' + detail)
             : 'Non è stato possibile inviare. Riprova fra un momento.', 'bad');
 }
-function showReview(b,name){
-  blob=b; blobName=name;
-  $('#prev').src=URL.createObjectURL(b);
+// What will actually be sent: the WAV if the browser could make one,
+// otherwise the original recording.
+let ready = null, readyName = null;
+
+async function showReview(b,name){
+  blob=b; blobName=name; ready=null; readyName=null;
   $('#review').style.display='block';
-  msg('');
+  $('#send').disabled=true;
+  msg('Preparazione…');
+  // Convert now rather than at sending. Chrome's recorder writes WebM with no
+  // length in its header, so the player shows no duration, its bar does not
+  // move, and pressing play jumps it to the end. The WAV has a real length,
+  // so previewing it fixes the bar -- and it is also exactly what is sent.
+  try{
+    ready = await toWav(b);
+    readyName = name.replace(/\.[A-Za-z0-9]+$/, '') + '.wav';
+  }catch(convErr){
+    console.warn('[add-a-sound] could not convert; will send the original', convErr);
+    ready = b; readyName = name;
+    if(DEBUG) msg('DEBUG: conversion failed — '+(convErr&&convErr.message||convErr),'bad');
+  }
+  const a=$('#prev');
+  a.src=URL.createObjectURL(ready);
+  fixDuration(a);
+  $('#send').disabled=false;
+  if(!DEBUG || ready!==b) msg('');
+}
+
+// Last resort for a WebM that could not be converted: ask the player to seek
+// far past the end, which forces it to work out the real length, then come
+// back to the start. A known workaround for Chrome's length-less recordings.
+function fixDuration(a){
+  a.onloadedmetadata = ()=>{
+    if(a.duration===Infinity || isNaN(a.duration)){
+      a.currentTime = 1e101;
+      a.ontimeupdate = ()=>{ a.ontimeupdate=null; a.currentTime=0; };
+    }
+  };
 }
 
 /* ---- recording ---- */
@@ -296,7 +329,7 @@ $('#send').addEventListener('click', async ()=>{
   // with the buttons dead. Anything unresolved after this is a failure they
   // can retry.
   const ctl = new AbortController();
-  const timer = setTimeout(()=>ctl.abort(), 45000);
+  const timer = setTimeout(()=>ctl.abort(), 120000);
   // Count what the drop box holds BEFORE anything is sent. A fetch blocked by
   // CORS still delivers the request -- the browser simply refuses to let us
   // read the reply -- so a baseline taken afterwards is already too late and
@@ -307,13 +340,7 @@ $('#send').addEventListener('click', async ()=>{
     let r;
     // Convert before sending. If this browser cannot decode what it recorded
     // (very old ones), send the original rather than nothing.
-    let sendBlob = blob, sendName = blobName;
-    try{
-      sendBlob = await toWav(blob);
-      sendName = blobName.replace(/\.[A-Za-z0-9]+$/, '') + '.wav';
-    }catch(convErr){
-      console.warn('[add-a-sound] could not convert, sending original', convErr);
-    }
+    const sendBlob = ready || blob, sendName = readyName || blobName;
     if(MODE==='appsscript'){
       // Apps Script cannot read multipart uploads, and a JSON content-type
       // would trigger a CORS preflight it does not answer. A plain-text body
@@ -372,7 +399,7 @@ $('#send').addEventListener('click', async ()=>{
     // request had in fact never been delivered that was simply untrue, and
     // it invited duplicates. If delivery cannot be confirmed, it did not
     // happen as far as the contributor is concerned.
-    if(e && e.name==='AbortError') fail(null,'no answer after 45 s');
+    if(e && e.name==='AbortError') fail(null,'no answer after 120 s');
     else fail(e,'could not reach the drop box');
   }
   clearTimeout(timer);
