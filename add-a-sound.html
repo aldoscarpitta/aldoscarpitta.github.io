@@ -122,7 +122,17 @@ const MODE = 'appsscript';
    host their own copy, they just use their own link. The console builds
    that link and its QR code for you. Without ?room= it falls back to
    'default'. */
-const DEPLOY = (new URLSearchParams(location.search).get('room') || 'default')
+// The room this page feeds, in order of preference:
+//   1. ?room= in the address, if given;
+//   2. the page's own name: add-a-sound-riottosa-1 feeds the room riottosa-1.
+//      One page per room is what lets each room have its own photograph, so
+//      the name has to be enough -- opened without ?room= it used to fall
+//      through to 'default', where the console watching riottosa-1 never
+//      looked;
+//   3. otherwise 'default'.
+const PAGE_ROOM = (location.pathname.split('/').pop() || '')
+  .replace(/\.html?$/i, '').replace(/^add-a-sound-?/i, '');
+const DEPLOY = (new URLSearchParams(location.search).get('room') || PAGE_ROOM || 'default')
   .toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40)
   || 'default';
 
