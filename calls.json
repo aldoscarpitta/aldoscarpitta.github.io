@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-28T19:31:38.258Z",
+  "updated": "2026-09-28T19:31:46.817Z",
   "calls": [
     {
       "id": 4,
@@ -411,6 +411,21 @@
       "deadline": "2026-10-12",
       "status": "interested",
       "url": "https://www.goethe.de/en/kul/foe/int.html",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1790623906816,
+      "title": "CTM 2027 Open Call: Spatial Audio Experimentation Lab | CTM Festival",
+      "org": "",
+      "deadline": "2026-10-15",
+      "status": "curious",
+      "url": "https://www.ctm-festival.de/festival-2027/open-calls/spatial-audio-experimentation-lab",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
