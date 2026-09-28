@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-28T22:09:06.976Z",
+  "updated": "2026-09-28T22:09:14.228Z",
   "calls": [
     {
       "id": 4,
@@ -426,6 +426,21 @@
       "deadline": "2026-10-25",
       "status": "interested",
       "url": "https://www.meethub.it/call-magnetica-2027/",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1790633354228,
+      "title": "Campania Teatro Festival 2027: aperte le candidature per le selezioni artistiche - Webzine Theatron 2.0",
+      "org": "",
+      "deadline": "2026-11-14",
+      "status": "curious",
+      "url": "https://webzine.theatronduepuntozero.it/campania-teatro-festival-2027-aperte-le-candidature-per-le-selezioni-artistiche/",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
