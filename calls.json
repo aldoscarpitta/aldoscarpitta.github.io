@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-23T08:54:29.445Z",
+  "updated": "2026-09-28T19:20:05.836Z",
   "calls": [
     {
       "id": 4,
@@ -294,7 +294,7 @@
       "id": 1786824187950,
       "title": "Situated Research Residencies 2027 — IKT International Association of Curators of Contemporary Art",
       "org": "",
-      "deadline": "2026-09-27",
+      "deadline": "2027-09-27",
       "status": "interested",
       "url": "https://www.iktsite.org/news/situated-research-residencies-2027",
       "notes": "",
@@ -306,7 +306,13 @@
         "type": "annual-fixed",
         "pattern": ""
       },
-      "history": []
+      "history": [
+        {
+          "cycle": "2026-09-27",
+          "dateApplied": null,
+          "outcome": "skipped"
+        }
+      ]
     },
     {
       "id": 1787355762777,
