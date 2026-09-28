@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-28T19:20:05.836Z",
+  "updated": "2026-09-28T19:20:27.286Z",
   "calls": [
     {
       "id": 4,
@@ -366,6 +366,21 @@
       "deadline": "2026-10-05",
       "status": "interested",
       "url": "https://www.tofringe.it/call-2027-eng/",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1790623227285,
+      "title": "Institute for X Radio",
+      "org": "",
+      "deadline": "2026-12-01",
+      "status": "interested",
+      "url": "about:home",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
