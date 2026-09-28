@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-28T19:38:44.567Z",
+  "updated": "2026-09-28T19:38:57.106Z",
   "calls": [
     {
       "id": 4,
@@ -441,6 +441,21 @@
       "deadline": "2026-10-09",
       "status": "curious",
       "url": "https://aperto-crt.it/seminario/lascolto-come-metodo/",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1790624337106,
+      "title": "Tempo Reale – Call per Magnetica 2027 – MeetHub",
+      "org": "",
+      "deadline": "2026-10-25",
+      "status": "interested",
+      "url": "https://www.meethub.it/call-magnetica-2027/",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
