@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-28T19:48:04.885Z",
+  "updated": "2026-09-28T19:48:14.799Z",
   "calls": [
     {
       "id": 4,
@@ -321,21 +321,6 @@
       "deadline": "2026-09-28",
       "status": "observe",
       "url": "https://www.ctm-festival.de/festival-2027/open-calls/resynthesising-the-traditional-2027",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1787915970514,
-      "title": "Karriere an der FHNW: Call for the MAKE/SENSE PhD Programme 2026",
-      "org": "",
-      "deadline": "2026-09-27",
-      "status": "curious",
-      "url": "https://apply.refline.ch/655298/4554/pub/en/index.html",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
