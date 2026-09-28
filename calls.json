@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-28T19:23:45.092Z",
+  "updated": "2026-09-28T19:23:56.648Z",
   "calls": [
     {
       "id": 4,
@@ -381,6 +381,21 @@
       "deadline": "2026-12-01",
       "status": "interested",
       "url": "about:home",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1790623436647,
+      "title": "Funded Research Residency Open Call - SD Futures – The Sustainable Darkroom",
+      "org": "",
+      "deadline": "2026-10-23",
+      "status": "interested",
+      "url": "https://sustainabledarkroom.com/blogs/news/funded-research-residency-open-call-sd-futures",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
