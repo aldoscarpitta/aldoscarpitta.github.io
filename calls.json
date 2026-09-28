@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-28T19:45:14.467Z",
+  "updated": "2026-09-28T19:48:04.885Z",
   "calls": [
     {
       "id": 4,
@@ -274,21 +274,6 @@
           "outcome": "skipped"
         }
       ]
-    },
-    {
-      "id": 1786717142750,
-      "title": "PACT Residenzen – pact-zollverein",
-      "org": "",
-      "deadline": "2026-09-28",
-      "status": "interested",
-      "url": "https://www.pact-zollverein.de/en/fields-of-work/artists-centre/residencies",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
     },
     {
       "id": 1786824187950,
