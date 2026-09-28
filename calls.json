@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-28T19:49:35.262Z",
+  "updated": "2026-09-28T21:23:53.919Z",
   "calls": [
     {
       "id": 4,
@@ -319,7 +319,7 @@
       "title": "Resynthesising the Traditional 2027 | CTM Festival",
       "org": "",
       "deadline": "2026-09-28",
-      "status": "observe",
+      "status": "applied",
       "url": "https://www.ctm-festival.de/festival-2027/open-calls/resynthesising-the-traditional-2027",
       "notes": "",
       "fit": "",
@@ -426,21 +426,6 @@
       "deadline": "2026-10-25",
       "status": "interested",
       "url": "https://www.meethub.it/call-magnetica-2027/",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1790624975262,
-      "title": "Visioni-Masterclass-27.pdf",
-      "org": "",
-      "deadline": "2026-10-15",
-      "status": "interested",
-      "url": "https://www.testoniragazzi.it/wp-content/uploads/2026/09/Visioni-Masterclass-27.pdf",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
