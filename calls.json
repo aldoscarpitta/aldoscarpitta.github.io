@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-28T19:35:51.914Z",
+  "updated": "2026-09-28T19:36:00.863Z",
   "calls": [
     {
       "id": 4,
@@ -426,6 +426,21 @@
       "deadline": "2026-10-15",
       "status": "curious",
       "url": "https://www.ctm-festival.de/festival-2027/open-calls/spatial-audio-experimentation-lab",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1790624160863,
+      "title": "L’ascolto come metodo - Aperto CRT",
+      "org": "",
+      "deadline": "2026-10-09",
+      "status": "curious",
+      "url": "https://aperto-crt.it/seminario/lascolto-come-metodo/",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
