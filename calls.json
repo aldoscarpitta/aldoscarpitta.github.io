@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-09-29T20:03:07.838Z",
+  "updated": "2026-10-05T11:42:39.750Z",
   "calls": [
     {
       "id": 4,
@@ -80,11 +80,17 @@
       "id": 1783025641324,
       "title": "Camargo Fellowship 2027-2028: For artists, scholars and thinkers - Fondation Camargo",
       "org": "",
-      "deadline": "2026-10-01",
+      "deadline": "2027-10-01",
       "status": "interested",
       "url": "https://camargofoundation.org/en/camargo-fellowship-2026-2027",
       "notes": "",
-      "history": [],
+      "history": [
+        {
+          "cycle": "2026-10-01",
+          "dateApplied": null,
+          "outcome": "skipped"
+        }
+      ],
       "recurs": {
         "type": "annual-fixed",
         "pattern": ""
