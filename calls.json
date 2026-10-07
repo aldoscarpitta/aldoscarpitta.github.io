@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-07T22:39:49.139Z",
+  "updated": "2026-10-07T22:40:24.681Z",
   "calls": [
     {
       "id": 4,
@@ -304,21 +304,6 @@
           "outcome": "skipped"
         }
       ]
-    },
-    {
-      "id": 1787355762777,
-      "title": "Tokyo Biennale: “Social Dive” — IKT International Association of Curators of Contemporary Art",
-      "org": "",
-      "deadline": "2026-09-30",
-      "status": "curious",
-      "url": "https://www.iktsite.org/news/tokyo-biennale-social-dive",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
     },
     {
       "id": 1787915558220,
