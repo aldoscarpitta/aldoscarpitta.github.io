@@ -1,12 +1,12 @@
 {
   "schema": 3,
-  "updated": "2026-10-07T22:40:29.679Z",
+  "updated": "2026-10-08T17:46:44.815Z",
   "calls": [
     {
       "id": 4,
       "title": "Dysographies — Gallery Outreach",
       "org": "30+ galleries across Europe",
-      "deadline": "2026-10-09",
+      "deadline": "2026-12-31",
       "status": "curious",
       "url": "",
       "notes": "Top targets: Galerie Bigaignon, Galerie Minimal Berlin, STILL Fotografia Milan, Matèria Rome.",
@@ -65,7 +65,7 @@
       "id": 1783025037394,
       "title": "Open Calls - Klang Festival",
       "org": "",
-      "deadline": "2026-10-08",
+      "deadline": "2026-10-12",
       "status": "curious",
       "url": "https://klang.dk/en/open-calls",
       "notes": "",
