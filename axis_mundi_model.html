@@ -258,7 +258,6 @@ const DY=0.14,DTOP=DY+0.05;
   mesh(cyl(0.024,0.07),M.device,V(0,DY+0.054,0));
 })();
 const GEO=V(0,DY+0.09,0);
-line([GEO,V(0,DY+0.13,0),V(0.52,0.02,0),V(-h+0.08,0.02,h-0.08),V(-h+0.08,F1+FT+0.02,h-0.08)],M.violet);
 
 /* Stone: undrilled, about 32 cm, centre at 3/4 of the height from dish to beam */
 const SC=DTOP+0.75*(bB-DTOP);
@@ -288,6 +287,8 @@ line([V(0.05,eyeLow,0),V(0.012,STR.y+0.1,0),V(0,STR.y+0.015,0)],M.safety);
 mesh(cyl(0.035,0.025),M.device,V(0,SC-0.15,0));
 line([V(0,SC-0.163,0),V(0.03,SC-0.168,0.03),V(.12,SC-.155,.12)],M.violet);
 line([V(.12,SC-.155,.12),V(.165,SC,.165),V(.14,SC+.17,.14),V(-0.025,STR.y+0.08,0.008),V(-0.025,bB-0.09,0.008),V(-0.025,bB-0.09,0.3),V(-0.025,F1+FT+0.02,0.3)],M.violet);
+/* Geophone XLR: straight up the axis from the centre of the dish to the bottom centre of the stone, then up a leg with the transducer cable */
+line([GEO,V(0,SC-0.165,0),V(0.03,SC-0.172,0.024),V(.128,SC-.152,.112),V(.172,SC,.158),V(.146,SC+.17,.134),V(0.0,STR.y+0.08,0.008),V(0.0,bB-0.09,0.008),V(0.0,bB-0.09,0.3),V(0.0,F1+FT+0.02,0.3)],M.violet);
 
 /* People for scale */
 function person(x,z,rotZ,y){const g=new THREE.Group();
@@ -376,7 +377,8 @@ label(V(WX,0.4,0),'terra, acqua profonda',{word:true,cls:'word'});
 label(V(0.5,DTOP,-0.05),'Dish<small>your metal disc, diameter to measure</small>',{view:'dish'});
 label(V(-0.233,0.07,0.219),'Three stones as feet<small>point contacts, the dish rings free</small>',{view:'dish',cls:'left'});
 label(V(0,DY+0.095,0),'Geophone<small>magnetic base, dead centre</small>',{view:'dish'});
-label(V(0.52,0.02,0.05),'Cable along the floor<small>to the electronics, position open</small>',{view:'dish'});
+label(V(0,0.55,0),'Geophone XLR<small>straight up to the centre of the stone</small>',{view:'dish'});
+label(V(0,SC-0.32,0),'Geophone XLR from the dish',{view:'stone'});
 /* detail: stone */
 label(V(0.01,STR.y,0),'Safety ring<small>catches only if the net fails</small>',{view:'stone'});
 label(V(0.01,TR.y,0),'Load ring',{view:'stone'});
