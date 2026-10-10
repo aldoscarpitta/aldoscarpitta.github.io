@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Axis Mundi, rigging model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600&family=Archivo+Narrow:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#EEF0EE;--graphite:#2F3134;--pencil:#86898C;--ink:#1F5FA8;--violet:#5A3C9E;--panel:rgba(238,240,238,.93);--rule:#C7CAC7;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#191A1C;--graphite:#D9DAD7;--pencil:#7F8285;--ink:#73A9EA;--violet:#B69DEB;--panel:rgba(25,26,28,.92);--rule:#3B3D40}}
+:root[data-theme="dark"]{--paper:#191A1C;--graphite:#D9DAD7;--pencil:#7F8285;--ink:#73A9EA;--violet:#B69DEB;--panel:rgba(25,26,28,.92);--rule:#3B3D40}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--graphite);font-family:'Archivo',system-ui,-apple-system,'Segoe UI',sans-serif;overflow:hidden}
+#app{position:relative;height:100%;overflow:hidden}
+canvas{display:block;touch-action:none}
+header{position:absolute;top:16px;left:18px;max-width:340px;pointer-events:none}
+h1{font-family:'Archivo Narrow','Arial Narrow',sans-serif;font-weight:500;font-size:30px;line-height:1;margin:0 0 6px;letter-spacing:-.01em}
+header p{margin:0;font-size:13px;line-height:1.45;color:var(--pencil)}
+#detailTitle{font-family:'Archivo Narrow','Arial Narrow',sans-serif;font-size:17px;color:var(--violet);margin-top:8px;min-height:1em}
+#panel{position:absolute;left:18px;bottom:18px;width:300px;max-height:calc(100% - 150px);overflow:auto;background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:10px 14px 10px;font-size:13px}
+#panel[hidden]{display:none}
+.phead{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.phead span{font-family:'Archivo Narrow','Arial Narrow',sans-serif;font-size:14px;color:var(--pencil)}
+.plain{font:inherit;font-size:12.5px;color:var(--graphite);background:transparent;border:1px solid var(--rule);border-radius:4px;padding:4px 9px;cursor:pointer}
+#open{position:absolute;left:18px;bottom:18px;background:var(--panel)}
+#open[hidden]{display:none}
+#panel h2{font-family:'Archivo Narrow','Arial Narrow',sans-serif;font-weight:500;font-size:14px;margin:10px 0 6px}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.seg button{font:inherit;font-size:12.5px;color:var(--graphite);background:transparent;border:1px solid var(--rule);border-radius:4px;padding:5px 8px;cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink)}
+button:focus-visible,label:focus-within{outline:2px solid var(--ink);outline-offset:2px}
+.toggles{display:flex;flex-wrap:wrap;gap:4px 14px}
+.toggles label{display:flex;align-items:center;gap:5px;cursor:pointer}
+.key{display:grid;grid-template-columns:28px 1fr;gap:3px 8px;align-items:center;font-size:12px;color:var(--pencil);margin-top:2px}
+.key i{display:block;height:0;border-top:2px solid}
+.note{font-size:12px;color:var(--pencil);line-height:1.4;margin:10px 0 0}
+#labels{position:absolute;inset:0;pointer-events:none;font-family:'Archivo Narrow','Arial Narrow',sans-serif}
+.lab{position:absolute;white-space:nowrap;font-size:13px;line-height:1.2;color:var(--graphite);transform:translate(8px,-50%);background:var(--panel);padding:1px 5px;border-radius:3px}
+.lab::before{content:"";position:absolute;left:-10px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--violet)}
+.lab small{display:block;font-size:12px;color:var(--pencil)}
+.lab.left{transform:translate(calc(-100% - 8px),-50%);text-align:right}
+.lab.left::before{left:auto;right:-12px}
+.lab.word{transform:translate(-100%,-50%);font-style:italic;color:var(--violet);font-size:14px;background:none}
+.lab.word::before{display:none}
+.lab.open{color:var(--violet)}
+@media (max-width:640px){
+  header{left:12px;top:10px;max-width:70%}
+  h1{font-size:24px}
+  header p{display:none}
+  #panel{left:8px;right:8px;width:auto;bottom:8px;max-height:45%;padding:10px}
+  #open{left:8px;bottom:8px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Axis Mundi</h1>
+    <p>Torre Aldobrandesca, Arcidosso.</p>
+    <div id="detailTitle"></div>
+  </header>
+  <div id="labels"></div>
+  <button id="open" class="plain" hidden>Show options</button>
+  <div id="panel">
+    <div class="phead"><span>Options</span><button id="close" class="plain">Hide</button></div>
+    <h2>View</h2>
+    <div class="seg" id="views">
+      <button data-v="tower" aria-pressed="true">Whole tower</button>
+      <button data-v="stoneRoom">Stone room</button>
+      <button data-v="small">Small room</button>
+      <button data-v="vault">Vault</button>
+    </div>
+    <h2>Details</h2>
+    <div class="seg" id="details">
+      <button data-v="dish">Dish</button>
+      <button data-v="stone">Hanging stone</button>
+      <button data-v="clamp">Beam clamps</button>
+      <button data-v="base">Pole base</button>
+      <button data-v="roofT">Roof transducer</button>
+    </div>
+    <h2>Small room</h2>
+    <div class="seg" id="small">
+      <button data-o="relay" aria-pressed="true">Acoustic relay</button>
+      <button data-o="line">Line continues</button>
+      <button data-o="gap">Gap</button>
+    </div>
+    <h2>Roof transducer mount</h2>
+    <div class="seg" id="roof">
+      <button data-o="pole" aria-pressed="true">Pole from floor</button>
+      <button data-o="ballast">Ballast on terrace</button>
+    </div>
+    <h2>Show</h2>
+    <div class="toggles">
+      <label><input type="checkbox" id="tLabels" checked> Labels</label>
+      <label><input type="checkbox" id="tWords" checked> Sketch words</label>
+      <label><input type="checkbox" id="tWalls" checked> Walls</label>
+    </div>
+    <h2>Key</h2>
+    <div class="key">
+      <i style="border-color:var(--ink)"></i><span>Load path</span>
+      <i style="border-top-style:dashed;border-color:var(--pencil)"></i><span>Safety, carries nothing</span>
+      <i style="border-color:var(--violet)"></i><span>Sound: cables and active devices</span>
+    </div>
+    <p class="note">Drag to rotate, scroll or pinch to zoom, right-drag or two fingers to pan. Detail views hide the walls and stairs.</p>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+const app=document.getElementById('app');
+if(!window.THREE){app.insertAdjacentHTML('beforeend','<p style="position:absolute;top:45%;left:0;right:0;text-align:center">The 3D library did not load. Check the connection and reload the page.</p>');return;}
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+app.prepend(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(35,1,0.02,200);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);
+controls.enableDamping=true;controls.dampingFactor=0.08;controls.minDistance=0.15;controls.maxDistance=70;
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a8a8a,0.85));
+const sun=new THREE.DirectionalLight(0xffffff,0.55);sun.position.set(6,14,9);scene.add(sun);
+
+const M={
+  graphite:new THREE.LineBasicMaterial(),
+  pencil:new THREE.LineBasicMaterial({transparent:true,opacity:.55}),
+  ink:new THREE.LineBasicMaterial(),
+  violet:new THREE.LineBasicMaterial(),
+  safety:new THREE.LineDashedMaterial({dashSize:.03,gapSize:.02}),
+  safetyBig:new THREE.LineDashedMaterial({dashSize:.12,gapSize:.08}),
+  wall:new THREE.MeshBasicMaterial({transparent:true,opacity:.05,depthWrite:false,side:THREE.DoubleSide}),
+  floor:new THREE.MeshBasicMaterial({transparent:true,opacity:.16,depthWrite:false,side:THREE.DoubleSide}),
+  steel:new THREE.MeshStandardMaterial({color:0x7d8287,metalness:.5,roughness:.45}),
+  dark:new THREE.MeshStandardMaterial({color:0x2e2f31,roughness:.9}),
+  stone:new THREE.MeshStandardMaterial({color:0x8e8a82,roughness:.95,flatShading:true}),
+  dish:new THREE.MeshStandardMaterial({color:0xa3a7ab,metalness:.7,roughness:.35,side:THREE.DoubleSide}),
+  device:new THREE.MeshStandardMaterial({roughness:.6}),
+  body:new THREE.MeshBasicMaterial({transparent:true,opacity:.28,depthWrite:false}),
+  timber:new THREE.MeshStandardMaterial({color:0x9b7b55,roughness:.9,transparent:true,opacity:.55}),
+  brick:new THREE.MeshStandardMaterial({color:0xa4765f,roughness:.95,transparent:true,opacity:.62})
+};
+function theme(){
+  const c=k=>new THREE.Color(css(k));
+  scene.background=c('--paper');
+  M.graphite.color=c('--graphite');M.pencil.color=c('--pencil');M.ink.color=c('--ink');M.violet.color=c('--violet');
+  M.safety.color=c('--pencil');M.safetyBig.color=c('--pencil');M.wall.color=c('--graphite');M.floor.color=c('--pencil');
+  M.device.color=c('--violet');M.body.color=c('--pencil');
+}
+theme();matchMedia('(prefers-color-scheme: dark)').addEventListener('change',theme);
+
+function line(pts,mat,parent){
+  const g=new THREE.BufferGeometry().setFromPoints(pts);
+  const l=new THREE.Line(g,mat);
+  if(mat.isLineDashedMaterial) l.computeLineDistances();
+  (parent||scene).add(l);return l;
+}
+function solid(geo,pos,fill,edge,parent){
+  const g=new THREE.Group();g.position.copy(pos);
+  if(fill) g.add(new THREE.Mesh(geo,fill));
+  if(edge) g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo,20),edge));
+  (parent||scene).add(g);return g;
+}
+function mesh(geo,mat,pos,parent){const m=new THREE.Mesh(geo,mat);m.position.copy(pos);(parent||scene).add(m);return m;}
+const box=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
+const cyl=(r,h)=>new THREE.CylinderGeometry(r,r,h,24);
+
+/* Tower: schematic dimensions in metres */
+const W=2.8,h=W/2,T=1.0,F1=5.0,F2=8.0,FT=0.25,F3T=0.4,SPRING=11.0,CROWN=SPRING+h,TER=CROWN+0.6,PAR=TER+1.0;
+const walls=new THREE.Group(),stairs=new THREE.Group(),people=new THREE.Group();
+scene.add(walls,stairs,people);
+[[0,-(h+T/2),W+2*T,T],[0,h+T/2,W+2*T,T],[-(h+T/2),0,T,W],[h+T/2,0,T,W]].forEach(([x,z,w,d])=>{
+  solid(box(w,PAR,d),V(x,PAR/2,z),M.wall,M.pencil,walls);
+});
+for(const side of [-1,1]){for(const k of [-1,0,1]){
+  solid(box(0.7,0.7,T),V(k*1.4,PAR+0.35,side*(h+T/2)),M.wall,M.pencil,walls);
+  solid(box(T,0.7,0.7),V(side*(h+T/2),PAR+0.35,k*1.4),M.wall,M.pencil,walls);
+}}
+solid(box(W,0.2,W),V(0,-0.1,0),M.floor,M.pencil);
+function floorWithHole(y,t,mat,x0,x1,z0,z1){
+  const parts=[[-h,h,-h,z0],[-h,h,z1,h],[-h,x0,z0,z1],[x1,h,z0,z1]];
+  parts.forEach(([a,b,c,d])=>{if(b-a<0.01||d-c<0.01)return;solid(box(b-a,t,d-c),V((a+b)/2,y+t/2,(c+d)/2),mat,M.pencil);});
+}
+/* Floor 2: timber, edge carried by the H beam; open between the beam and the stairs, side walkways to the flights.
+   Floor 3: stone and brick, opening where the small-room flight arrives */
+const slab=(x0,x1,z0,z1,y,t,mat)=>solid(box(x1-x0,t,z1-z0),V((x0+x1)/2,y+t/2,(z0+z1)/2),mat,M.pencil);
+slab(-h,h,-h,0.08,F1,FT,M.timber);
+slab(-h,-0.7,0.08,0.7,F1,FT,M.timber);
+slab(0.7,h,0.08,0.7,F1,FT,M.timber);
+floorWithHole(F2,F3T,M.brick,0,h,0.7,h);
+floorWithHole(TER-0.2,0.2,M.floor,-0.7,0.6,0.7,h);
+
+/* Barrel vault, axis along z */
+(function(){
+  const N=28,pos=[],idx=[];
+  for(let i=0;i<=N;i++){const a=Math.PI*i/N,x=h*Math.cos(a),y=SPRING+h*Math.sin(a);pos.push(x,y,-h,x,y,h);}
+  for(let i=0;i<N;i++){const a=2*i;idx.push(a,a+1,a+2,a+1,a+3,a+2);}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setIndex(idx);
+  scene.add(new THREE.Mesh(g,M.floor));
+  for(const z of [-h,h]){const p=[];for(let i=0;i<=N;i++){const a=Math.PI*i/N;p.push(V(h*Math.cos(a),SPRING+h*Math.sin(a),z));}line(p,M.graphite);}
+  for(const a of [0.35,0.8,Math.PI/2,2.34,2.79]) line([V(h*Math.cos(a),SPRING+h*Math.sin(a),-h),V(h*Math.cos(a),SPRING+h*Math.sin(a),h)],M.pencil);
+})();
+
+/* Stairs, schematic */
+function flight(x0,z0,dx,dz,y0,rise,n,width){
+  const len=Math.hypot(dx,dz),ux=dx/len,uz=dz/len,step=len/n,sh=rise/n;
+  for(let i=0;i<n;i++){
+    const geo=box(Math.abs(ux)>.5?step:width,sh,Math.abs(uz)>.5?step:width);
+    solid(geo,V(x0+ux*step*(i+.5),y0+sh*(i+.5),z0+uz*step*(i+.5)),M.floor,M.pencil,stairs);
+  }
+}
+const landing=(x,z,y)=>solid(box(0.7,0.06,0.7),V(x,y-0.03,z),M.floor,M.pencil,stairs);
+/* Stone room: three flights round the walls, counterclockwise seen from above; inner edge 0.53 m from the stone */
+flight(h,-1.05,-2.1,0,0,1.97,9,0.7);landing(-1.05,-1.05,1.97);
+flight(-1.05,-0.7,0,1.4,1.97,1.31,6,0.7);landing(-1.05,1.05,3.28);
+flight(-0.7,1.05,2.1,0,3.28,1.97,9,0.7);
+/* Small room: one flight, directly above the last flight of the stone room */
+flight(-0.7,1.05,2.1,0,F1+FT,F2+F3T-(F1+FT),13,0.7);
+/* Vault room: two flights, a corridor along the wall, then a steeper flight through a hatch to the roof */
+const VR=F2+F3T;
+flight(1.05,0.7,0,-1.4,VR,1.0,5,0.7);landing(1.05,-1.05,VR+1.0);
+flight(0.7,-1.05,-1.4,0,VR+1.0,1.0,5,0.7);landing(-1.05,-1.05,VR+2.0);
+solid(box(0.7,0.06,1.4),V(-1.05,VR+2.0-0.03,0),M.floor,M.pencil,stairs);landing(-1.05,1.05,VR+2.0);
+flight(-0.7,1.05,1.3,0,VR+2.0,TER-(VR+2.0),11,0.7);
+
+/* H beam (doppio T) under floor 1, along x through the axis: assumed HEB 160 */
+const bTop=F1,bH=0.16,bB=bTop-bH,FL=0.012;
+solid(box(W,FL,0.16),V(0,bTop-FL/2,0),M.steel,M.graphite);
+solid(box(W,FL,0.16),V(0,bB+FL/2,0),M.steel,M.graphite);
+solid(box(W,bH-2*FL,0.008),V(0,bB+bH/2,0),M.steel,null);
+/* Two girder clamps on the bottom flange: jaws over the flange edges, spindle, eye under the web */
+function clamp(x,eyeMat){
+  solid(box(0.04,0.025,0.13),V(x,bB-0.03,0),M.steel,M.graphite);
+  for(const s of [-1,1]){
+    solid(box(0.04,0.05,0.01),V(x,bB-0.012,s*0.091),M.steel,M.graphite);
+    solid(box(0.04,0.008,0.024),V(x,bB+FL+0.004,s*0.076),M.steel,M.graphite);
+  }
+  const sp=mesh(cyl(0.006,0.26),M.dark,V(x,bB-0.03,0.015));sp.rotation.x=Math.PI/2;
+  const cr=mesh(cyl(0.014,0.012),M.dark,V(x,bB-0.03,0.15));cr.rotation.x=Math.PI/2;
+  const eye=mesh(new THREE.TorusGeometry(0.014,0.004,8,20),eyeMat,V(x,bB-0.06,0));
+}
+clamp(-0.05,M.steel);clamp(0.05,M.steel);
+const eyeLow=bB-0.078;
+
+/* Dish on three stones, with magnetic geophone */
+const DY=0.14,DTOP=DY+0.05;
+(function(){
+  const prof=[[0.001,0],[0.25,0.012],[0.47,0.04],[0.5,0.05],[0.49,0.056],[0.25,0.019],[0.001,0.007]].map(([r,y])=>new THREE.Vector2(r,y));
+  const d=new THREE.Mesh(new THREE.LatheGeometry(prof,48),M.dish);d.position.y=DY;scene.add(d);
+  for(let i=0;i<3;i++){const a=i*2*Math.PI/3+0.3;const f=new THREE.Mesh(new THREE.DodecahedronGeometry(0.075),M.stone);f.position.set(0.32*Math.cos(a),0.07,0.32*Math.sin(a));f.rotation.set(i,i*2,0);scene.add(f);}
+  mesh(cyl(0.03,0.012),M.steel,V(0,DY+0.013,0));
+  mesh(cyl(0.024,0.07),M.device,V(0,DY+0.054,0));
+})();
+const GEO=V(0,DY+0.09,0);
+line([GEO,V(0,DY+0.13,0),V(0.52,0.02,0),V(-h+0.08,0.02,h-0.08),V(-h+0.08,F1+FT+0.02,h-0.08)],M.violet);
+
+/* Stone: undrilled, about 32 cm, centre at 3/4 of the height from dish to beam */
+const SC=DTOP+0.75*(bB-DTOP);
+(function(){
+  const g=new THREE.IcosahedronGeometry(1,2),p=g.attributes.position,v=new THREE.Vector3();
+  for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i);
+    const f=1+0.13*Math.sin(5*v.x+1.3)*Math.cos(4*v.y+.7)*Math.sin(3*v.z+2)+0.07*Math.sin(9*v.y+v.z*4);
+    p.setXYZ(i,v.x*f*0.175,v.y*f*0.16,v.z*f*0.165);}
+  g.computeVertexNormals();
+  const s=new THREE.Mesh(g,M.stone);s.position.set(0,SC,0);s.rotation.y=0.4;scene.add(s);
+})();
+/* Net, load path */
+const TR=V(0,SC+0.42,0),BR=V(0,SC-0.178,0);
+function ring(p,r,mat){const m=new THREE.Mesh(new THREE.TorusGeometry(r,0.004,8,24),mat);m.position.copy(p);m.rotation.x=Math.PI/2;scene.add(m);return m;}
+ring(TR,0.018,M.steel);ring(BR,0.07,M.steel);
+const corners=[[1,1],[1,-1],[-1,1],[-1,-1]];
+corners.forEach(([a,b])=>line([V(0,TR.y-0.018,0),V(.13*a,SC+.17,.13*b),V(.155*a,SC,.155*b),V(.12*a,SC-.15,.12*b),V(.0495*a,BR.y,.0495*b)],M.ink));
+line([V(.142,SC+.1,.142),V(.142,SC+.1,-.142),V(-.142,SC+.1,-.142),V(-.142,SC+.1,.142),V(.142,SC+.1,.142)],M.ink);
+/* Safety cradle: outside the net, 5 to 10 mm below the stone, no contact */
+const STR=V(0,TR.y+0.12,0),SBR=V(0,SC-0.205,0);
+ring(STR,0.015,M.steel);ring(SBR,0.09,M.steel);
+corners.forEach(([a,b])=>line([V(0,STR.y-0.015,0),V(.15*a,SC+.18,.15*b),V(.178*a,SC,.178*b),V(.14*a,SC-.165,.14*b),V(.0636*a,SBR.y,.0636*b)],M.safety));
+/* Bundle to the clamps */
+line([V(-0.05,eyeLow,0),V(-0.012,STR.y+0.1,0),V(0,TR.y+0.018,0)],M.ink);
+line([V(0.05,eyeLow,0),V(0.012,STR.y+0.1,0),V(0,STR.y+0.015,0)],M.safety);
+/* Transducer bonded under the stone, bottom centre, inside the wide load ring; cable up a leg to the bundle */
+mesh(cyl(0.035,0.025),M.device,V(0,SC-0.15,0));
+line([V(0,SC-0.163,0),V(0.03,SC-0.168,0.03),V(.12,SC-.155,.12)],M.violet);
+line([V(.12,SC-.155,.12),V(.165,SC,.165),V(.14,SC+.17,.14),V(-0.025,STR.y+0.08,0.008),V(-0.025,bB-0.09,0.008),V(-0.025,bB-0.09,0.3),V(-0.025,F1+FT+0.02,0.3)],M.violet);
+
+/* People for scale */
+function person(x,z,rotZ,y){const g=new THREE.Group();
+  mesh(new THREE.CylinderGeometry(0.16,0.14,1.4,16),M.body,V(0,0.7,0),g);
+  mesh(new THREE.SphereGeometry(0.11,16,12),M.body,V(0,1.55,0),g);
+  g.position.set(x,y||0,z);g.rotation.z=rotZ||0;people.add(g);return g;}
+person(-1.05,0,0,2.63);
+person(0.2,-0.85,0,F1+FT);
+person(0.55,-0.5,Math.PI/2,TER+0.16);
+
+/* Small room options */
+const small={line:new THREE.Group(),gap:new THREE.Group(),relay:new THREE.Group()};
+Object.values(small).forEach(g=>scene.add(g));
+const CUP=V(-0.025,F1+FT+0.02,0.3);
+line([CUP,V(0.35,F2,1.0),V(0.35,F2+F3T+0.02,1.0),V(0.06,F2+F3T+0.02,0.1)],M.violet,small.line);
+line([CUP,V(-0.025,F1+FT+0.02,-0.1),V(-0.025,F1+FT+0.02,-h+0.05),V(h-0.05,F1+FT+0.02,-h+0.05),V(h-0.05,F2-0.05,-h+0.05),V(h-0.05,F2-0.05,1.0),V(h-0.05,F2+F3T+0.02,1.0),V(0.06,F2+F3T+0.02,0.1)],M.violet,small.gap);
+const RX=0.35,RZ=-0.45,MICY=F2-0.4;
+(function(){
+  const g=small.relay;
+  mesh(cyl(0.06,0.04),M.device,V(RX,F1+FT+0.02,RZ),g);
+  line([CUP,V(-0.025,F1+FT+0.02,-0.1),V(RX,F1+FT+0.02,-0.1),V(RX,F1+FT+0.02,RZ+0.06)],M.violet,g);
+  line([V(RX,F2,RZ),V(RX,MICY+0.06,RZ)],M.violet,g);
+  mesh(cyl(0.012,0.09),M.device,V(RX,MICY,RZ),g);
+  for(let i=1;i<=3;i++){const r=new THREE.Mesh(new THREE.TorusGeometry(0.15*i,0.004,6,40),M.device);r.rotation.x=Math.PI/2;r.position.set(RX,F1+FT+0.55*i,RZ);g.add(r);}
+  line([V(RX,F2-0.02,RZ),V(RX,F2-0.02,1.0),V(RX,F2+F3T+0.02,1.0),V(0.06,F2+F3T+0.02,0.1)],M.violet,g);
+})();
+
+/* Roof transducer options */
+const roof={pole:new THREE.Group(),ballast:new THREE.Group()};
+Object.values(roof).forEach(g=>scene.add(g));
+const BASE=F2+F3T,POLETOP=CROWN-0.045;
+(function(){
+  const g=roof.pole;
+  solid(box(0.3,0.01,0.3),V(0,BASE+0.005,0),M.dark,null,g);
+  solid(box(0.3,0.012,0.3),V(0,BASE+0.016,0),M.steel,M.graphite,g);
+  mesh(cyl(0.015,0.2),M.dark,V(0,BASE+0.122,0),g);
+  mesh(cyl(0.032,0.03),M.steel,V(0,BASE+0.11,0),g);
+  solid(box(0.2,0.01,0.01),V(0,BASE+0.11,0),M.steel,null,g);
+  mesh(cyl(0.025,POLETOP-(BASE+0.2)),M.steel,V(0,(POLETOP+BASE+0.2)/2,0),g);
+  line([V(0,BASE+1.5,0),V(-h,BASE+1.5,0)],M.safety,g);
+  mesh(new THREE.TorusGeometry(0.03,0.004,8,20),M.steel,V(-h+0.03,BASE+1.5,0),g);
+  mesh(cyl(0.04,0.03),M.steel,V(0,POLETOP+0.015-0.03,0),g);
+  solid(box(0.25,0.01,0.25),V(0,CROWN-0.009,0),M.steel,M.graphite,g);
+  solid(box(0.25,0.004,0.25),V(0,CROWN-0.002,0),M.dark,null,g);
+  mesh(cyl(0.05,0.05),M.device,V(0.085,CROWN-0.039,0),g);
+  line([V(-0.12,CROWN-0.014,0.12),V(-0.02,CROWN-0.35,0.02)],M.safety,g);
+  line([V(0.06,BASE+0.03,0.1),V(0.035,BASE+0.3,0.03),V(0.035,CROWN-0.3,0.03),V(0.085,CROWN-0.065,0)],M.violet,g);
+})();
+(function(){
+  const g=roof.ballast,y=TER;
+  mesh(cyl(0.07,0.05),M.device,V(-0.6,y+0.025,-0.6),g);
+  solid(box(0.42,0.02,0.42),V(-0.6,y+0.06,-0.6),M.steel,M.graphite,g);
+  solid(box(0.38,0.12,0.18),V(-0.6,y+0.13,-0.69),M.floor,M.graphite,g);
+  solid(box(0.38,0.12,0.18),V(-0.6,y+0.13,-0.51),M.floor,M.graphite,g);
+  line([V(0.06,BASE+0.02,0.1),V(1.1,BASE+0.02,-1.1),V(1.1,TER+0.02,-1.1),V(-0.6,TER+0.02,-0.4),V(-0.6,TER+0.04,-0.55)],M.violet,g);
+})();
+
+/* Axis reference */
+line([V(0,0,0),V(0,CROWN,0)],M.safetyBig);
+
+/* Labels */
+const layer=document.getElementById('labels');
+const L=[];
+function label(p,html,opt){opt=opt||{};const d=document.createElement('div');d.className='lab '+(opt.cls||'');d.innerHTML=html;layer.appendChild(d);
+  const o={p,d,view:opt.view||null,only:opt.only||null,word:!!opt.word,group:opt.group||null,sgroup:opt.sgroup||null};L.push(o);return o;}
+/* overview */
+label(V(0,CROWN-0.04,0),'Roof transducer<small>under the vault crown</small>',{group:'pole'});
+label(V(0,(F2+CROWN)/2,0),'Palo<small>screw prop, plate on the crown</small>',{group:'pole'});
+label(V(-0.6,TER+0.05,-0.6),'Roof transducer<small>under ballast on the terrace</small>',{group:'ballast'});
+const smallLab=label(V(RX,(F1+F2)/2+0.45,RZ),'',{cls:'open'});
+label(V(0.9,bB,0),'H beam, doppio T',{});
+label(V(-h,F1+FT/2,-h),'Floor 2: timber<small>carried by the H beam</small>',{cls:'left'});
+label(V(-h,F2+F3T/2,h),'Floor 3: stone and brick',{cls:'left'});
+label(V(0,F1+FT,0.45),'Open between beam and stairs',{only:'small'});
+label(V(-1.05,VR+2.0,0),'Corridor',{only:'vault',cls:'left'});
+label(V(0.3,VR+2.9,1.05),'Steeper flight<small>through a hatch to the roof</small>',{only:'vault'});
+label(V(0.2,SC,0.1),'Stone in steel net<small>swings lightly, free of the dish</small>',{});
+label(V(0.5,DTOP,0),'Dish on three stones<small>geophone at the centre</small>',{});
+const WX=-(h+T+0.4);
+label(V(WX,PAR,0),'cielo, cosmo, aria',{word:true,cls:'word'});
+label(V(WX,(F1+F2)/2+0.4,0),'lavoro, rito, tradizione',{word:true,cls:'word'});
+label(V(WX,3.6,0),'la roccia dal fuoco cade',{word:true,cls:'word'});
+label(V(WX,2.6,0),'eruzione, tensione, estrazione,<br>fuoriuscita, caduta in basso',{word:true,cls:'word'});
+label(V(WX,0.4,0),'terra, acqua profonda',{word:true,cls:'word'});
+/* detail: dish */
+label(V(0.5,DTOP,-0.05),'Dish<small>your metal disc, diameter to measure</small>',{view:'dish'});
+label(V(-0.233,0.07,0.219),'Three stones as feet<small>point contacts, the dish rings free</small>',{view:'dish',cls:'left'});
+label(V(0,DY+0.095,0),'Geophone<small>magnetic base, dead centre</small>',{view:'dish'});
+label(V(0.52,0.02,0.05),'Cable along the floor<small>to the electronics, position open</small>',{view:'dish'});
+/* detail: stone */
+label(V(0.01,STR.y,0),'Safety ring<small>catches only if the net fails</small>',{view:'stone'});
+label(V(0.01,TR.y,0),'Load ring',{view:'stone'});
+label(V(-0.13,SC+.17,-0.13),'Legs at the four corners',{view:'stone',cls:'left'});
+label(V(.142,SC+.1,-.142),'Girdle, above the widest point',{view:'stone'});
+label(V(-0.035,SC-0.15,0),'Transducer, bottom centre',{view:'stone',cls:'left'});
+label(V(0.17,SC+0.01,-0.02),'Stone, whole<small>about 32 cm, about 80 kg</small>',{view:'stone'});
+label(V(-0.09,SBR.y,0),'Safety cradle, wide ring',{view:'stone',cls:'left'});
+label(V(0.07,BR.y,0),'Wide load ring around the transducer',{view:'stone'});
+/* detail: clamps */
+label(V(0.1,bB+0.006,-0.08),'Bottom flange<small>measure width and thickness</small>',{view:'clamp'});
+label(V(0.07,bB+FL+0.004,0.08),'Jaw over the flange edge',{view:'clamp'});
+label(V(-0.05,bB-0.03,0.155),'Spindle, tightened<small>to the maker\'s torque</small>',{view:'clamp',cls:'left'});
+label(V(-0.05,bB-0.074,0),'Load clamp<small>WLL 1,000 kg</small>',{view:'clamp',cls:'left'});
+label(V(0.05,bB-0.06,0),'Safety clamp<small>10 cm along the flange</small>',{view:'clamp'});
+label(V(-0.03,bB-0.3,0),'Load rope',{view:'clamp',cls:'left'});
+label(V(0.03,bB-0.3,0),'Safety rope',{view:'clamp'});
+label(V(-0.025,bB-0.09,0.3),'Audio up to the small room',{view:'clamp',cls:'left'});
+/* detail: pole base */
+label(V(0.15,BASE+0.005,0.15),'Isolation pad, rated<small>on the stone and brick floor</small>',{view:'base'});
+label(V(-0.15,BASE+0.016,-0.15),'Base plate',{view:'base',cls:'left'});
+label(V(0.1,BASE+0.11,0),'Screw jack<small>sets the pressure on the crown</small>',{view:'base'});
+label(V(0.025,BASE+0.9,0),'Pole',{view:'base'});
+label(V(-0.6,BASE+1.5,0),'Safety tie<small>tie point to find, no drilling</small>',{view:'base',cls:'left'});
+label(V(RX,MICY,RZ),'Relay mic hangs below this floor<small>on a cord, not touching the masonry</small>',{view:'base',sgroup:'relay'});
+/* detail: roof transducer */
+label(V(0.12,CROWN,0.12),'Vault crown',{view:'roofT'});
+label(V(-0.12,CROWN-0.002,0.12),'Hard pad<small>takes up about 3 mm of curvature</small>',{view:'roofT',cls:'left'});
+label(V(-0.12,CROWN-0.012,-0.12),'Steel plate pressed to the crown',{view:'roofT',cls:'left'});
+label(V(0.135,CROWN-0.05,0),'Exciter bolted to the plate',{view:'roofT'});
+label(V(0.025,CROWN-0.13,0),'Pole head',{view:'roofT'});
+label(V(-0.07,CROWN-0.18,0.07),'Retaining tie, plate to pole',{view:'roofT',cls:'left'});
+
+const state={small:'relay',roof:'pole',labels:true,words:true,mode:'overview',view:'tower'};
+const smallText={
+  relay:'Small room: acoustic relay<small>transducer on the timber floor, mic hanging from the masonry;<br>people in the room become part of the transmission</small>',
+  line:'Small room: line continues<small>cables cross in view</small>',
+  gap:'Small room: gap<small>cables along the wall</small>'};
+function apply(){
+  for(const k in small) small[k].visible=k===state.small;
+  for(const k in roof) roof[k].visible=k===state.roof;
+  smallLab.d.innerHTML=smallText[state.small];
+  const ov=state.mode==='overview';
+  walls.visible=ov&&document.getElementById('tWalls').checked;stairs.visible=ov;people.visible=ov;
+}
+function seg(id,key){document.querySelectorAll('#'+id+' button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#'+id+' button').forEach(x=>x.setAttribute('aria-pressed',x===b));state[key]=b.dataset.o;apply();}));}
+seg('small','small');seg('roof','roof');
+document.getElementById('tLabels').addEventListener('change',e=>{state.labels=e.target.checked;});
+document.getElementById('tWords').addEventListener('change',e=>{state.words=e.target.checked;});
+document.getElementById('tWalls').addEventListener('change',apply);
+const panel=document.getElementById('panel'),openB=document.getElementById('open');
+document.getElementById('close').addEventListener('click',()=>{panel.hidden=true;openB.hidden=false;openB.focus();});
+openB.addEventListener('click',()=>{panel.hidden=false;openB.hidden=true;document.getElementById('close').focus();});
+if(app.clientWidth<640){state.words=false;document.getElementById('tWords').checked=false;}
+
+/* Views */
+const VIEWS={
+  tower:[V(16,10,21),V(0,7.3,0)],
+  stoneRoom:[V(5.6,3.3,8.2),V(0,2.55,0)],
+  small:[V(3.2,7.6,4.5),V(0,6.8,0)],
+  vault:[V(4.6,11.4,6.2),V(0,10.9,0)],
+  dish:[V(1.3,1.05,1.75),V(0.05,0.1,0)],
+  stone:[V(0.95,SC+0.45,1.35),V(0,SC+0.12,0)],
+  clamp:[V(0.42,bB-0.09,0.58),V(0,bB-0.035,0.02)],
+  base:[V(1.7,BASE+1.15,2.1),V(-0.35,BASE+0.6,0)],
+  roofT:[V(0.75,CROWN-0.45,0.95),V(0,CROWN-0.09,0)]};
+const TITLES={dish:'Detail: the dish',stone:'Detail: the hanging stone',clamp:'Detail: the beam clamps',base:'Detail: the pole base',roofT:'Detail: the roof transducer'};
+let anim=null;
+function go(name){const [p,t]=VIEWS[name];
+  state.mode=TITLES[name]?name:'overview';state.view=name;apply();
+  document.getElementById('detailTitle').textContent=TITLES[name]||'';
+  if(state.mode==='base'&&state.roof!=='pole') document.querySelector('#roof button[data-o="pole"]').click();
+  if(state.mode==='roofT'&&state.roof!=='pole') document.querySelector('#roof button[data-o="pole"]').click();
+  if(reduce){camera.position.copy(p);controls.target.copy(t);return;}
+  anim={p0:camera.position.clone(),t0:controls.target.clone(),p1:p,t1:t,s:performance.now()};}
+const allViewBtns=document.querySelectorAll('#views button,#details button');
+allViewBtns.forEach(b=>b.addEventListener('click',()=>{allViewBtns.forEach(x=>x.setAttribute('aria-pressed',x===b));go(b.dataset.v);}));
+camera.position.copy(VIEWS.tower[0]);controls.target.copy(VIEWS.tower[1]);
+
+function size(){const w=app.clientWidth,hh=app.clientHeight;renderer.setSize(w,hh);camera.aspect=w/hh;
+  if(w>=900&&!panel.hidden) camera.setViewOffset(w,hh,-170,0,w,hh); else camera.clearViewOffset();
+  camera.updateProjectionMatrix();
+  const fit=w<640?1.35:1;VIEWS.tower[0]=V(16*fit,10*fit,21*fit);}
+addEventListener('resize',size);size();
+new MutationObserver(size).observe(panel,{attributes:true,attributeFilter:['hidden']});
+if(app.clientWidth<640) camera.position.copy(VIEWS.tower[0]);
+apply();
+
+const tmp=new THREE.Vector3();
+function frame(now){
+  if(anim){let k=Math.min(1,(now-anim.s)/800);k=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+    camera.position.lerpVectors(anim.p0,anim.p1,k);controls.target.lerpVectors(anim.t0,anim.t1,k);if(k>=1)anim=null;}
+  controls.update();renderer.render(scene,camera);
+  const w=app.clientWidth,hh=app.clientHeight,ov=state.mode==='overview';
+  for(const o of L){
+    let show=o.word?(state.words&&ov&&camera.position.distanceTo(controls.target)>14):state.labels;
+    if(o.view){if(o.view!==state.mode) show=false;}
+    else if(!o.word&&!ov) show=false;
+    if(o.only&&o.only!==state.view) show=false;
+    if(o.group&&o.group!==state.roof) show=false;
+    if(o.sgroup&&o.sgroup!==state.small) show=false;
+    if(show){tmp.copy(o.p).project(camera);if(tmp.z>1||tmp.z<-1) show=false;}
+    if(!show){o.d.style.display='none';continue;}
+    o.d.style.display='block';o.d.style.left=((tmp.x+1)/2*w)+'px';o.d.style.top=((1-tmp.y)/2*hh)+'px';
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
