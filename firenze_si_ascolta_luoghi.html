@@ -12,7 +12,7 @@
    CONFIGURAZIONE
    ============================================================ */
 /* L'URL /exec dell'Apps Script (vedi collector.gs). Vuoto = solo download. */
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbysxbsJiWhqskZI9NMTmb7cpvhJUDMjKYZfa4YIaeWCUS3lpTp4mHtXF3a7Xe-vQwE/exec';
+const SCRIPT_URL = '';
 const DATE_FESTIVAL = '10–13 dicembre';
 const MAX_LISTA = 15;
 const MIN_ASCOLTATI = 20;   // dopo quanti luoghi si può passare oltre
@@ -842,6 +842,7 @@ label.campo{display:block;font-weight:700;margin:.8rem 0 .35rem}
 @media (prefers-color-scheme:dark){ .pin{border-color:#E8EBE6} .pin.sel{background:#E8EBE6;color:#1E2A44} }
 .proposta{border:2px solid var(--inchiostro);border-radius:12px;padding:.8rem;margin:.6rem 0}
 .proposta.aperta{background:var(--carta2)}
+@media (prefers-color-scheme:dark){ .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9)} }
 .leaflet-container{font-family:var(--f-testo)}
 /* regia */
 .regia section{border-top:3px solid var(--inchiostro);padding:1rem 0 1.4rem}
@@ -1237,10 +1238,15 @@ function vAltri(){
   <div class="riga fine"><button class="btn vuoto" data-act="a-tasca">Indietro</button><button class="btn" data-act="a-citta">Avanti</button></div>`;
 }
 function iconaPin(n, sel){ return L.divIcon({className:'', html:`<div class="pin${sel?' sel':''}"><span>${n}</span></div>`, iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-28]}); }
+/* Sfondo: tessere ufficiali di OpenStreetMap, senza chiave. Uso leggero (pochi utenti) consentito, attribuzione obbligatoria. */
 function sfondo(m){
-  const scuro = matchMedia('(prefers-color-scheme: dark)').matches;
-  L.tileLayer(`https://{s}.basemaps.cartocdn.com/${scuro?'dark_all':'light_all'}/{z}/{x}/{y}{r}.png`,
-    {maxZoom:19, subdomains:'abcd', attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(m);
+  let avvisato = false;
+  const l = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {maxZoom:19, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'}).addTo(m);
+  l.on('tileerror', ()=>{ if (avvisato) return; avvisato = true;
+    const el = m.getContainer(); const n = document.createElement('div'); n.className = 'avviso'; n.style.margin = '0 0 .6rem';
+    n.textContent = 'Lo sfondo della mappa non si è caricato. I punti che segni vengono comunque salvati; puoi anche usare “Proponi un luogo senza punto”.';
+    el.parentNode.insertBefore(n, el); });
 }
 function montaMappa(){
   const el = document.getElementById('mappa'); if (!el) return;
