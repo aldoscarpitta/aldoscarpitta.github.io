@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-12T18:52:43.476Z",
+  "updated": "2026-10-12T18:52:46.183Z",
   "calls": [
     {
       "id": 4,
@@ -327,21 +327,6 @@
       "deadline": "2026-10-23",
       "status": "interested",
       "url": "https://sustainabledarkroom.com/blogs/news/funded-research-residency-open-call-sd-futures",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1790623747106,
-      "title": "International Coproduction Fund (IKF) - Goethe-Institut",
-      "org": "",
-      "deadline": "2026-10-12",
-      "status": "interested",
-      "url": "https://www.goethe.de/en/kul/foe/int.html",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
