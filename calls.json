@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-15T08:54:42.258Z",
+  "updated": "2026-10-15T08:54:49.963Z",
   "calls": [
     {
       "id": 4,
@@ -327,21 +327,6 @@
       "deadline": "2026-10-23",
       "status": "interested",
       "url": "https://sustainabledarkroom.com/blogs/news/funded-research-residency-open-call-sd-futures",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1790623906816,
-      "title": "CTM 2027 Open Call: Spatial Audio Experimentation Lab | CTM Festival",
-      "org": "",
-      "deadline": "2026-10-15",
-      "status": "curious",
-      "url": "https://www.ctm-festival.de/festival-2027/open-calls/spatial-audio-experimentation-lab",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
