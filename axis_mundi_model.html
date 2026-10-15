@@ -172,7 +172,7 @@ const box=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
 const cyl=(r,h)=>new THREE.CylinderGeometry(r,r,h,24);
 
 /* Tower: schematic dimensions in metres */
-const W=2.8,h=W/2,T=1.0,F1=5.0,F2=8.0,FT=0.25,F3T=0.4,SPRING=11.0,CROWN=SPRING+h,TER=CROWN+0.6,PAR=TER+1.0;
+const W=2.8,h=W/2,T=1.0,F1=5.0,F2=8.0,FT=0.25,F3T=0.4,SPRING=F2+F3T+5.9-h,CROWN=SPRING+h,TER=CROWN+0.6,PAR=TER+1.0;
 const walls=new THREE.Group(),stairs=new THREE.Group(),people=new THREE.Group();
 scene.add(walls,stairs,people);
 [[0,-(h+T/2),W+2*T,T],[0,h+T/2,W+2*T,T],[-(h+T/2),0,T,W],[h+T/2,0,T,W]].forEach(([x,z,w,d])=>{
@@ -194,10 +194,11 @@ slab(-h,h,-h,0.08,F1,FT,M.timber);
 slab(-h,-0.7,0.08,0.7,F1,FT,M.timber);
 slab(0.7,h,0.08,0.7,F1,FT,M.timber);
 floorWithHole(F2,F3T,M.brick,0,h,0.7,h);
-floorWithHole(TER-0.2,0.2,M.floor,-0.7,0.6,0.7,h);
+floorWithHole(TER-0.2,0.2,M.floor,-h,-0.7,-0.2,h);
 
-/* Barrel vault, axis along z */
-(function(){
+/* Barrel vaults, axis along z: the vault room (about 5.9 m to the crown) and the small room */
+const SV=F2-h,intr=x=>SV+Math.sqrt(h*h-x*x);
+function drawVault(SPRING){
   const N=28,pos=[],idx=[];
   for(let i=0;i<=N;i++){const a=Math.PI*i/N,x=h*Math.cos(a),y=SPRING+h*Math.sin(a);pos.push(x,y,-h,x,y,h);}
   for(let i=0;i<N;i++){const a=2*i;idx.push(a,a+1,a+2,a+1,a+3,a+2);}
@@ -205,7 +206,8 @@ floorWithHole(TER-0.2,0.2,M.floor,-0.7,0.6,0.7,h);
   scene.add(new THREE.Mesh(g,M.floor));
   for(const z of [-h,h]){const p=[];for(let i=0;i<=N;i++){const a=Math.PI*i/N;p.push(V(h*Math.cos(a),SPRING+h*Math.sin(a),z));}line(p,M.graphite);}
   for(const a of [0.35,0.8,Math.PI/2,2.34,2.79]) line([V(h*Math.cos(a),SPRING+h*Math.sin(a),-h),V(h*Math.cos(a),SPRING+h*Math.sin(a),h)],M.pencil);
-})();
+}
+drawVault(SPRING);drawVault(SV);
 
 /* Stairs, schematic */
 function flight(x0,z0,dx,dz,y0,rise,n,width){
@@ -223,11 +225,14 @@ flight(-0.7,1.05,2.1,0,3.28,1.97,9,0.7);
 /* Small room: one flight, directly above the last flight of the stone room */
 flight(-0.7,1.05,2.1,0,F1+FT,F2+F3T-(F1+FT),13,0.7);
 /* Vault room: two flights, a corridor along the wall, then a steeper flight through a hatch to the roof */
-const VR=F2+F3T;
-flight(1.05,0.7,0,-1.4,VR,1.0,5,0.7);landing(1.05,-1.05,VR+1.0);
-flight(0.7,-1.05,-1.4,0,VR+1.0,1.0,5,0.7);landing(-1.05,-1.05,VR+2.0);
-solid(box(0.7,0.06,1.4),V(-1.05,VR+2.0-0.03,0),M.floor,M.pencil,stairs);landing(-1.05,1.05,VR+2.0);
-flight(-0.7,1.05,1.3,0,VR+2.0,TER-(VR+2.0),11,0.7);
+const VR=F2+F3T,VS=1.2;
+/* three flights from the left wall, counterclockwise: left, front, right */
+flight(-1.05,-0.7,0,1.4,VR,VS,6,0.7);landing(-1.05,1.05,VR+VS);
+flight(-0.7,1.05,1.4,0,VR+VS,VS,6,0.7);landing(1.05,1.05,VR+2*VS);
+flight(1.05,0.7,0,-1.4,VR+2*VS,VS,6,0.7);landing(1.05,-1.05,VR+3*VS);
+/* corridor along the back wall, then the steep flight above the first one, through a hatch to the roof */
+solid(box(1.4,0.06,0.7),V(0,VR+3*VS-0.03,-1.05),M.floor,M.pencil,stairs);landing(-1.05,-1.05,VR+3*VS);
+flight(-1.05,-0.7,0,1.4,VR+3*VS,TER-(VR+3*VS),12,0.7);
 
 /* H beam (doppio T) under floor 1, along x through the axis: assumed HEB 160 */
 const bTop=F1,bH=0.16,bB=bTop-bH,FL=0.012;
@@ -304,16 +309,16 @@ const small={line:new THREE.Group(),gap:new THREE.Group(),relay:new THREE.Group(
 Object.values(small).forEach(g=>scene.add(g));
 const CUP=V(-0.025,F1+FT+0.02,0.3);
 line([CUP,V(0.35,F2,1.0),V(0.35,F2+F3T+0.02,1.0),V(0.06,F2+F3T+0.02,0.1)],M.violet,small.line);
-line([CUP,V(-0.025,F1+FT+0.02,-0.1),V(-0.025,F1+FT+0.02,-h+0.05),V(h-0.05,F1+FT+0.02,-h+0.05),V(h-0.05,F2-0.05,-h+0.05),V(h-0.05,F2-0.05,1.0),V(h-0.05,F2+F3T+0.02,1.0),V(0.06,F2+F3T+0.02,0.1)],M.violet,small.gap);
-const RX=0.35,RZ=-0.45,MICY=F2-0.4;
+line([CUP,V(-0.025,F1+FT+0.02,-0.1),V(-0.025,F1+FT+0.02,-h+0.05),V(h-0.05,F1+FT+0.02,-h+0.05),V(h-0.05,SV-0.05,-h+0.05),V(h-0.05,SV-0.05,1.0),V(h-0.05,F2+F3T+0.02,1.0),V(0.06,F2+F3T+0.02,0.1)],M.violet,small.gap);
+const RX=0.35,RZ=-0.45,MICY=F2-0.45;
 (function(){
   const g=small.relay;
   mesh(cyl(0.06,0.04),M.device,V(RX,F1+FT+0.02,RZ),g);
   line([CUP,V(-0.025,F1+FT+0.02,-0.1),V(RX,F1+FT+0.02,-0.1),V(RX,F1+FT+0.02,RZ+0.06)],M.violet,g);
-  line([V(RX,F2,RZ),V(RX,MICY+0.06,RZ)],M.violet,g);
+  line([V(RX,intr(RX),RZ),V(RX,MICY+0.06,RZ)],M.violet,g);
   mesh(cyl(0.012,0.09),M.device,V(RX,MICY,RZ),g);
   for(let i=1;i<=3;i++){const r=new THREE.Mesh(new THREE.TorusGeometry(0.15*i,0.004,6,40),M.device);r.rotation.x=Math.PI/2;r.position.set(RX,F1+FT+0.55*i,RZ);g.add(r);}
-  line([V(RX,F2-0.02,RZ),V(RX,F2-0.02,1.0),V(RX,F2+F3T+0.02,1.0),V(0.06,F2+F3T+0.02,0.1)],M.violet,g);
+  line([V(RX,intr(RX)-0.02,RZ),V(RX,intr(RX)-0.02,1.0),V(RX,F2+F3T+0.02,1.0),V(0.06,F2+F3T+0.02,0.1)],M.violet,g);
 })();
 
 /* Roof transducer options */
@@ -363,8 +368,10 @@ label(V(0.9,bB,0),'H beam, doppio T',{});
 label(V(-h,F1+FT/2,-h),'Floor 2: timber<small>carried by the H beam</small>',{cls:'left'});
 label(V(-h,F2+F3T/2,h),'Floor 3: stone and brick',{cls:'left'});
 label(V(0,F1+FT,0.45),'Open between beam and stairs',{only:'small'});
-label(V(-1.05,VR+2.0,0),'Corridor',{only:'vault',cls:'left'});
-label(V(0.3,VR+2.9,1.05),'Steeper flight<small>through a hatch to the roof</small>',{only:'vault'});
+label(V(0,VR+3*VS,-1.05),'Corridor',{only:'vault'});
+label(V(-1.05,VR+3*VS+1.6,0),'Steep flight<small>through a hatch to the roof</small>',{only:'vault',cls:'left'});
+label(V(-1.05,VR+0.6,0),'Stairs start here',{only:'vault',cls:'left'});
+label(V(0.9,intr(0.9),0),'Vaulted ceiling',{only:'small'});
 label(V(0.2,SC,0.1),'Stone in steel net<small>swings lightly, free of the dish</small>',{});
 label(V(0.5,DTOP,0),'Dish on three stones<small>geophone at the centre</small>',{});
 const WX=-(h+T+0.4);
@@ -406,7 +413,7 @@ label(V(-0.6,BASE+1.5,0),'Safety tie<small>tie point to find, no drilling</small
 label(V(RX,MICY,RZ),'Relay mic hangs below this floor<small>on a cord, not touching the masonry</small>',{view:'base',sgroup:'relay'});
 /* detail: roof transducer */
 label(V(0.12,CROWN,0.12),'Vault crown',{view:'roofT'});
-label(V(-0.12,CROWN-0.002,0.12),'Hard pad<small>takes up about 3 mm of curvature</small>',{view:'roofT',cls:'left'});
+label(V(-0.12,CROWN-0.002,0.12),'Hard pad<small>takes up about 6 mm of curvature</small>',{view:'roofT',cls:'left'});
 label(V(-0.12,CROWN-0.012,-0.12),'Steel plate pressed to the crown',{view:'roofT',cls:'left'});
 label(V(0.135,CROWN-0.05,0),'Exciter bolted to the plate',{view:'roofT'});
 label(V(0.025,CROWN-0.13,0),'Pole head',{view:'roofT'});
@@ -437,10 +444,10 @@ if(app.clientWidth<640){state.words=false;document.getElementById('tWords').chec
 
 /* Views */
 const VIEWS={
-  tower:[V(16,10,21),V(0,7.3,0)],
+  tower:[V(18,11.5,24),V(0,8.2,0)],
   stoneRoom:[V(5.6,3.3,8.2),V(0,2.55,0)],
   small:[V(3.2,7.6,4.5),V(0,6.8,0)],
-  vault:[V(4.6,11.4,6.2),V(0,10.9,0)],
+  vault:[V(7.2,12.0,9.8),V(0,11.5,0)],
   dish:[V(1.3,1.05,1.75),V(0.05,0.1,0)],
   stone:[V(0.95,SC+0.45,1.35),V(0,SC+0.12,0)],
   clamp:[V(0.42,bB-0.09,0.58),V(0,bB-0.035,0.02)],
@@ -462,7 +469,7 @@ camera.position.copy(VIEWS.tower[0]);controls.target.copy(VIEWS.tower[1]);
 function size(){const w=app.clientWidth,hh=app.clientHeight;renderer.setSize(w,hh);camera.aspect=w/hh;
   if(w>=900&&!panel.hidden) camera.setViewOffset(w,hh,-170,0,w,hh); else camera.clearViewOffset();
   camera.updateProjectionMatrix();
-  const fit=w<640?1.35:1;VIEWS.tower[0]=V(16*fit,10*fit,21*fit);}
+  const fit=w<640?1.35:1;VIEWS.tower[0]=V(18*fit,11.5*fit,24*fit);}
 addEventListener('resize',size);size();
 new MutationObserver(size).observe(panel,{attributes:true,attributeFilter:['hidden']});
 if(app.clientWidth<640) camera.position.copy(VIEWS.tower[0]);
