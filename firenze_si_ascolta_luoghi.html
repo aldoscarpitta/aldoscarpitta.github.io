@@ -15,7 +15,7 @@
 const SCRIPT_URL = '';
 const DATE_FESTIVAL = '10–13 dicembre';
 const MAX_LISTA = 15;
-const MIN_ASCOLTATI = 20;   // dopo quanti luoghi si può passare oltre
+const TEMPO_A_DISPOSIZIONE = 'una decina di giorni';
 
 /* ============================================================
    I LUOGHI. Ogni luogo è descritto con lo stesso vocabolario
@@ -24,59 +24,59 @@ const MIN_ASCOLTATI = 20;   // dopo quanti luoghi si può passare oltre
    n nome · z zona · t tipo · s spazio (i interno, e esterno, s soglia)
    c capienza stimata · v suoni prevalenti · l strati · a 1 = accesso in piano
    p premessa d'ascolto · u link · x nota per la regia
+   LUOGHI: istituzioni e realtà da contattare (si votano). f = valutazione interna (Sì, Sì/tempi lunghi, Forse),
+     fm = facilità media % del gruppo: visibili solo nella regia.
+   SPAZI_PUBBLICI: piazze e giardini che suggeriamo (non si votano: si può segnare "mi interessa").
    Non rinominare un luogo dopo aver mandato il link: il nome è la chiave.
    ============================================================ */
 const LUOGHI = [
-{"n": "Murate Idea Park", "z": "Sant'Ambrogio", "t": "formazione", "s": "s", "c": "grande", "v": ["voci", "riverbero"], "l": ["memoria", "sapere", "mutazione"], "p": "Spazi per l'innovazione nell'ex carcere delle Murate, con un auditorium dal tetto vetrato. Dove si stava chiusi oggi si progetta: che cosa trattengono i muri di una prigione?", "u": "https://www.google.com/maps/place/Murate+Idea+Park/data=!4m2!3m1!1s0x132a540971bb9839:0xc4892721367a544"},
-{"n": "Refettorio delle ex Leopoldine", "z": "San Frediano", "t": "civico", "s": "i", "c": "medio", "v": ["riverbero", "voci"], "l": ["memoria", "mutuo"], "p": "Il refettorio del complesso delle ex Leopoldine, in piazza Tasso. Una stanza nata per mangiare insieme: il suono di una comunità che si siede alla stessa tavola.", "u": "https://www.google.com/maps/place/Piazza+Torquato+Tasso,+5/data=!4m2!3m1!1s0x132a51529fa9d0eb:0x85cf76472e280027"},
-{"n": "Conservatorio Luigi Cherubini", "z": "San Marco", "t": "formazione", "s": "i", "c": "grande", "v": ["musica", "riverbero", "voci"], "l": ["sapere"], "p": "Il conservatorio della città, in piazza delle Belle Arti. Aule in cui la stessa frase si ripete per ore: il suono come disciplina, e quello che filtra dalle porte chiuse.", "u": "https://www.google.com/maps/place/Conservatorio+di+Musica+Luigi+Cherubini+Sede+Centrale/data=!4m2!3m1!1s0x132a5404a9aa6369:0x5cf5421d189bcc71"},
-{"n": "Accademia di Belle Arti", "z": "San Marco", "t": "formazione", "s": "i", "c": "medio", "v": ["voci", "riverbero"], "l": ["sapere", "occhio", "lavoro"], "p": "L'accademia nell'antico ospedale di San Matteo, accanto alla Galleria dell'Accademia. Laboratori di scultura e pittura: il suono di mani che fanno immagini.", "u": "https://www.google.com/maps/place/Accademia+di+Belle+Arti+di+Firenze/data=!4m2!3m1!1s0x132a5404a86f3599:0x26da64bbd6d8f2b3"},
-{"n": "Casa del Popolo di Settignano", "z": "Settignano", "t": "circolo", "s": "s", "c": "medio", "v": ["voci", "natura"], "l": ["mutuo", "lavoro"], "p": "Casa del popolo sulla collina di Settignano, il borgo degli scalpellini della pietra serena. La città si sente da lontano; da vicino, le voci del circolo.", "u": "https://www.google.com/maps/place/Casa+del+Popolo+di+Settignano+-+Circolo+ARCI/data=!4m2!3m1!1s0x132a54c1c66227b9:0x37955f7264926407"},
-{"n": "CPA Firenze Sud", "z": "Gavinana", "t": "autogestito", "s": "s", "c": "grande", "v": ["musica", "voci"], "l": ["mutuo"], "p": "Uno dei centri popolari autogestiti storici della città, a sud dell'Arno. Concerti, assemblee, iniziative di quartiere: il suono dell'autorganizzazione.", "u": "https://www.google.com/maps/place/CPA+-+Centro+Popolare+Autogestito+Firenze+Sud/data=!4m2!3m1!1s0x132a5300446f6a13:0x5901a88a79a6b0ea"},
-{"n": "Cinema Flora", "z": "Rifredi", "t": "cinema", "s": "i", "c": "grande", "v": ["musica", "silenzio"], "l": ["occhio", "quotidiano"], "p": "Cinema di quartiere su piazza Dalmazia, dove passa la tramvia per Careggi. La sala come riparo dal rumore della piazza.", "u": "https://www.google.com/maps/place/Cinema+Flora/data=!4m2!3m1!1s0x132a56906931e045:0xc65f9264eaa08fd3"},
-{"n": "Concretipo", "z": "Libertà", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["macchine", "voci"], "l": ["lavoro"], "p": "Stamperia artigianale ed ecologica in via Pier Capponi. Il ritmo delle macchine da stampa e della rilegatura a mano: il lavoro come partitura.", "u": "https://www.google.com/maps/place/Concretipo/data=!4m2!3m1!1s0x132a569793cee0b7:0x279f3f9171c5dd53"},
-{"n": "Artiglieria", "z": "Fortezza", "t": "indipendente", "s": "i", "c": "medio", "v": ["voci", "passaggio"], "l": ["occhio", "sapere", "mutazione"], "p": "Spazio di mostre, laboratori e racconti in via Cittadella, accanto alla Fortezza da Basso, con un programma rivolto ai giovani. Un luogo nuovo in una zona di passaggio.", "u": "https://www.google.com/maps/place/Artiglieria/data=!4m2!3m1!1s0x132a57fead3f2de3:0x2a0592bd969689a0"},
-{"n": "Museo Marino Marini", "z": "Centro", "t": "museo", "s": "i", "c": "medio", "v": ["riverbero", "silenzio"], "l": ["occhio", "memoria"], "p": "Il museo nell'ex chiesa di San Pancrazio, con la Cappella Rucellai e il tempietto di Leon Battista Alberti. Una navata piena di sculture: il riverbero di una chiesa senza liturgia.", "u": "https://www.google.com/maps/place/Museo+Marino+Marini+Firenze/data=!4m2!3m1!1s0x132a56aa348d96ad:0xb1eed8fddd6003d5"},
-{"n": "Palazzo Strozzi", "z": "Centro", "t": "museo", "s": "s", "c": "grande", "v": ["riverbero", "voci", "passaggio"], "l": ["occhio"], "p": "Il palazzo rinascimentale delle grandi mostre. Il cortile è una piazza di pietra coperta che chiunque può attraversare.", "u": "https://www.google.com/maps/place/Palazzo+Strozzi/data=!4m2!3m1!1s0x132a56aa73c1b501:0x38349b89124ab11"},
-{"n": "Toast Project Studio", "z": "Novoli", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["voci"], "l": ["occhio", "mutazione"], "p": "Studio per progetti e performance in piazza Morvillo, nel quartiere nuovo di Novoli. Un posto ancora poco conosciuto, in una parte di città ancora da ascoltare.", "u": "https://www.google.com/maps/place/Toast+Project+Studio/data=!4m2!3m1!1s0x132a570004826c57:0xf19ea7554519169c"},
-{"n": "Biblioteca delle Oblate", "z": "Centro", "t": "biblioteca", "s": "s", "c": "grande", "v": ["silenzio", "voci", "riverbero"], "l": ["sapere", "memoria", "cura"], "p": "La biblioteca nell'ex convento delle Oblate, le religiose che assistevano i malati di Santa Maria Nuova. Chiostro, sale di lettura, terrazza sul Duomo: tre silenzi diversi.", "u": "https://www.google.com/maps/place/Biblioteca+delle+Oblate/data=!4m2!3m1!1s0x132a5404239efca5:0x9b7f2357b8c9b677"},
-{"n": "IED Firenze", "z": "Firenze", "t": "formazione", "s": "i", "c": "medio", "v": ["voci"], "l": ["sapere"], "p": "Scuola di design, moda e comunicazione. Studenti che progettano oggetti e immagini: che posto ha il suono in una scuola di progetto?", "u": "https://www.google.com/maps/place/IED+Istituto+Europeo+di+Design/data=!4m2!3m1!1s0x132a55397983f5a1:0x4d8fa89dbe12e27"},
-{"n": "The Social Hub Lavagnini", "z": "Viali", "t": "commercio", "s": "i", "c": "grande", "v": ["voci", "passaggio", "musica"], "l": ["transito", "quotidiano"], "p": "Hotel e ostello con spazi comuni sui viali, tra studenti e viaggiatori. Lingue diverse, soggiorni brevi: chi abita un luogo per una settimana.", "u": "https://www.google.com/maps/place/The+Social+Hub+Florence+Lavagnini/data=!4m2!3m1!1s0x132a541e08073c43:0x67b49ce676d42454"},
-{"n": "Museo Novecento", "z": "Santa Maria Novella", "t": "museo", "s": "i", "c": "medio", "v": ["riverbero", "silenzio", "voci"], "l": ["occhio", "cura", "memoria"], "p": "Il museo d'arte del Novecento nell'antico Spedale delle Leopoldine, su piazza Santa Maria Novella. Un ex ospizio diventato museo.", "u": "https://www.google.com/maps/place/Museo+Novecento/data=!4m2!3m1!1s0x132a56a9085e6617:0x60de5cce83b709f2"},
-{"n": "Manifattura Tabacchi", "z": "Cascine", "t": "indipendente", "s": "s", "c": "grande", "v": ["riverbero", "voci", "passaggio"], "l": ["lavoro", "mutazione", "memoria"], "p": "L'ex fabbrica di sigari degli anni Trenta, dove lavoravano soprattutto donne, oggi distretto creativo con il programma NAM Not A Museum. Cortili enormi, capannoni, una città nella città.", "u": "https://www.google.com/maps/place/Manifattura+Tabacchi+Firenze/data=!4m2!3m1!1s0x132a57315ea204ab:0xf12421a8cfc488fa"},
-{"n": "Palazzina dell'Indiano (PIA)", "z": "Cascine", "t": "indipendente", "s": "s", "c": "medio", "v": ["macchine", "acqua", "natura"], "l": ["verde", "transito", "arno"], "p": "In fondo al Parco delle Cascine, sotto il ponte all'Indiano: treni che passano, aerei in atterraggio, il Mugnone che entra nell'Arno. Spazio per l'arte e caffè.", "u": "https://www.google.com/maps/place/Palazzina+dell'Indiano+Arte+_+PIA/data=!4m2!3m1!1s0x132a5722f6c3e36d:0x5fc694f64d53eea9"},
-{"n": "Circolo Vie Nuove", "z": "Gavinana", "t": "circolo", "s": "i", "c": "grande", "v": ["voci", "musica"], "l": ["mutuo"], "p": "Grande circolo ricreativo e culturale di Gavinana: sale, bar, attività per tutte le età. La socialità di quartiere come suono continuo.", "u": "https://www.google.com/maps/place/Circolo+Ricreativo+Culturale+Vie+Nuove/data=!4m2!3m1!1s0x132a53891d59fd3f:0x77cf694358c83202"},
-{"n": "Exfila", "z": "Gignoro", "t": "circolo", "s": "s", "c": "medio", "v": ["voci", "musica"], "l": ["mutuo"], "p": "Spazio di quartiere dietro il Gignoro gestito da una cooperativa sociale: loggia all'aperto, sale al piano terra, al primo piano una sala con palco e impianto.", "u": "https://www.google.com/maps/place/Exfila/data=!4m2!3m1!1s0x132a54875f0e7875:0x991c1f7454f5c2d8"},
-{"n": "L'appartamento", "z": "Centro", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["voci", "musica", "silenzio"], "l": ["quotidiano"], "p": "Associazione culturale al primo piano di un palazzo storico in via de' Giraldi: sembra davvero una casa. Musica, danza e laboratori in stanze domestiche, con una piccola terrazza coperta.", "u": "https://www.google.com/maps/place/L'appartamento/data=!4m2!3m1!1s0x132a5406ba8b0155:0x2bacfa260ab48cf8"},
-{"n": "Biblioteca Palagio di Parte Guelfa", "z": "Centro", "t": "biblioteca", "s": "i", "c": "medio", "v": ["silenzio", "riverbero"], "l": ["sapere", "memoria"], "p": "Biblioteca comunale nel palazzo medievale della Parte Guelfa, a pochi passi dal Mercato Nuovo. Il silenzio di una lettura a cento metri dalla folla.", "u": "https://www.google.com/maps/place/Biblioteca+Palagio+di+Parte+Guelfa/data=!4m2!3m1!1s0x132a540034242a63:0xd08e0f2b45e6cf33"},
-{"n": "Avamposto Cinque Punte", "z": "San Frediano", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["voci"], "l": ["mutuo", "sapere"], "p": "Associazione in Borgo San Frediano per il fantasy, il gioco e l'arte: mostre, laboratori, giochi di ruolo. Mondi inventati raccontati ad alta voce.", "u": "https://www.google.com/maps/place/Avamposto+-+Cinque+Punte/data=!4m2!3m1!1s0x132a574350bf5a53:0xe6593deb99c411f5"},
-{"n": "Ex Officine Galileo", "z": "Rifredi", "t": "infrastruttura", "s": "s", "c": "grande", "v": ["riverbero", "passaggio"], "l": ["lavoro", "mutazione", "memoria"], "p": "L'area delle storiche officine di Rifredi, dove si costruivano strumenti ottici e macchine tessili. Volumi industriali in trasformazione.", "x": "Accesso e disponibilità degli spazi da verificare.", "u": "https://www.google.com/maps/place/Ex+Officine+meccanotessile+Galileo/data=!4m2!3m1!1s0x132a57fb0c6186e5:0xc5b5adbd6e42e4e3"},
-{"n": "Ex Spedale di San Piero, via Romana", "z": "Porta Romana", "t": "civico", "s": "i", "c": "medio", "v": ["riverbero", "passaggio"], "l": ["cura", "memoria", "transito"], "p": "Un ex spedale su via Romana, la strada dei pellegrini diretti a Roma lungo la quale sorgevano piccoli ospizi.", "x": "Uso attuale e gestore da verificare.", "u": "https://www.google.com/maps/place/Via+Romana,+64+R/data=!4m2!3m1!1s0x132a5153e34ec3a1:0x401b613304666d3a"},
-{"n": "Atallier", "z": "Santo Spirito", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["voci", "silenzio"], "l": ["lavoro", "cura"], "p": "Laboratorio creativo di ceramica e arti in via de' Coverelli. Argilla, tornio, forno: il suono del fare con le mani, insieme.", "u": "https://www.google.com/maps/place/Atallier/data=!4m2!3m1!1s0x132a51b0560da191:0x283ae7d08669bf29"},
-{"n": "L'ornitorinco", "z": "San Frediano", "t": "commercio", "s": "i", "c": "piccolo", "v": ["silenzio", "voci"], "l": ["sapere", "quotidiano"], "p": "Libreria con caffè in via di Camaldoli, per adulti e bambini. Una stanza calma dove si legge e si studia.", "u": "https://www.google.com/maps/place/L'ornitorinco/data=!4m2!3m1!1s0x132a51702359b6a3:0x32b9839f15c8c05f"},
-{"n": "Tempo Reale", "z": "Villa Strozzi", "t": "formazione", "s": "s", "c": "medio", "v": ["musica", "natura", "silenzio"], "l": ["sapere", "memoria"], "p": "Il centro di ricerca e produzione musicale fondato da Luciano Berio, a Villa Strozzi. La casa della musica elettronica a Firenze, che ha già composto la città con le sue registrazioni.", "u": "https://www.google.com/maps/place/Tempo+Reale,+centro+di+ricerca+produzione+e+didattica+musicale/data=!4m2!3m1!1s0x132a56b57f1b57e1:0xbc306f9c3657c839"},
-{"n": "Combo Social Club", "z": "Campo di Marte", "t": "indipendente", "s": "i", "c": "grande", "v": ["musica", "voci", "macchine"], "l": ["mutuo", "quotidiano"], "p": "Locale per concerti ed eventi in via Mannelli, lungo la ferrovia. Generi diversi, un pubblico di quartiere, i treni dall'altra parte del muro.", "u": "https://www.google.com/maps/place/Combo+Social+Club/data=!4m2!3m1!1s0x132a547217dac9fd:0xc207d5ae1ebae227"},
-{"n": "Murate Art District", "z": "Sant'Ambrogio", "t": "museo", "s": "i", "c": "medio", "v": ["riverbero", "silenzio"], "l": ["memoria", "occhio"], "p": "Centro per l'arte contemporanea nelle ex celle del carcere delle Murate. Stanze misurate per isolare, oggi aperte.", "u": "https://www.google.com/maps/place/Murate+Art+District/data=!4m2!3m1!1s0x132a5574dec7a449:0xab8df587af8b9a72"},
-{"n": "gattaccio.", "z": "Sant'Ambrogio", "t": "commercio", "s": "i", "c": "piccolo", "v": ["musica", "voci"], "l": ["quotidiano", "sapere"], "p": "Libri, riviste e vinili in piazza Ghiberti, davanti al mercato di Sant'Ambrogio. Un posto piccolo dove la musica si sceglie con cura.", "u": "https://www.google.com/maps/place/gattaccio./data=!4m2!3m1!1s0x132a5542a283de89:0x66246031a81704e7"},
-{"n": "Beast Gallery", "z": "Sant'Ambrogio", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["silenzio", "voci"], "l": ["occhio"], "p": "Galleria d'arte contemporanea in via di Mezzo, con una cucina per cene ed eventi. Uno spazio per guardare che si apre alla tavola.", "u": "https://www.google.com/maps/place/Beast+Gallery/data=!4m2!3m1!1s0x132a5567f5440287:0x7c3097c3b9278b9d"},
-{"n": "Terza Piazza", "z": "Rifredi", "t": "pubblico", "s": "e", "c": "aperto", "v": ["voci", "passaggio", "macchine"], "l": ["quotidiano", "mutazione"], "a": 1, "p": "Lo spazio pubblico tra piazza Leopoldo e la Coop: aiuole, panche di cemento, un murale di Nelson Mandela. Una piazza nuova e contesa, attraversata da chi la vive e da chi la evita.", "u": "https://www.google.com/maps/place/Terza+Piazza/data=!4m2!3m1!1s0x132a57203f0cf35b:0x4794305b32a3087b"},
-{"n": "Flog", "z": "Poggetto", "t": "circolo", "s": "i", "c": "grande", "v": ["musica", "voci"], "l": ["mutuo", "lavoro", "memoria"], "p": "L'auditorium della fondazione nata dai lavoratori delle Officine Galileo, casa del festival Musica dei Popoli. Decenni di musiche del mondo passate da una sola sala.", "u": "https://www.google.com/maps/place/Flog/data=!4m2!3m1!1s0x132a569af3c525df:0x451ad2215f9ed5e6"},
-{"n": "Giardino del Museo Stibbert", "z": "Montughi", "t": "pubblico", "s": "e", "c": "aperto", "v": ["natura", "silenzio"], "l": ["verde", "memoria"], "p": "Il giardino romantico del museo Stibbert sulla collina di Montughi, con laghetto, tempietto egizio e limonaia. Un paesaggio costruito come una collezione.", "u": "https://www.google.com/maps/place/Giardino+del+Museo+Stibbert/data=!4m2!3m1!1s0x132a5426c85e2f15:0x7076adc75dafb1df"},
-{"n": "Street Levels Gallery", "z": "Santa Maria Novella", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["passaggio", "voci"], "l": ["occhio", "quotidiano"], "p": "Galleria dedicata all'arte urbana in via Palazzuolo, una delle strade più multiculturali del centro. L'arte dei muri portata dentro.", "u": "https://www.google.com/maps/place/Street+Levels+Gallery/data=!4m2!3m1!1s0x132a56aeacb44ad1:0x6877acc7a92976da"},
-{"n": "Circolo ARCI Porta al Prato", "z": "Porta al Prato", "t": "circolo", "s": "i", "c": "medio", "v": ["voci"], "l": ["mutuo", "lavoro"], "p": "Il circolo fra i lavoratori di Porta al Prato, a ridosso delle mura e della Leopolda. La socialità di quartiere accanto a un vecchio nodo ferroviario.", "u": "https://www.google.com/maps/place/Circolo+ARCI+fra+i+Lavoratori+di+Porta+Al+Prato/data=!4m2!3m1!1s0x132a56bafaaf0975:0xf9a3f36bc36d03d8"},
-{"n": "Porta San Frediano e le mura", "z": "San Frediano", "t": "infrastruttura", "s": "s", "c": "aperto", "v": ["passaggio", "riverbero"], "l": ["transito", "memoria"], "a": 1, "p": "La porta trecentesca con le grandi ante di legno e il tratto di mura verso l'Arno. Una soglia che la città continua ad attraversare.", "u": "https://www.google.com/maps/place/Mura+e+porta+di+San+Frediano/data=!4m2!3m1!1s0x132a56b296ebf721:0x3ef2bdd1b1c1441e"},
+{"n": "Concretipo", "z": "Libertà", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["macchine", "voci"], "l": ["lavoro"], "p": "Stamperia artigianale ed ecologica in via Pier Capponi. Il ritmo delle macchine da stampa e della rilegatura a mano: il lavoro come partitura.", "f": "Sì", "fm": 100, "u": "https://www.google.com/maps/place/Concretipo/data=!4m2!3m1!1s0x132a569793cee0b7:0x279f3f9171c5dd53"},
+{"n": "Circolo ARCI Porta al Prato", "z": "Porta al Prato", "t": "circolo", "s": "i", "c": "medio", "v": ["voci"], "l": ["mutuo", "lavoro"], "p": "Il circolo fra i lavoratori di Porta al Prato, a ridosso delle mura e della Leopolda. La socialità di quartiere accanto a un vecchio nodo ferroviario.", "f": "Sì", "fm": 84, "u": "https://www.google.com/maps/place/Circolo+ARCI+fra+i+Lavoratori+di+Porta+Al+Prato/data=!4m2!3m1!1s0x132a56bafaaf0975:0xf9a3f36bc36d03d8"},
+{"n": "Società di Mutuo Soccorso di Rifredi", "z": "Rifredi", "t": "circolo", "s": "s", "c": "grande", "v": ["voci"], "l": ["mutuo", "cura"], "p": "La Friendly Society di Rifredi: mercato del riuso il terzo sabato del mese, corsi di italiano gratuiti, biblioteca, danza, scacchi. Il mutuo soccorso come rumore di fondo.", "f": "Sì", "fm": 84, "u": "https://www.google.com/maps/place/Friendly+Society+Rifredi/data=!4m2!3m1!1s0x132a569a900519bf:0xd5d43be8baf9446e"},
+{"n": "Art with Love Foundation", "z": "Rifredi", "t": "indipendente", "s": "i", "c": "medio", "v": ["silenzio", "voci"], "l": ["cura", "occhio"], "p": "Atelier aperto: tele, colori e pennelli a disposizione di chi entra, a offerta libera. Dipingere insieme come pratica di cura.", "f": "Sì", "fm": 81, "u": "https://www.google.com/maps/place/Art+with+love+foundation/data=!4m2!3m1!1s0x132a57a09002275d:0x6a0bdb68c49bbdf1"},
+{"n": "IED Firenze", "z": "Centro", "t": "formazione", "s": "i", "c": "medio", "v": ["voci", "riverbero"], "l": ["sapere", "memoria", "mutazione"], "p": "Scuola di design, moda e comunicazione nell'ex Teatro dell'Oriuolo, chiuso per anni e riaperto come aule e laboratori. Un teatro che non suona più come un teatro: che posto ha il suono in una scuola di progetto?", "f": "Sì", "fm": 74, "u": "https://www.google.com/maps/place/IED+Istituto+Europeo+di+Design/data=!4m2!3m1!1s0x132a55397983f5a1:0x4d8fa89dbe12e27"},
+{"n": "Sala ex Leopoldine", "z": "San Frediano", "t": "civico", "s": "i", "c": "medio", "v": ["riverbero", "voci"], "l": ["memoria", "mutuo"], "p": "La sala comunale del complesso delle ex Leopoldine, in piazza Tasso, data in uso ad attività culturali del quartiere: incontri, concerti, corsi.", "f": "Sì, tempi lunghi", "fm": 74, "u": "https://www.google.com/maps/place/Sala+ex+Leopoldine/data=!4m2!3m1!1s0x132a514d67760f59:0xc9f9ce9e7f23ba39"},
+{"n": "Circolo Vie Nuove", "z": "Gavinana", "t": "circolo", "s": "i", "c": "grande", "v": ["voci", "musica"], "l": ["mutuo"], "p": "Grande circolo ricreativo e culturale di Gavinana: sale, bar, attività per tutte le età. La socialità di quartiere come suono continuo.", "f": "Sì", "fm": 73, "u": "https://www.google.com/maps/place/Circolo+Ricreativo+Culturale+Vie+Nuove/data=!4m2!3m1!1s0x132a53891d59fd3f:0x77cf694358c83202"},
+{"n": "Circolo Il Progresso/Villa Fabbricotti", "z": "Rifredi", "t": "circolo", "s": "i", "c": "medio", "v": ["musica", "voci"], "l": ["mutuo"], "p": "Circolo in via Vittorio Emanuele: concerti, danze popolari, una birra al banco. Un palco di quartiere.", "f": "Forse", "fm": 71, "u": "https://www.google.com/maps/place/Circolo+%E2%80%9CIl+Progresso%E2%80%9D/data=!4m2!3m1!1s0x132a5420b3e8f485:0x51b07ed4ee823066"},
+{"n": "Avamposto Cinque Punte", "z": "San Frediano", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["voci"], "l": ["mutuo", "sapere"], "p": "Associazione in Borgo San Frediano per il fantasy, il gioco e l'arte: mostre, laboratori, giochi di ruolo. Mondi inventati raccontati ad alta voce.", "f": "Forse", "fm": 70, "u": "https://www.google.com/maps/place/Avamposto+-+Cinque+Punte/data=!4m2!3m1!1s0x132a574350bf5a53:0xe6593deb99c411f5"},
+{"n": "Spazio Marameo", "z": "Centro", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["silenzio", "passaggio"], "l": ["occhio"], "p": "Spazio espositivo in Borgo Santi Apostoli, una delle strade medievali più strette vicino a Ponte Vecchio.", "f": "Sì", "fm": 69, "u": "https://www.google.com/maps/place/Spazio+Marameo/data=!4m2!3m1!1s0x132a57005c54bb9b:0xe0ecec6439d10298"},
+{"n": "gattaccio.", "z": "Sant'Ambrogio", "t": "commercio", "s": "i", "c": "piccolo", "v": ["musica", "voci"], "l": ["quotidiano", "sapere"], "p": "Libri, riviste e vinili in piazza Ghiberti, davanti al mercato di Sant'Ambrogio. Un posto piccolo dove la musica si sceglie con cura.", "f": "Sì", "fm": 68, "u": "https://www.google.com/maps/place/gattaccio./data=!4m2!3m1!1s0x132a5542a283de89:0x66246031a81704e7"},
+{"n": "ISIA Firenze/Giardino Villa Strozzi", "z": "Villa Strozzi", "t": "formazione", "s": "i", "c": "medio", "v": ["voci", "natura"], "l": ["sapere", "lavoro", "verde"], "p": "Istituto pubblico di design del prodotto e della comunicazione in via Pisana, accanto al parco di Villa Strozzi. Progettare oggetti che fanno, o non fanno, rumore, con un giardino storico a due passi.", "f": "Forse", "fm": 68, "u": "https://www.google.com/maps/place/ISIA+Firenze+Design+-+Istituto+Superiore+per+le+Industrie+Artistiche/data=!4m2!3m1!1s0x132a56cada0d35f9:0xf61c6ec50cb9bc84"},
+{"n": "Biblioteca Pietro Thouar", "z": "Santo Spirito", "t": "biblioteca", "s": "i", "c": "medio", "v": ["silenzio", "voci"], "l": ["sapere", "quotidiano", "cura"], "p": "Biblioteca comunale dell'Oltrarno vicino a piazza Santo Spirito. Lettori, bambini, chi viene a stare al caldo.", "f": "Sì", "fm": 64, "u": "https://www.google.com/maps/place/Biblioteca+Pietro+Thouar/data=!4m2!3m1!1s0x132a51547d947525:0xdba8f69ee08433b3"},
+{"n": "Biblioteca delle Oblate", "z": "Centro", "t": "biblioteca", "s": "s", "c": "grande", "v": ["silenzio", "voci", "riverbero"], "l": ["sapere", "memoria", "cura"], "p": "La biblioteca nell'ex convento delle Oblate, le religiose che assistevano i malati di Santa Maria Nuova. Chiostro, sale di lettura, terrazza sul Duomo: tre silenzi diversi.", "f": "Sì, tempi lunghi", "fm": 62, "u": "https://www.google.com/maps/place/Biblioteca+delle+Oblate/data=!4m2!3m1!1s0x132a5404239efca5:0x9b7f2357b8c9b677"},
+{"n": "Murate Idea Park", "z": "Sant'Ambrogio", "t": "formazione", "s": "s", "c": "grande", "v": ["voci", "riverbero"], "l": ["memoria", "sapere", "mutazione"], "p": "Spazi per l'innovazione nell'ex carcere delle Murate, con un auditorium dal tetto vetrato. Dove si stava chiusi oggi si progetta: che cosa trattengono i muri di una prigione?", "f": "Forse", "fm": 61, "u": "https://www.google.com/maps/place/Murate+Idea+Park/data=!4m2!3m1!1s0x132a540971bb9839:0xc4892721367a544"},
+{"n": "Tempo Reale", "z": "Villa Strozzi", "t": "formazione", "s": "s", "c": "medio", "v": ["musica", "natura", "silenzio"], "l": ["sapere", "memoria"], "p": "Il centro di ricerca e produzione musicale fondato da Luciano Berio, a Villa Strozzi. La casa della musica elettronica a Firenze, che ha già composto la città con le sue registrazioni.", "f": "Sì", "fm": 61, "u": "https://www.google.com/maps/place/Tempo+Reale,+centro+di+ricerca+produzione+e+didattica+musicale/data=!4m2!3m1!1s0x132a56b57f1b57e1:0xbc306f9c3657c839"},
+{"n": "Accademia di Belle Arti", "z": "San Marco", "t": "formazione", "s": "i", "c": "medio", "v": ["voci", "riverbero"], "l": ["sapere", "occhio", "lavoro"], "p": "L'accademia nell'antico ospedale di San Matteo, accanto alla Galleria dell'Accademia. Laboratori di scultura e pittura: il suono di mani che fanno immagini.", "f": "Sì", "fm": 57, "u": "https://www.google.com/maps/place/Accademia+di+Belle+Arti+di+Firenze/data=!4m2!3m1!1s0x132a5404a86f3599:0x26da64bbd6d8f2b3"},
+{"n": "Artiglieria", "z": "Fortezza", "t": "indipendente", "s": "i", "c": "medio", "v": ["voci", "passaggio"], "l": ["occhio", "sapere", "mutazione"], "p": "Spazio di mostre, laboratori e racconti in via Cittadella, accanto alla Fortezza da Basso, con un programma rivolto ai giovani. Un luogo nuovo in una zona di passaggio.", "f": "Sì", "fm": 54, "u": "https://www.google.com/maps/place/Artiglieria/data=!4m2!3m1!1s0x132a57fead3f2de3:0x2a0592bd969689a0"},
+{"n": "Palazzina dell'Indiano (PIA)", "z": "Cascine", "t": "indipendente", "s": "s", "c": "medio", "v": ["macchine", "acqua", "natura"], "l": ["verde", "transito", "arno"], "p": "In fondo al Parco delle Cascine, sotto il ponte all'Indiano: treni che passano, aerei in atterraggio, il Mugnone che entra nell'Arno. Spazio per l'arte e caffè.", "f": "Forse", "fm": 53, "u": "https://www.google.com/maps/place/Palazzina+dell'Indiano+Arte+_+PIA/data=!4m2!3m1!1s0x132a5722f6c3e36d:0x5fc694f64d53eea9"},
+{"n": "Street Levels Gallery (via Palazzuolo)", "z": "Santa Maria Novella", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["passaggio", "voci"], "l": ["occhio", "quotidiano"], "p": "Galleria dedicata all'arte urbana in via Palazzuolo, una delle strade più multiculturali del centro. L'arte dei muri portata dentro.", "f": "Sì", "fm": 50, "u": "https://www.google.com/maps/place/Street+Levels+Gallery/data=!4m2!3m1!1s0x132a56aeacb44ad1:0x6877acc7a92976da"},
+{"n": "Casa del Popolo di Settignano", "z": "Settignano", "t": "circolo", "s": "s", "c": "medio", "v": ["voci", "natura"], "l": ["mutuo", "lavoro"], "p": "Casa del popolo sulla collina di Settignano, il borgo degli scalpellini della pietra serena. La città si sente da lontano; da vicino, le voci del circolo.", "f": "Sì", "fm": 49, "u": "https://www.google.com/maps/place/Casa+del+Popolo+di+Settignano+-+Circolo+ARCI/data=!4m2!3m1!1s0x132a54c1c66227b9:0x37955f7264926407"},
+{"n": "La Polveriera SpazioComune", "z": "San Marco", "t": "autogestito", "s": "i", "c": "medio", "v": ["voci"], "l": ["mutuo", "sapere"], "p": "Spazio aperto e condiviso per la cultura, lo studio e nuove pratiche di convivenza, in via Santa Reparata. Un luogo comune gestito da chi lo usa.", "f": "Forse", "fm": 44, "u": "https://www.google.com/maps/place/LaPolveriera+SpazioComune/data=!4m2!3m1!1s0x132a541cdcd549e1:0x7f5280f8e99f39a9"},
+{"n": "CPA Firenze Sud", "z": "Gavinana", "t": "autogestito", "s": "s", "c": "grande", "v": ["musica", "voci"], "l": ["mutuo"], "p": "Uno dei centri popolari autogestiti storici della città, a sud dell'Arno. Concerti, assemblee, iniziative di quartiere: il suono dell'autorganizzazione.", "f": "Sì", "fm": 43, "u": "https://www.google.com/maps/place/CPA+-+Centro+Popolare+Autogestito+Firenze+Sud/data=!4m2!3m1!1s0x132a5300446f6a13:0x5901a88a79a6b0ea"},
+{"n": "L'ornitorinco", "z": "San Frediano", "t": "commercio", "s": "i", "c": "piccolo", "v": ["silenzio", "voci"], "l": ["sapere", "quotidiano"], "p": "Libreria con caffè in via di Camaldoli, per adulti e bambini. Una stanza calma dove si legge e si studia.", "f": "Forse", "fm": 43, "u": "https://www.google.com/maps/place/L'ornitorinco/data=!4m2!3m1!1s0x132a51702359b6a3:0x32b9839f15c8c05f"},
+{"n": "Conservatorio Luigi Cherubini", "z": "San Marco", "t": "formazione", "s": "i", "c": "grande", "v": ["musica", "riverbero", "voci"], "l": ["sapere"], "p": "Il conservatorio della città, in piazza delle Belle Arti. Aule in cui la stessa frase si ripete per ore: il suono come disciplina, e quello che filtra dalle porte chiuse.", "f": "Forse", "fm": 42, "u": "https://www.google.com/maps/place/Conservatorio+di+Musica+Luigi+Cherubini+Sede+Centrale/data=!4m2!3m1!1s0x132a5404a9aa6369:0x5cf5421d189bcc71"},
+{"n": "Palazzo Strozzi", "z": "Centro", "t": "museo", "s": "s", "c": "grande", "v": ["riverbero", "voci", "passaggio"], "l": ["occhio"], "p": "Il palazzo rinascimentale delle grandi mostre. Il cortile è una piazza di pietra coperta che chiunque può attraversare.", "f": "Forse", "fm": 42, "u": "https://www.google.com/maps/place/Palazzo+Strozzi/data=!4m2!3m1!1s0x132a56aa73c1b501:0x38349b89124ab11"},
+{"n": "Manifattura Tabacchi", "z": "Cascine", "t": "indipendente", "s": "s", "c": "grande", "v": ["riverbero", "voci", "passaggio"], "l": ["lavoro", "mutazione", "memoria"], "p": "L'ex fabbrica di sigari degli anni Trenta, dove lavoravano soprattutto donne, oggi distretto creativo con il programma NAM Not A Museum. Cortili enormi, capannoni, una città nella città.", "f": "Sì", "fm": 41, "u": "https://www.google.com/maps/place/Manifattura+Tabacchi+Firenze/data=!4m2!3m1!1s0x132a57315ea204ab:0xf12421a8cfc488fa"},
+{"n": "Next Emerson", "z": "Castello", "t": "autogestito", "s": "s", "c": "grande", "v": ["musica", "voci"], "l": ["mutuo"], "p": "Centro sociale autogestito a nord della città: concerti, assemblee, socialità lontano dai circuiti del centro.", "f": "Forse", "fm": 34, "u": "https://www.google.com/maps/place/Centro+Sociale+Autogestito+Next-Emerson/data=!4m2!3m1!1s0x132a5754744cd477:0x52f10546de77810"}
+];
+const SPAZI_PUBBLICI = [
+{"n": "Piazza della Santissima Annunziata", "z": "San Marco", "t": "pubblico", "s": "e", "c": "aperto", "v": ["riverbero", "voci", "passaggio"], "l": ["cura", "memoria"], "a": 1, "p": "Il loggiato dello Spedale degli Innocenti, dove per secoli si lasciavano i neonati alla ruota. Una piazza disegnata intorno alla cura, chiusa su tre lati da portici.", "u": "https://www.google.com/maps/place/Piazza+della+Santissima+Annunziata/data=!4m2!3m1!1s0x132a541b2c8b2faf:0xa91edc3ffca3b153"},
+{"n": "Piazza delle Cure", "z": "Le Cure", "t": "pubblico", "s": "e", "c": "aperto", "v": ["voci", "passaggio"], "l": ["quotidiano", "mutuo"], "a": 1, "p": "La piazza del mercato rionale delle Cure, vicino al Mugnone e alla ferrovia. Banchi e voci la mattina, quasi vuota la sera.", "u": "https://www.google.com/maps/place/Piazza+delle+Cure/data=!4m2!3m1!1s0x132a543ddb9a12cb:0xee6685decf5346d7"},
+{"n": "Piazza di Cestello", "z": "San Frediano", "t": "pubblico", "s": "e", "c": "aperto", "v": ["acqua", "voci", "passaggio"], "l": ["arno", "memoria"], "a": 1, "p": "La piazza sull'Arno davanti a San Frediano in Cestello e agli antichi granai granducali. Il fiume e il lungarno a un passo.", "u": "https://www.google.com/maps/place/Piazza+di+Cestello/data=!4m2!3m1!1s0x132a56ace2b78f5d:0x663d50f69eb1a879"},
+{"n": "Parco dell'Anconella", "z": "Gavinana", "t": "pubblico", "s": "e", "c": "aperto", "v": ["natura", "acqua"], "l": ["verde", "arno"], "a": 1, "p": "Il grande parco sulla riva sud dell'Arno, accanto all'impianto dell'acquedotto. Uccelli, cani, chi corre, il fiume largo.", "u": "https://www.google.com/maps/place/Parco+dell'Anconella/data=!4m2!3m1!1s0x132a547f84668c71:0x6cc04ede1f21ac97"},
+{"n": "Piazza Dalmazia", "z": "Rifredi", "t": "pubblico", "s": "e", "c": "aperto", "v": ["passaggio", "macchine", "voci"], "l": ["transito", "quotidiano"], "a": 1, "p": "Snodo di Rifredi attraversato dalla tramvia per Careggi. Fermate, negozi, traffico: una piazza fatta di passaggi.", "u": "https://www.google.com/maps/place/Piazza+Dalmazia/data=!4m2!3m1!1s0x132a56900eb3b54b:0xe89f92ae09cece1e"},
+{"n": "Giardino delle Officine Galileo", "z": "Rifredi", "t": "pubblico", "s": "e", "c": "aperto", "v": ["natura", "voci"], "l": ["verde", "lavoro", "mutazione"], "p": "Il giardino pubblico sull'area delle ex Officine Galileo. Verde nuovo su un suolo industriale.", "u": "https://www.google.com/maps/place/Giardino+delle+Officine+Galileo/data=!4m2!3m1!1s0x132a569ac3084dc9:0x4cc95d4a97d2c0d9"},
+{"n": "Piazza d'Azeglio", "z": "Sant'Ambrogio", "t": "pubblico", "s": "e", "c": "aperto", "v": ["natura", "voci"], "l": ["verde", "memoria"], "a": 1, "p": "Giardino recintato nel quartiere costruito negli anni di Firenze Capitale, a pochi passi dalla Sinagoga. Alberi alti, giochi, il silenzio relativo di un salotto urbano.", "u": "https://www.google.com/maps/place/Piazza+Massimo+D'Azeglio/data=!4m2!3m1!1s0x132a540e414204db:0x5a16f657fe738f9f"},
+{"n": "Piazza del Carmine", "z": "San Frediano", "t": "pubblico", "s": "e", "c": "aperto", "v": ["voci", "passaggio"], "l": ["memoria", "quotidiano"], "a": 1, "p": "La piazza davanti alla chiesa del Carmine e alla Cappella Brancacci. Ampia e sobria, un vuoto nel tessuto fitto di San Frediano.", "u": "https://www.google.com/maps/place/Piazza+del+Carmine/data=!4m2!3m1!1s0x132a51532b1fa023:0x478c4a3cb0ac5752"},
+{"n": "Piazza Santo Spirito", "z": "Santo Spirito", "t": "pubblico", "s": "e", "c": "aperto", "v": ["voci", "musica", "riverbero"], "l": ["quotidiano", "mutuo"], "a": 1, "p": "La piazza della notte dell'Oltrarno, davanti alla facciata spoglia di Brunelleschi. Mercato la mattina, folla la sera: un ascolto conteso tra chi ci abita e chi ci passa la notte.", "u": "https://www.google.com/maps/place/Piazza+Santo+Spirito,+26-16/data=!4m2!3m1!1s0x132a5154905bfdc9:0xb9f38cf43cbdce37"},
+{"n": "Piazza dei Ciompi", "z": "Sant'Ambrogio", "t": "pubblico", "s": "e", "c": "aperto", "v": ["voci", "passaggio"], "l": ["memoria", "lavoro"], "a": 1, "p": "La piazza che porta il nome dei Ciompi, i lavoratori della lana che si ribellarono nel 1378. Mercatino delle pulci e Loggia del Pesce.", "u": "https://www.google.com/maps/place/Piazza+dei+Ciompi/data=!4m2!3m1!1s0x132a55e3eebb3889:0x59d0ab713d227935"},
+{"n": "Loggia del Pesce", "z": "Sant'Ambrogio", "t": "pubblico", "s": "s", "c": "aperto", "v": ["riverbero", "passaggio"], "l": ["memoria", "lavoro", "mutazione"], "a": 1, "p": "La loggia del Vasari che ospitava il mercato del pesce nel Mercato Vecchio, smontata con lo sventramento del centro e rimontata qui nel Novecento. Un'architettura spostata.", "u": "https://www.google.com/maps/place/Loggia+del+Pesce/data=!4m2!3m1!1s0x132a540f4b2db03b:0xf31b7a728740ee76"},
+{"n": "Piazza Tanucci", "z": "Rifredi", "t": "pubblico", "s": "e", "c": "aperto", "v": ["voci", "passaggio"], "l": ["quotidiano"], "a": 1, "p": "Piazza residenziale di Rifredi. Una piazza ordinaria: che cosa si sente dove non succede niente di speciale?", "u": "https://www.google.com/maps/place/Piazza+Bernardo+Tanucci/data=!4m2!3m1!1s0x132a5699037dbbc7:0xceeeedfe93846bcf"},
+{"n": "Porta San Frediano e le mura", "z": "San Frediano", "t": "pubblico", "s": "s", "c": "aperto", "v": ["passaggio", "riverbero"], "l": ["transito", "memoria"], "a": 1, "p": "La porta trecentesca con le grandi ante di legno e il tratto di mura verso l'Arno. Una soglia che la città continua ad attraversare.", "u": "https://www.google.com/maps/place/Mura+e+porta+di+San+Frediano/data=!4m2!3m1!1s0x132a56b296ebf721:0x3ef2bdd1b1c1441e"},
 {"n": "Giardino Henry Dunant", "z": "San Frediano", "t": "pubblico", "s": "e", "c": "aperto", "v": ["natura", "silenzio", "acqua"], "l": ["verde", "cura"], "p": "Piccolo giardino lungo le mura di Santa Rosa, aperto poche ore al giorno, intitolato al fondatore della Croce Rossa. Una panchina, i cani del quartiere, la pescaia poco lontano.", "u": "https://www.google.com/maps/place/Giardino+Henry+Dunant/data=!4m2!3m1!1s0x132a57c30d80e1b1:0xe1bb40a5b8b1df71"},
-{"n": "Biblioteca Pietro Thouar", "z": "Santo Spirito", "t": "biblioteca", "s": "i", "c": "medio", "v": ["silenzio", "voci"], "l": ["sapere", "quotidiano", "cura"], "p": "Biblioteca comunale dell'Oltrarno vicino a piazza Santo Spirito. Lettori, bambini, chi viene a stare al caldo.", "u": "https://www.google.com/maps/place/Biblioteca+Pietro+Thouar/data=!4m2!3m1!1s0x132a51547d947525:0xdba8f69ee08433b3"},
-{"n": "Sala ex Leopoldine", "z": "San Frediano", "t": "civico", "s": "i", "c": "medio", "v": ["riverbero", "voci"], "l": ["memoria", "mutuo"], "p": "La sala comunale del complesso delle ex Leopoldine, in piazza Tasso, data in uso ad attività culturali del quartiere: incontri, concerti, corsi.", "u": "https://www.google.com/maps/place/Sala+ex+Leopoldine/data=!4m2!3m1!1s0x132a514d67760f59:0xc9f9ce9e7f23ba39"},
-{"n": "ISIA Firenze", "z": "Firenze", "t": "formazione", "s": "i", "c": "medio", "v": ["voci"], "l": ["sapere", "lavoro"], "p": "Istituto pubblico di design del prodotto e della comunicazione. Progettare oggetti che fanno, o non fanno, rumore.", "u": "https://www.google.com/maps/place/ISIA+Firenze+Design+-+Istituto+Superiore+per+le+Industrie+Artistiche/data=!4m2!3m1!1s0x132a56cada0d35f9:0xf61c6ec50cb9bc84"},
-{"n": "La Polveriera SpazioComune", "z": "San Marco", "t": "autogestito", "s": "i", "c": "medio", "v": ["voci"], "l": ["mutuo", "sapere"], "p": "Spazio aperto e condiviso per la cultura, lo studio e nuove pratiche di convivenza, in via Santa Reparata. Un luogo comune gestito da chi lo usa.", "u": "https://www.google.com/maps/place/LaPolveriera+SpazioComune/data=!4m2!3m1!1s0x132a541cdcd549e1:0x7f5280f8e99f39a9"},
-{"n": "Spazio Marameo", "z": "Centro", "t": "indipendente", "s": "i", "c": "piccolo", "v": ["silenzio", "passaggio"], "l": ["occhio"], "p": "Spazio espositivo in Borgo Santi Apostoli, una delle strade medievali più strette vicino a Ponte Vecchio.", "u": "https://www.google.com/maps/place/Spazio+Marameo/data=!4m2!3m1!1s0x132a57005c54bb9b:0xe0ecec6439d10298"},
+{"n": "Giardino del Museo Stibbert", "z": "Montughi", "t": "pubblico", "s": "e", "c": "aperto", "v": ["natura", "silenzio"], "l": ["verde", "memoria"], "p": "Il giardino romantico del museo Stibbert sulla collina di Montughi, con laghetto, tempietto egizio e limonaia. Un paesaggio costruito come una collezione.", "u": "https://www.google.com/maps/place/Giardino+del+Museo+Stibbert/data=!4m2!3m1!1s0x132a5426c85e2f15:0x7076adc75dafb1df"},
 {"n": "Giardino dell'Orticoltura", "z": "Libertà", "t": "pubblico", "s": "s", "c": "aperto", "v": ["natura", "riverbero"], "l": ["verde", "memoria"], "p": "Il giardino della Società Toscana di Orticultura con il Tepidario del Roster, la grande serra ottocentesca in ferro e vetro. Una cassa armonica trasparente in mezzo agli alberi.", "u": "https://www.google.com/maps/place/Giardino+dell'Orticoltura/data=!4m2!3m1!1s0x132a55007b2c064d:0xc2c63f978a2f06e8"},
-{"n": "Circolo Il Progresso", "z": "Rifredi", "t": "circolo", "s": "i", "c": "medio", "v": ["musica", "voci"], "l": ["mutuo"], "p": "Circolo in via Vittorio Emanuele: concerti, danze popolari, una birra al banco. Un palco di quartiere.", "u": "https://www.google.com/maps/place/Circolo+%E2%80%9CIl+Progresso%E2%80%9D/data=!4m2!3m1!1s0x132a5420b3e8f485:0x51b07ed4ee823066"},
-{"n": "Art with Love Foundation", "z": "Rifredi", "t": "indipendente", "s": "i", "c": "medio", "v": ["silenzio", "voci"], "l": ["cura", "occhio"], "p": "Atelier aperto: tele, colori e pennelli a disposizione di chi entra, a offerta libera. Dipingere insieme come pratica di cura.", "u": "https://www.google.com/maps/place/Art+with+love+foundation/data=!4m2!3m1!1s0x132a57a09002275d:0x6a0bdb68c49bbdf1"},
-{"n": "Società di Mutuo Soccorso di Rifredi", "z": "Rifredi", "t": "circolo", "s": "s", "c": "grande", "v": ["voci"], "l": ["mutuo", "cura"], "p": "La Friendly Society di Rifredi: mercato del riuso il terzo sabato del mese, corsi di italiano gratuiti, biblioteca, danza, scacchi. Il mutuo soccorso come rumore di fondo.", "u": "https://www.google.com/maps/place/Friendly+Society+Rifredi/data=!4m2!3m1!1s0x132a569a900519bf:0xd5d43be8baf9446e"},
-{"n": "EDA Servizi, cooperativa sociale", "z": "Castello", "t": "sociale", "s": "i", "c": "medio", "v": ["voci"], "l": ["cura", "lavoro"], "p": "Cooperativa e impresa sociale in via delle Panche. Un luogo di lavoro e di servizi alle persone: l'ascolto dentro la cura organizzata.", "x": "Attività e spazi disponibili da verificare.", "u": "https://www.google.com/maps/place/EDA+Servizi+-+Societ%C3%A0+Cooperativa+Impresa+Sociale/data=!4m2!3m1!1s0x132a5690281ab497:0xe36c2e8c90e8eff8"},
-{"n": "Next Emerson", "z": "Castello", "t": "autogestito", "s": "s", "c": "grande", "v": ["musica", "voci"], "l": ["mutuo"], "p": "Centro sociale autogestito a nord della città: concerti, assemblee, socialità lontano dai circuiti del centro.", "u": "https://www.google.com/maps/place/Centro+Sociale+Autogestito+Next-Emerson/data=!4m2!3m1!1s0x132a5754744cd477:0x52f10546de77810"}
+{"n": "Terza Piazza", "z": "Rifredi", "t": "pubblico", "s": "e", "c": "aperto", "v": ["voci", "passaggio", "macchine"], "l": ["quotidiano", "mutazione"], "a": 1, "p": "Lo spazio pubblico tra piazza Leopoldo e la Coop: aiuole, panche di cemento, un murale di Nelson Mandela. Una piazza nuova e contesa, attraversata da chi la vive e da chi la evita.", "u": "https://www.google.com/maps/place/Terza+Piazza/data=!4m2!3m1!1s0x132a57203f0cf35b:0x4794305b32a3087b"}
 ];
 </script>
 <style>/* required styles */
@@ -774,9 +774,14 @@ a{color:inherit}
 button,input,textarea{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--vicino);outline-offset:2px}
 
-.cammino{display:flex;align-items:center;margin:.2rem 0 1.4rem}
+.cammino{display:flex;align-items:center;margin:.2rem 0 1.2rem}
 .cammino span{flex:1;height:2px;background:var(--filo)} .cammino span.fatto{background:var(--inchiostro)}
-.cammino i{width:11px;height:11px;border-radius:50%;border:2px solid var(--inchiostro);flex:none} .cammino i.fatto{background:var(--inchiostro)}
+.cammino button{width:28px;height:28px;flex:none;border:0;background:none;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.cammino button::before{content:'';width:12px;height:12px;border-radius:50%;border:2px solid var(--inchiostro);box-sizing:border-box}
+.cammino button.fatto::before{background:var(--inchiostro)}
+.cammino button[aria-current=step]::before{width:16px;height:16px;box-shadow:0 0 0 3px var(--carta),0 0 0 5px var(--inchiostro)}
+.cammino button:disabled{cursor:default}
+.cammino button:disabled:not([aria-current])::before{opacity:.45}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;padding:.6rem 1.3rem;border-radius:999px;
   border:2px solid var(--inchiostro);background:var(--inchiostro);color:var(--carta);font-weight:700;cursor:pointer;text-decoration:none}
@@ -797,41 +802,70 @@ label.campo{display:block;font-weight:700;margin:.8rem 0 .35rem}
 .carta{position:relative;border-radius:14px;background:var(--carta2);padding:1.2rem 1.2rem 1rem;border:2px solid var(--inchiostro);border-top-width:12px}
 .carta .ancora{font-family:var(--f-display);font-size:1.15rem;margin-bottom:1rem}
 .domanda{font-weight:700;margin:.2rem 0 .3rem}
-.aperta-note{border:2px dashed var(--inchiostro);border-radius:10px;padding:.6rem .8rem;margin:.5rem 0}
-.tavolo{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;margin:1rem 0}
-@media (min-width:560px){.tavolo{grid-template-columns:repeat(3,1fr)}}
-.tessera{min-height:6.2rem;border:2px solid var(--inchiostro);border-top-width:10px;border-radius:12px;background:var(--carta2);padding:.6rem;display:flex;flex-direction:column;justify-content:flex-end;
-  cursor:pointer;text-align:left;font-weight:700;line-height:1.15}
-.tessera small{font-weight:400;font-size:.82rem;color:var(--tenue)}
-.tessera.aperta{border-style:dashed}
+.aperta-note{display:none;border:2px dashed var(--inchiostro);border-radius:10px;padding:.6rem .8rem;margin:.5rem 0}
+.carta.aperta{border-style:dashed}
+.carta.aperta .domande{display:none}
+.carta.aperta .aperta-note{display:block}
 
-/* il luogo: la premessa è il contenuto */
-.luogo{border-radius:14px;background:var(--carta2);padding:1.1rem 1.1rem 1rem;border:2px solid var(--inchiostro);touch-action:pan-y;transition:transform .18s ease}
-.luogo .nome{font-family:var(--f-display);font-size:clamp(1.6rem,6.5vw,2.2rem);font-weight:800;line-height:1.05;margin:.1rem 0 .3rem}
-.luogo .premessa{font-size:1.08rem;margin:.6rem 0 .7rem}
+/* il mazzo: le carte scorrono di lato, si vede il bordo della successiva */
+.mazzo-testa{position:sticky;top:0;z-index:5;background:var(--carta);padding:calc(.5rem + env(safe-area-inset-top,0px)) 0 .6rem;margin:0 0 .4rem}
+.puntini{display:flex;gap:.35rem;flex-wrap:wrap}
+.puntino{width:30px;height:30px;border-radius:50%;border:3px solid var(--c);background:transparent;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:var(--inchiostro)}
+.puntino[data-stato=parziale]{background:linear-gradient(90deg,var(--c) 50%,transparent 50%)}
+.puntino[data-stato=fatta]{background:var(--c)}
+.puntino[data-stato=aperta]{border-style:dashed}
+.puntino[aria-current=true]{outline:3px solid var(--inchiostro);outline-offset:2px}
+.puntino.pop{animation:pop .35s ease}
+@keyframes pop{50%{transform:scale(1.35)}}
+.mazzo-info{display:flex;justify-content:space-between;font-size:.9rem;color:var(--tenue);margin-top:.4rem}
+.mazzo{display:flex;gap:.75rem;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;align-items:flex-start;transition:height .25s ease}
+.mazzo::-webkit-scrollbar{display:none}
+.mazzo>.carta{flex:0 0 calc(100% - 2.2rem);scroll-snap-align:start}
+.mazzo>.coda{flex:0 0 1.5rem}
+
+/* il luogo: la premessa è il contenuto; si scorre di lato per rispondere */
+.luogo{position:relative;border-radius:14px;background:var(--carta2);padding:1.1rem 1.1rem 1rem;border:2px solid var(--inchiostro);touch-action:pan-y;transition:transform .2s ease}
+.luogo.trascina{transition:none}
+.luogo .nome{font-family:var(--f-display);font-size:clamp(1.3rem,5.5vw,1.7rem);font-weight:800;line-height:1.05;margin:.1rem 0 .3rem}
+.luogo .premessa{margin:.6rem 0 .7rem}
+.luogo[data-verso]::after{position:absolute;top:.7rem;font-weight:800;border-radius:6px;padding:.1rem .5rem;border:2px solid;background:var(--carta2)}
+.luogo[data-verso=si]{border-color:var(--ok)} .luogo[data-verso=si]::after{content:'Ci sta';color:var(--ok);left:.8rem}
+.luogo[data-verso=no]{opacity:.6} .luogo[data-verso=no]::after{content:'Non per me';color:var(--tenue);right:.8rem}
+.luogo[data-verso=interessa]{border-color:var(--ok)} .luogo[data-verso=interessa]::after{content:'Mi interessa';color:var(--ok);left:.8rem}
+.luogo[data-verso=togli]{opacity:.6} .luogo[data-verso=togli]::after{content:'Non mi interessa';color:var(--tenue);right:.8rem}
+.voti.uno{grid-template-columns:1fr}
+.luogo.appena{animation:pop-luogo .4s ease}
+@keyframes pop-luogo{40%{transform:scale(1.015)}}
 .strati{display:flex;flex-wrap:wrap;gap:.3rem .8rem;font-size:.88rem;margin:.2rem 0 .6rem}
 .badge{display:inline-block;border-radius:6px;padding:.1rem .5rem;font-size:.85rem;font-weight:700;margin:0 .3rem .3rem 0;border:2px solid}
 .badge.vicino{color:var(--vicino);border-color:var(--vicino)} .badge.sposta{color:var(--sposta);border-color:var(--sposta)}
-.voti{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;margin:.9rem 0 .4rem}
-.voti .chip{text-align:center;display:flex;align-items:center;justify-content:center;font-weight:700;border-radius:10px;min-height:52px}
-.voti .chip.forte{min-height:60px;font-size:1.05rem}
-.voti .chip.forte[aria-pressed=true]{background:var(--inchiostro)}
+.voti{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin:.9rem 0 .4rem}
+.voti .chip{text-align:center;display:flex;align-items:center;justify-content:center;font-weight:700;border-radius:10px;min-height:52px;padding:.4rem .3rem}
 .check{display:flex;gap:.5rem;align-items:center;min-height:44px;cursor:pointer}
 .check input{width:22px;height:22px;accent-color:var(--inchiostro)}
 .lista-luoghi{list-style:none;padding:0;margin:1rem 0}
 .lista-luoghi>li{margin:0 0 1rem}
-.filtri{display:flex;flex-wrap:wrap;gap:.35rem;margin:.4rem 0 .8rem}
-.filtri .chip{min-height:38px;padding:.3rem .7rem;font-size:.9rem}
+.barra-fissa{position:sticky;top:0;z-index:5;background:var(--carta);border-bottom:2px solid var(--filo);padding:calc(.45rem + env(safe-area-inset-top,0px)) 0 .45rem;margin:0 0 .8rem;font-size:.92rem;font-weight:700}
 
+/* scale: vuote finché non le tocchi */
 .scala{margin:.2rem 0 1.1rem}
-.scala input{width:100%;accent-color:var(--inchiostro);height:36px}
+.scala input{width:100%;accent-color:var(--inchiostro);height:40px;touch-action:none;cursor:pointer}
+.scala input.vuota::-webkit-slider-thumb{opacity:.25}
+.scala input.vuota::-moz-range-thumb{opacity:.25}
 .scala .estremi{display:flex;justify-content:space-between;font-size:.92rem;color:var(--tenue);gap:1rem}
 
-.tasca{border:2px solid var(--inchiostro);border-radius:12px;padding:.8rem;margin:.6rem 0}
-.tasca[aria-pressed=true]{background:var(--carta2)}
+/* tre tasche */
+.tasche{display:grid;gap:.6rem;margin:1rem 0}
+.tasca{border:2px solid var(--inchiostro);border-radius:14px;padding:.8rem}
+.tasca.vuota{border-style:dashed;color:var(--tenue);min-height:3.4rem;display:flex;align-items:center}
+.tasca.piena{background:var(--carta2);animation:pop-luogo .35s ease}
+.chip[disabled]{opacity:.4;cursor:not-allowed}
+.gruppo{margin:1.4rem 0 .4rem}
+
 .avviso{border:2px solid var(--errore);color:var(--errore);border-radius:10px;padding:.7rem .9rem;margin:.8rem 0;font-weight:700}
 .esito-ok{border:2px solid var(--ok);border-radius:10px;padding:.7rem .9rem;margin:.8rem 0}
 .nascosto{display:none!important}
+.nota-tempo{border-left:6px solid var(--inchiostro);padding:.2rem 0 .2rem .9rem;margin:1rem 0}
 
 /* altri luoghi */
 .mappa{height:58vh;min-height:320px;border:2px solid var(--inchiostro);border-radius:14px;margin:.6rem 0;z-index:0}
@@ -857,7 +891,7 @@ label.campo{display:block;font-weight:700;margin:.8rem 0 .35rem}
 .drop.sopra{background:var(--carta2)}
 .etichetta{display:inline-block;border:1.5px solid var(--inchiostro);border-radius:999px;padding:0 .5rem;font-size:.8rem;margin:0 .2rem .2rem 0}
 .regia .chip{min-height:38px;padding:.3rem .7rem;font-size:.9rem}
-@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
 </style>
 </head>
 <body>
@@ -916,44 +950,34 @@ const opzStrati = Object.entries(STRATI).map(([k,v])=>[k,v.t]);
    ============================================================ */
 const COLORI_CARTE = ['#5EC8E5','#00A95C','#FF6C2F','#F15060','#FFB511','#00838A','#765BA7','#3255A4','#FF48B0'];
 const CARTE = [
+ /* le prime tre guidano anche l'ordine dei luoghi (lega:true) */
  {id:'luogo', titolo:'Il luogo', ancora:'Prima di entrarci, un luogo si ascolta.', domande:[
    {id:'spazio', tipo:'multi', testo:'Dove vive la tua pratica?', opz:[['i','Interno'],['e','All’aperto'],['s','Sulla soglia, tra i due'],['*','Ovunque']], lega:true},
-   {id:'suoni', tipo:'multi', testo:'Quali suoni ti attirano verso un luogo?', opz:Object.entries(VOCI), lega:true},
-   {id:'nota', tipo:'testo', testo:'Un luogo dove la tua pratica ha funzionato, e perché.'}]},
+   {id:'suoni', tipo:'multi', testo:'Quali suoni ti attirano verso un luogo?', opz:Object.entries(VOCI), lega:true}]},
  {id:'chi', titolo:'Partecipanti e ospiti', ancora:'Chi c’è, e quanti.', domande:[
    {id:'quanti', tipo:'uno', testo:'Quante persone alla volta?', opz:[['1','Una'],['8','Da 2 a 8'],['25','Da 9 a 25'],['tutti','Pubblico aperto, chi passa']], lega:true},
    {id:'con', tipo:'multi', testo:'Con chi ti piacerebbe lavorare?', opz:CON.map(c=>[c[0],c[1]]), lega:true},
-   {id:'fuori', tipo:'multi', testo:'Chi lascia fuori, oggi, la tua pratica?', opz:['Chi non sente','Chi non vede','Chi non cammina o non sta in piedi a lungo','Chi non parla italiano','Chi sta male nella folla','Non lo so ancora']},
-   {id:'nota', tipo:'testo', testo:'Chi vorresti incontrare?'}]},
+   {id:'fuori', tipo:'multi', testo:'Chi lascia fuori, oggi, la tua pratica?', opz:['Chi non sente','Chi non vede','Chi non cammina o non sta in piedi a lungo','Chi non parla italiano','Chi sta male nella folla','Non lo so ancora']}]},
  {id:'ricerca', titolo:'La tua ricerca', ancora:'Com’è oggi, e dove potrebbe andare.', domande:[
    {id:'oggi', tipo:'multi', testo:'Su che cosa lavora oggi la tua pratica?', opz:opzStrati, lega:true},
-   {id:'verso', tipo:'multi', testo:'Verso dove vorresti spostarla?', opz:opzStrati, lega:true},
-   {id:'nota', tipo:'testo', testo:'Una domanda che ti stai facendo, in una riga.'}]},
+   {id:'verso', tipo:'multi', testo:'Verso dove vorresti spostarla?', opz:opzStrati, lega:true}]},
  {id:'tempo', titolo:'Il tempo', ancora:'Si entra, si resta, si esce.', domande:[
    {id:'forma', tipo:'uno', testo:'Che forma ha il tempo della tua pratica?', opz:['Un appuntamento, con inizio e fine','Durazionale: si entra e si esce','Una consegna, poi il tempo è di chi partecipa']},
    {id:'durata', tipo:'uno', testo:'Quanto dura per chi la attraversa?', opz:['Meno di 15 minuti','15–45 minuti','45–90 minuti','Mezza giornata o più']},
    {id:'ore', tipo:'multi', testo:'A dicembre fa buio verso le cinque. In che ore vive?', opz:['Mattina','Pomeriggio','Al tramonto','Sera e notte']}]},
  {id:'materiali', titolo:'Materiali', ancora:'Che cosa tocchi, che cosa porti.', domande:[
    {id:'porti', tipo:'multi', testo:'Che cosa porti?', opz:['Strumenti o dispositivi miei','Oggetti di recupero','Oggetti da comprare o noleggiare','Il luogo così com’è']},
-   {id:'serve', tipo:'multi', testo:'Che cosa deve offrire il luogo?', opz:['Corrente elettrica','Buio','Superfici da far vibrare','Un posto dove l’opera resta per giorni','Riparo dalla pioggia']},
-   {id:'nota', tipo:'testo', testo:'Esiste un oggetto che sia la pratica stessa?'}]},
+   {id:'serve', tipo:'multi', testo:'Che cosa deve offrire il luogo?', opz:['Corrente elettrica','Buio','Superfici da far vibrare','Un posto dove l’opera resta per giorni','Riparo dalla pioggia']}]},
  {id:'istruzioni', titolo:'Istruzioni', ancora:'Una partitura dice quanto basta.', domande:[
    {id:'intento', tipo:'uno', testo:'Quanto è esplicita la tua intenzione artistica?', opz:['Dichiarata','Suggerita','Da scoprire']},
    {id:'capire', tipo:'scala', testo:'Chi partecipa deve soprattutto…', sx:'capire', dx:'esperire'},
-   {id:'fare', tipo:'multi', testo:'Che cosa fa chi partecipa?', opz:['Ascolta','Si muove','Registra','Fa suono','Scrive o disegna','Tocca']},
-   {id:'nota', tipo:'testo', testo:'Il compito, in una riga.'}]},
+   {id:'fare', tipo:'multi', testo:'Che cosa fa chi partecipa?', opz:['Ascolta','Si muove','Registra','Fa suono','Scrive o disegna','Tocca']}]},
  {id:'ruolo', titolo:'Il tuo ruolo', ancora:'Tenere l’ascolto di altri è una forma di cura.', domande:[
    {id:'sei', tipo:'multi', testo:'Durante l’intervento sei…', opz:['Guida','Osservatrice, osservatore','Facilitatrice, facilitatore','Una persona tra le altre','Assente: l’opera va da sola']},
-   {id:'con', tipo:'uno', testo:'Lavori…', opz:['Da sola, da solo','In coppia','Con un gruppo']},
-   {id:'nota', tipo:'testo', testo:'Come avvicina, la tua restituzione, chi ascolta a una dimensione di cura?'}]},
- {id:'wildcare', titolo:'Dalla formazione', ancora:'Che cosa porti con te dal Listening Kit.', domande:[
-   {id:'usi', tipo:'multi', testo:'Nel tuo intervento entrano…', opz:['Le carte del Kit','La sonda e l’app WILD','Esercizi miei','La mia pratica, così com’è']},
-   {id:'famiglie', tipo:'multi', testo:'Quali famiglie di carte?', opz:['Soundmapping','Deep Listening','Soundwalking','Memoria sonora','La sonda','Trasduzione e vibrazione','Trasmissione','Cura','Futuri sonori']},
-   {id:'nota', tipo:'testo', testo:'Una carta che è rimasta con te, e perché.'}]},
+   {id:'con', tipo:'uno', testo:'Lavori…', opz:['Da sola, da solo','In coppia','Con un gruppo']}]},
  {id:'resta', titolo:'Ciò che resta', ancora:'Dopo il 13 dicembre qualcosa rimane.', domande:[
    {id:'resta', tipo:'multi', testo:'A chi partecipa resta…', opz:['Una registrazione','Un oggetto','Una mappa o una partitura','Un modo di ascoltare','Niente di materiale']},
-   {id:'durata', tipo:'scala', testo:'La percezione di quel luogo cambierà…', sx:'per un momento', dx:'a lungo'},
-   {id:'nota', tipo:'testo', testo:'Che cosa resta al luogo, e a chi lo abita?'}]},
+   {id:'durata', tipo:'scala', testo:'La percezione di quel luogo cambierà…', sx:'per un momento', dx:'a lungo'}]},
 ];
 CARTE.forEach((c,i)=>c.col = COLORI_CARTE[i % COLORI_CARTE.length]);
 const kv = o => Array.isArray(o) ? o : [o,o];
@@ -962,8 +986,9 @@ const kv = o => Array.isArray(o) ? o : [o,o];
    Luoghi: chiavi
    ============================================================ */
 function slug(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
-(()=>{ const visti={}; LUOGHI.forEach(p=>{ let id=slug(p.n)||'luogo'; if(visti[id]) id+='-'+(++visti[id]); else visti[id]=1; p.id=id; p.v=p.v||[]; p.l=p.l||[]; }); })();
+(()=>{ const visti={}; [...LUOGHI, ...SPAZI_PUBBLICI].forEach(p=>{ let id=slug(p.n)||'luogo'; if(visti[id]) id+='-'+(++visti[id]); else visti[id]=1; p.id=id; p.v=p.v||[]; p.l=p.l||[]; }); })();
 const LUOGO = Object.fromEntries(LUOGHI.map(p=>[p.id,p]));
+const SPAZIO_PUBBLICO = Object.fromEntries(SPAZI_PUBBLICI.map(p=>[p.id,p]));
 
 /* ============================================================
    Il ponte: dalle carte al profilo, dal profilo ai luoghi
@@ -1005,34 +1030,50 @@ const app = document.getElementById('app');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const mescola = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; };
 const norm = s => String(s||'').trim().toLowerCase().replace(/\s+/g,' ');
-const CHIAVE = 'fsa_v3';
+const CHIAVE = 'fsa_v8';
 function salva(){ try{ localStorage.setItem(CHIAVE, JSON.stringify(S)); }catch(e){} }
 function carica(){ try{ const t = localStorage.getItem(CHIAVE); return t ? JSON.parse(t) : null; }catch(e){ return null; } }
 function statoNuovo(){
-  return { v:3, passo:'copertina', nome:'', modo:null, ordineCarte: mescola(CARTE.map(c=>c.id)), iCarta:0, cartaAperta:null,
-    ordineLuoghi:[], iLuogo:0, filtro:null, carte:{}, luoghi:{}, tasca:[], altri:[], altroAperto:null, citta:{filo:[], dispersione:50, tramvia:null}, inviato:false };
+  return { v:8, passo:'copertina', massimo:0, nome:'', cartaCorrente:0, piazze:{},
+    ordineLuoghi:[], firma:'', carte:{}, luoghi:{}, tasca:[], altri:[], altroAperto:null, citta:{filo:[], dispersione:null, tramvia:null}, inviato:false };
 }
-let S = carica(); if (!S || S.v !== 3) S = statoNuovo();
-const PASSI = ['copertina','modo','carte','luoghi','altri','citta','invio'];
+let S = carica(); if (!S || S.v !== 8) S = statoNuovo();
+const PASSI = ['copertina','carte','luoghi','tasca','piazze','altri','citta','invio'];
+const NOMI_PASSI = ['Inizio','Le carte','I luoghi','In tasca','Piazze e giardini','Altri luoghi','La città','Invio'];
+/* la barra dei passi: i passi già raggiunti si possono riaprire toccandoli */
 function cammino(){
-  const k = Math.max(0, PASSI.indexOf(S.passo==='tasca' ? 'luoghi' : S.passo)); let h = '<div class="cammino" aria-hidden="true">';
-  PASSI.forEach((p,i)=>{ if(i) h += `<span class="${i<=k?'fatto':''}"></span>`; h += `<i class="${i<=k?'fatto':''}"></i>`; });
-  return h + '</div>';
+  const k = Math.max(0, PASSI.indexOf(S.passo)); let h = '<nav class="cammino" aria-label="Passi">';
+  PASSI.forEach((p,i)=>{ if (i) h += `<span class="${i<=S.massimo?'fatto':''}" aria-hidden="true"></span>`;
+    h += `<button class="${i<=S.massimo?'fatto':''}" data-act="passo-vai" data-i="${i}" title="${NOMI_PASSI[i]}" aria-label="${NOMI_PASSI[i]}"
+      ${i===k?'aria-current="step"':''} ${i===k || i>S.massimo ? 'disabled' : ''}></button>`; });
+  return h + '</nav>';
 }
 function rispostaCarta(id){ return S.carte[id] || (S.carte[id] = {aperta:false, r:{}}); }
+/* una carta è fatta quando ogni domanda ha una risposta, oppure quando è dichiarata "ancora aperta" */
+const risposta = (d, v) => Array.isArray(v) ? v.length > 0 : d.tipo==='scala' ? typeof v === 'number' : (v !== undefined && v !== null && v !== '');
 function statoCarta(id){
-  const c = S.carte[id]; if (!c) return 'muta'; if (c.aperta) return 'aperta';
-  return Object.values(c.r).some(v => Array.isArray(v) ? v.length : (v!==undefined && v!==null && String(v).trim()!=='')) ? 'fatta' : 'muta';
+  const c = S.carte[id]; if (c?.aperta) return 'aperta';
+  const carta = CARTE.find(x=>x.id===id), r = c?.r || {};
+  const n = carta.domande.filter(d=>risposta(d, r[d.id])).length;
+  return n === carta.domande.length ? 'fatta' : n ? 'parziale' : 'muta';
 }
+const cartaChiusa = id => ['fatta','aperta'].includes(statoCarta(id));
+const carteMancanti = () => CARTE.filter(c=>!cartaChiusa(c.id));
 const voto = id => S.luoghi[id] || {};
 const positivo = v => !!(v.ciSta || v.miSposta);
-const ascoltato = v => !!(v.ciSta || v.miSposta || v.no || v.ignoto);
-function vai(passo){ S.passo = passo; salva(); render(); window.scrollTo({top:0}); }
+const ascoltato = v => !!(v.ciSta || v.miSposta || v.no);
+function vai(passo){
+  const i = PASSI.indexOf(passo);
+  if (i > PASSI.indexOf('carte') && carteMancanti().length){ passo = 'carte'; S.cartaCorrente = CARTE.indexOf(carteMancanti()[0]); }
+  if (passo==='luoghi') costruisciOrdine();
+  S.passo = passo; S.massimo = Math.max(S.massimo, PASSI.indexOf(passo)); salva(); render(); window.scrollTo({top:0});
+}
 
 /* ordine dei luoghi: quelli già ascoltati restano in testa; poi, a turno,
    il più vicino alla pratica, quello che più la sposta, uno a caso */
 function costruisciOrdine(){
-  const pr = profilo(S.carte);
+  const pr = profilo(S.carte), firma = JSON.stringify(pr);
+  if (S.ordineLuoghi.length && S.firma === firma) return;       // non rimescolare se la pratica non è cambiata
   const fatti = S.ordineLuoghi.filter(id=>LUOGO[id] && ascoltato(voto(id)));
   const resto = LUOGHI.map(p=>p.id).filter(id=>!fatti.includes(id));
   const perV = resto.slice().sort((a,b)=>(vicinanza(pr,LUOGO[b])??0)-(vicinanza(pr,LUOGO[a])??0));
@@ -1040,7 +1081,7 @@ function costruisciOrdine(){
   const caso = mescola(resto), usati = new Set(), ord = [];
   const fonti = [perV, perS, caso]; let f = 0;
   while (ord.length < resto.length){ const src = fonti[f++ % 3]; const id = src.find(x=>!usati.has(x)); if (id){ usati.add(id); ord.push(id); } }
-  S.ordineLuoghi = fatti.concat(ord); S.iLuogo = fatti.length >= LUOGHI.length ? LUOGHI.length-1 : fatti.length;
+  S.ordineLuoghi = fatti.concat(ord); S.firma = firma;
 }
 
 /* ============================================================
@@ -1048,9 +1089,10 @@ function costruisciOrdine(){
    ============================================================ */
 function render(){
   if (REGIA) return renderRegia();
-  const f = {copertina:vCopertina, modo:vModo, carte:vCarte, luoghi:vLuoghi, tasca:vTasca, altri:vAltri, citta:vCitta, invio:vInvio}[S.passo] || vCopertina;
+  const f = {copertina:vCopertina, carte:vCarte, luoghi:vLuoghi, tasca:vTasca, piazze:vPiazze, altri:vAltri, citta:vCitta, invio:vInvio}[S.passo] || vCopertina;
+  osservatore?.disconnect(); osservatore = null;
   app.innerHTML = f();
-  if (S.passo==='luoghi' && S.modo==='coperte') montaSwipe();
+  if (S.passo==='carte') montaMazzo();
   if (S.passo==='altri') montaMappa();
 }
 const puntoStrato = k => `<span><span class="punto" style="background:${STRATI[k].col}"></span>${esc(STRATI[k].t)}</span>`;
@@ -1059,115 +1101,154 @@ function vCopertina(){
   return `<div class="strati" aria-hidden="true" style="margin:.4rem 0 1rem">${Object.keys(STRATI).map(puntoStrato).join('')}</div>
   <h1>Firenze si ascolta</h1>
   <p style="font-family:var(--f-display);font-size:1.3rem;line-height:1.25">${esc(DATE_FESTIVAL)}. Nove pratiche, una città che per un giorno o due ascolta sé stessa.</p>
-  <p>Abbiamo scelto ${LUOGHI.length} luoghi da contattare: musei, accademie, biblioteche, circoli, centri sociali, spazi indipendenti, qualche giardino. Insieme li stringiamo a una mappa di al massimo ${MAX_LISTA}; da lì ognuno sceglierà il proprio.</p>
-  <p>Prima racconti la tua pratica: com’è oggi e dove potrebbe andare. Poi ascolti i luoghi, dici se la tua pratica ci sta o se ti sposterebbe altrove, e ne metti tre in tasca. Infine proponi altri luoghi, quelli che non stanno in nessuna lista: piazze, rive, spazi abbandonati o insoliti. Una ventina di minuti; il gioco ricorda dove sei arrivato.</p>
+  <div class="nota-tempo"><p style="margin:0"><strong>Niente panico.</strong> Hai ${esc(TEMPO_A_DISPOSIZIONE)} e puoi farlo a pezzi: chiudi e riprendi quando vuoi, dallo stesso dispositivo. Se su una carta non sai ancora rispondere, segnala “ancora aperta”: anche questo ci dice qualcosa. È un punto di partenza, per il prossimo incontro e anche per te.</p></div>
+  <p>Che cosa c’è dentro:</p>
+  <ul style="margin:.2rem 0 1rem;padding-left:1.2rem">
+   <li><strong>${CARTE.length} carte</strong> sulla tua pratica: un tocco per ogni risposta, poi scorri alla carta successiva.</li>
+   <li><strong>${LUOGHI.length} luoghi</strong> da contattare: segni quelli che ti dicono qualcosa.</li>
+   <li><strong>Tre luoghi in tasca</strong>, con una frase ciascuno.</li>
+   <li><strong>Piazze e giardini</strong>: ${SPAZI_PUBBLICI.length} spazi pubblici che ti suggeriamo, se Firenze non la conosci. Segni quelli che ti interessano.</li>
+   <li><strong>Altri luoghi</strong>: una piazza, una riva, uno spazio abbandonato. Quelli che non stanno in nessuna lista.</li>
+   <li><strong>La città</strong>: il filo che lega il festival.</li></ul>
   <label class="campo" for="nome">Il tuo nome</label>
   <input type="text" id="nome" autocomplete="name" value="${esc(S.nome)}" data-in="nome">
   <div class="riga"><button class="btn" data-act="inizia" ${S.nome.trim()?'':'disabled'}>Inizia</button></div>`;
 }
-function vModo(){
-  const b = (v,t,d) => `<button class="btn vuoto" data-act="modo" data-v="${v}" style="justify-content:flex-start;text-align:left;padding:1rem 1.2rem;border-radius:14px"><span><strong>${t}</strong><br><span style="font-weight:400">${d}</span></span></button>`;
-  return `${cammino()}<h2>Come arrivano le carte?</h2><p>Vale per le carte e per i luoghi.</p>
-  <div class="riga" style="flex-direction:column;align-items:stretch">
-   ${b('coperte','Coperte','Una alla volta, come vengono. I luoghi arrivano alternando quelli vicini alla tua pratica, quelli che potrebbero spostarla e qualcuno a caso.')}
-   ${b('scoperte','Scoperte','Tutto sul tavolo: scegli tu l’ordine, filtra i luoghi per strato.')}
-  </div>`;
+function scalaHTML(id, testo, v, sx, dx, dati){
+  const vuota = typeof v !== 'number';
+  return `<div class="scala"><label class="domanda" for="${id}" style="display:block">${esc(testo)}</label>
+    <input type="range" id="${id}" class="${vuota?'vuota':''}" min="0" max="100" step="5" value="${vuota?50:v}" ${dati}>
+    <div class="estremi"><span>${esc(sx)}</span><span>${esc(dx)}</span></div>
+    ${vuota?'<p class="piccolo tenue suggerimento">Tocca un punto della linea.</p>':''}</div>`;
 }
 function domandaHTML(c, d){
   const r = rispostaCarta(c.id).r, nome = `${c.id}.${d.id}`;
-  if (d.tipo==='testo') return `<label class="campo" for="t-${nome}">${esc(d.testo)}</label><textarea id="t-${nome}" data-in="carta" data-c="${c.id}" data-d="${d.id}">${esc(r[d.id]||'')}</textarea>`;
-  if (d.tipo==='scala'){ const v = r[d.id] ?? 50;
-    return `<div class="scala"><label class="domanda" for="s-${nome}" style="display:block">${esc(d.testo)}</label>
-      <input type="range" id="s-${nome}" min="0" max="100" step="5" value="${v}" data-in="carta" data-c="${c.id}" data-d="${d.id}">
-      <div class="estremi"><span>${esc(d.sx)}</span><span>${esc(d.dx)}</span></div></div>`; }
+  if (d.tipo==='scala') return scalaHTML(`s-${nome}`, d.testo, r[d.id], d.sx, d.dx, `data-in="carta" data-c="${c.id}" data-d="${d.id}"`);
   const sel = d.tipo==='multi' ? (r[d.id]||[]) : (r[d.id]!=null ? [r[d.id]] : []);
   const isStrati = d.opz === opzStrati;
   return `<p class="domanda" id="q-${nome}">${esc(d.testo)}</p><div class="chips" role="group" aria-labelledby="q-${nome}">${
     d.opz.map(o=>{ const [k,t] = kv(o); return `<button class="chip" aria-pressed="${sel.includes(k)}" data-act="chip" data-c="${c.id}" data-d="${d.id}" data-t="${d.tipo}" data-v="${esc(k)}">${isStrati?`<span class="punto" style="background:${STRATI[k].col}"></span>`:''}${esc(t)}</button>`; }).join('')}</div>`;
 }
-function cartaHTML(c){
-  const st = rispostaCarta(c.id);
+function cartaHTML(c, i){
+  const aperta = !!rispostaCarta(c.id).aperta;
   const lega = c.domande.some(d=>d.lega) ? `<p class="piccolo tenue">Le risposte di questa carta decidono quali luoghi ti arrivano per primi.</p>` : '';
-  return `<article class="carta" style="border-top-color:${c.col}" aria-labelledby="h-${c.id}">
+  return `<article class="carta${aperta?' aperta':''}" style="border-top-color:${c.col}" data-c="${c.id}" aria-labelledby="h-${c.id}" aria-roledescription="carta" aria-label="Carta ${i+1} di ${CARTE.length}">
     <h2 id="h-${c.id}">${esc(c.titolo)}</h2><p class="ancora">${esc(c.ancora)}</p>${lega}
-    ${st.aperta ? `<div class="aperta-note">Ancora aperta.</div>` : c.domande.map(d=>domandaHTML(c,d)).join('')}
-    <div class="riga"><button class="btn vuoto" data-act="aperta" data-c="${c.id}">${st.aperta?'Riapri la carta':'Ancora aperta'}</button></div>
+    <div class="domande">${c.domande.map(d=>domandaHTML(c,d)).join('')}</div>
+    <div class="aperta-note">Ancora aperta: ne parliamo insieme.</div>
+    <div class="riga"><button class="btn vuoto" data-act="aperta" data-c="${c.id}">${aperta?'Riapri la carta':'Ancora aperta'}</button></div>
   </article>`;
 }
+const etichettaAiLuoghi = () => { const n = carteMancanti().length; return n ? `Mancano ${n} ${n===1?'carta':'carte'}` : 'Ai luoghi'; };
+const fatteTesto = () => `Fatte ${CARTE.length - carteMancanti().length} di ${CARTE.length}`;
 function vCarte(){
-  if (S.modo==='scoperte' && !S.cartaAperta){
-    const n = CARTE.filter(c=>statoCarta(c.id)!=='muta').length;
-    return `${cammino()}<h2>La tua pratica</h2><p>${CARTE.length} carte sul tavolo. Toccate finora: ${n}.</p>
-    <div class="tavolo">${CARTE.map(c=>{const st=statoCarta(c.id);
-      return `<button class="tessera ${st}" style="border-top-color:${c.col}" data-act="apri" data-c="${c.id}">${esc(c.titolo)}<small>${st==='fatta'?'fatta':st==='aperta'?'ancora aperta':'da fare'}</small></button>`;}).join('')}</div>
-    <div class="riga fine"><button class="btn vuoto" data-act="indietro-modo">Indietro</button><button class="btn" data-act="a-luoghi">Ai luoghi</button></div>`;
-  }
-  if (S.modo==='scoperte'){ const c = CARTE.find(x=>x.id===S.cartaAperta);
-    return `${cammino()}${cartaHTML(c)}<div class="riga fine"><span></span><button class="btn" data-act="al-tavolo">Torna al tavolo</button></div>`; }
-  const i = S.iCarta, c = CARTE.find(x=>x.id===S.ordineCarte[i]);
-  return `${cammino()}<p class="tenue piccolo">Carta ${i+1} di ${CARTE.length}</p>${cartaHTML(c)}
-  <div class="riga fine"><button class="btn vuoto" data-act="carta-prec">Indietro</button><button class="btn" data-act="carta-succ">${i===CARTE.length-1?'Ai luoghi':'Avanti'}</button></div>`;
+  return `${cammino()}<h2>La tua pratica</h2>
+  <p>${CARTE.length} carte. Tocca le risposte, poi scorri alla carta successiva. I pallini si riempiono man mano.</p>
+  <div class="mazzo-testa">
+    <div class="puntini" role="group" aria-label="Le carte">${CARTE.map((c,i)=>`<button class="puntino" style="--c:${c.col}" data-act="carta-vai" data-i="${i}" data-stato="${statoCarta(c.id)}" aria-label="${esc(c.titolo)}"></button>`).join('')}</div>
+    <div class="mazzo-info"><span id="conta-carta">Carta 1 di ${CARTE.length}</span><span id="conta-fatte">${fatteTesto()}</span></div>
+  </div>
+  <div class="mazzo" id="mazzo">${CARTE.map(cartaHTML).join('')}<div class="coda" aria-hidden="true"></div></div>
+  <div class="riga fine"><button class="btn vuoto" data-act="carta-prec">Precedente</button><button class="btn vuoto" data-act="carta-succ">Successiva</button></div>
+  <div class="riga fine"><button class="btn vuoto" data-act="a-copertina">Indietro</button><button class="btn" id="b-ai-luoghi" data-act="a-luoghi">${etichettaAiLuoghi()}</button></div>`;
 }
-
+const ridotto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let osservatore = null;
+const carteNelMazzo = () => [...document.querySelectorAll('#mazzo > .carta')];
+function vaiCarta(i, liscio=true){
+  const m = document.getElementById('mazzo'), cs = carteNelMazzo(); if (!m || !cs.length) return;
+  i = Math.max(0, Math.min(cs.length-1, i));
+  m.scrollTo({left: cs[i].offsetLeft - cs[0].offsetLeft, behavior: liscio && !ridotto ? 'smooth' : 'auto'});
+}
+function montaMazzo(){
+  const m = document.getElementById('mazzo'), cs = carteNelMazzo(); if (!m) return;
+  let corrente = -1;
+  const adatta = () => { if (cs[corrente]) m.style.height = cs[corrente].offsetHeight + 'px'; };
+  const aggiorna = () => {
+    const x = m.scrollLeft, base = cs[0].offsetLeft;
+    const i = cs.reduce((b,c,j)=>Math.abs(c.offsetLeft-base-x) < Math.abs(cs[b].offsetLeft-base-x) ? j : b, 0);
+    if (i === corrente) return;
+    const prima = corrente; corrente = i; S.cartaCorrente = i; salva();
+    document.querySelectorAll('.puntino').forEach((p,j)=>p.setAttribute('aria-current', String(j===i)));
+    document.getElementById('conta-carta').textContent = `Carta ${i+1} di ${cs.length}`;
+    adatta();
+    if (prima >= 0){ const top = m.getBoundingClientRect().top + scrollY - document.querySelector('.mazzo-testa').offsetHeight - 8;
+      if (scrollY > top) scrollTo({top, behavior: ridotto ? 'auto' : 'smooth'}); }
+  };
+  let attesa = false;
+  m.addEventListener('scroll', ()=>{ if (attesa) return; attesa = true; requestAnimationFrame(()=>{ attesa = false; aggiorna(); }); }, {passive:true});
+  osservatore = new ResizeObserver(adatta); cs.forEach(c=>osservatore.observe(c));
+  vaiCarta(S.cartaCorrente||0, false); aggiorna();
+}
+/* aggiorna pallino, contatori e pulsante dopo una risposta, senza ridisegnare il mazzo */
+function aggiornaMazzo(cid){
+  const i = CARTE.findIndex(c=>c.id===cid), st = statoCarta(cid), p = document.querySelector(`.puntino[data-i="${i}"]`);
+  if (p){ const prima = p.dataset.stato; p.dataset.stato = st;
+    if (st!==prima && (st==='fatta' || st==='aperta')){ p.classList.remove('pop'); void p.offsetWidth; p.classList.add('pop'); navigator.vibrate?.(12); } }
+  document.getElementById('conta-fatte').textContent = fatteTesto();
+  document.getElementById('b-ai-luoghi').textContent = etichettaAiLuoghi();
+}
 function badgeHTML(p){
   const pr = profilo(S.carte), vi = vicinanza(pr,p), sp = spostamento(pr,p); let h = '';
   if (vi!==null && vi>=SOGLIA_VICINO) h += `<span class="badge vicino">Vicino a come lavori</span>`;
   if (sp!==null && sp>=SOGLIA_SPOSTA) h += `<span class="badge sposta">Verso dove vuoi andare</span>`;
   return h ? `<div>${h}</div>` : '';
 }
-function schedaLuogo(p, conVoto){
-  const v = voto(p.id);
-  let h = `<div class="tenue piccolo">${esc(p.z)}, ${esc(TIPO_BREVE[p.t]||p.t)}</div>
+/* modo 'voto': luoghi da contattare (ci sta / mi sposta / non per me). modo 'interesse': piazze e giardini (mi interessa) */
+function schedaLuogo(p, modo){
+  const v = modo==='voto' ? voto(p.id) : {}, interessa = modo==='interesse' && !!S.piazze[p.id];
+  return `<article class="luogo" data-l="${p.id}" aria-label="${esc(p.n)}">
+    <div class="tenue piccolo">${esc(p.z)}, ${esc(TIPO_BREVE[p.t]||p.t)}</div>
     <div class="nome">${esc(p.n)}</div>${badgeHTML(p)}
     <p class="premessa">${esc(p.p)}</p>
     <div class="strati">${p.l.map(puntoStrato).join('')}</div>
-    <p class="piccolo tenue">${esc(SPAZIO[p.s]||'')}, ${esc(CAPIENZA[p.c]||'')} (stima).${p.u?` <a href="${esc(p.u)}" target="_blank" rel="noopener">Apri sulla mappa</a>`:''}</p>`;
-  if (!conVoto) return h;
-  h += `<div class="voti" role="group" aria-label="La tua pratica e questo luogo">
-    <button class="chip forte" aria-pressed="${!!v.ciSta}" data-act="voto" data-l="${p.id}" data-v="ciSta">La mia pratica ci sta</button>
-    <button class="chip forte" aria-pressed="${!!v.miSposta}" data-act="voto" data-l="${p.id}" data-v="miSposta">Mi sposterebbe</button>
-    <button class="chip" aria-pressed="${!!v.no}" data-act="voto" data-l="${p.id}" data-v="no">Non per me</button>
-    <button class="chip" aria-pressed="${!!v.ignoto}" data-act="voto" data-l="${p.id}" data-v="ignoto">Non lo conosco abbastanza</button></div>`;
-  if (positivo(v)) h += `<label class="campo" for="pq-${p.id}">Che cosa ascolteresti lì?</label>
-    <input type="text" id="pq-${p.id}" value="${esc(v.perche||'')}" data-in="perche" data-l="${p.id}">
-    <label class="check"><input type="checkbox" data-in="conosco" data-l="${p.id}" ${v.conosco?'checked':''}> Conosco qualcuno lì</label>`;
-  return h;
+    <p class="piccolo tenue">${esc(SPAZIO[p.s]||'')}, ${esc(CAPIENZA[p.c]||'')} (stima).${p.u?` <a href="${esc(p.u)}" target="_blank" rel="noopener">Apri sulla mappa</a>`:''}</p>
+    ${modo==='voto'?`<div class="voti" role="group" aria-label="La tua pratica e ${esc(p.n)}">
+     <button class="chip" aria-pressed="${!!v.ciSta}" data-act="voto" data-l="${p.id}" data-v="ciSta">Ci sta</button>
+     <button class="chip" aria-pressed="${!!v.miSposta}" data-act="voto" data-l="${p.id}" data-v="miSposta">Mi sposta</button>
+     <button class="chip" aria-pressed="${!!v.no}" data-act="voto" data-l="${p.id}" data-v="no">Non per me</button></div>
+    ${positivo(v)?`<label class="check"><input type="checkbox" data-in="conosco" data-l="${p.id}" ${v.conosco?'checked':''}> Conosco qualcuno lì</label>`:''}`
+    :`<div class="voti uno"><button class="chip" aria-pressed="${interessa}" data-act="interesse" data-l="${p.id}">${interessa?'Mi interessa':'Mi interessa?'}</button></div>`}
+  </article>`;
 }
 function vLuoghi(){
+  if (!LUOGHI.length) return `${cammino()}<div class="avviso">La lista dei luoghi è vuota.</div><div class="riga"><button class="btn" data-act="a-piazze">Avanti</button></div>`;
   const n = LUOGHI.filter(p=>ascoltato(voto(p.id))).length, np = LUOGHI.filter(p=>positivo(voto(p.id))).length;
-  const basta = n >= Math.min(MIN_ASCOLTATI, LUOGHI.length);
-  const piede = `<p class="piccolo tenue">Ascoltati ${n} di ${LUOGHI.length}, ${np} con un sì. ${basta?'Puoi continuare o passare oltre.':`Dopo ${Math.min(MIN_ASCOLTATI,LUOGHI.length)} puoi passare oltre.`}</p>`;
-  if (S.modo==='scoperte'){
-    const pr = profilo(S.carte);
-    let lista = LUOGHI.slice().sort((a,b)=>((vicinanza(pr,b)??0)+(spostamento(pr,b)??0))-((vicinanza(pr,a)??0)+(spostamento(pr,a)??0)));
-    if (S.filtro) lista = lista.filter(p=>p.l.includes(S.filtro));
-    return `${cammino()}<h2>I luoghi</h2><p>In cima quelli più vicini alla tua pratica o a dove vuoi portarla. Filtra per strato.</p>
-    <div class="filtri" role="group" aria-label="Filtra per strato"><button class="chip" aria-pressed="${!S.filtro}" data-act="filtro" data-v="">Tutti</button>${
-      Object.entries(STRATI).map(([k,s])=>`<button class="chip" aria-pressed="${S.filtro===k}" data-act="filtro" data-v="${k}"><span class="punto" style="background:${s.col}"></span>${esc(s.t)}</button>`).join('')}</div>
-    ${piede}
-    <ul class="lista-luoghi">${lista.map(p=>`<li><article class="luogo">${schedaLuogo(p,true)}</article></li>`).join('')}</ul>
-    <div class="riga fine"><button class="btn vuoto" data-act="a-carte">Alle carte</button><button class="btn" data-act="a-tasca" ${basta?'':'disabled'}>Avanti</button></div>`;
-  }
-  const i = Math.min(S.iLuogo, S.ordineLuoghi.length-1), p = LUOGO[S.ordineLuoghi[i]];
-  return `${cammino()}${piede}
-  <article class="luogo" id="carta-luogo">${schedaLuogo(p,true)}</article>
-  <div class="riga fine"><button class="btn vuoto" data-act="luogo-prec">Indietro</button>
-   <button class="btn" data-act="luogo-succ" ${ascoltato(voto(p.id))?'':'disabled'}>${i===LUOGHI.length-1?'Avanti':'Prossimo luogo'}</button></div>
-  ${basta?`<div class="riga"><button class="btn vuoto" data-act="a-tasca">Bastano questi, vai avanti</button></div>`:''}
-  <p class="piccolo tenue">Scorri a destra: ci sta. A sinistra: non per me.</p>`;
+  return `${cammino()}<h2>I luoghi</h2>
+  <p>Per ogni luogo: la tua pratica ci sta, o ti sposterebbe altrove? Se un luogo non ti dice niente, salta. In cima quelli più vicini alla tua pratica o a dove vuoi portarla.</p>
+  <p class="piccolo tenue">Scorri un luogo verso destra: ci sta. Verso sinistra: non per me.</p>
+  <div class="barra-fissa" role="status">Con un sì: ${np} · Guardati: ${n} di ${LUOGHI.length}</div>
+  <ul class="lista-luoghi">${S.ordineLuoghi.filter(id=>LUOGO[id]).map(id=>`<li>${schedaLuogo(LUOGO[id], 'voto')}</li>`).join('')}</ul>
+  <div class="riga fine"><button class="btn vuoto" data-act="a-carte">Alle carte</button><button class="btn" data-act="a-tasca">Avanti</button></div>`;
 }
 function vTasca(){
-  const pos = LUOGHI.filter(p=>positivo(voto(p.id)));
-  if (!pos.length) return `${cammino()}<h2>Tre luoghi in tasca</h2><div class="avviso">Nessun luogo con un sì: torna ai luoghi e trova almeno quello che ti sposterebbe.</div>
+  const pos = S.ordineLuoghi.filter(id=>LUOGO[id] && positivo(voto(id))).map(id=>LUOGO[id]);
+  if (!pos.length) return `${cammino()}<h2>Tre luoghi in tasca</h2><div class="avviso">Ancora nessun luogo con un sì: torna ai luoghi e segna almeno quelli che ti sposterebbero.</div>
     <div class="riga"><button class="btn" data-act="a-luoghi">Ai luoghi</button></div>`;
-  const tasca = id => S.tasca.find(t=>t.id===id);
-  return `${cammino()}<h2>Tre luoghi in tasca</h2><p>Tra quelli che ti hanno detto qualcosa, tienine tre. Per ognuno una frase: perché lì.</p>
-  <p class="piccolo tenue">In tasca: ${S.tasca.length} di 3.</p>
-  ${pos.map(p=>{ const t = tasca(p.id), v = voto(p.id);
-    return `<div class="tasca" aria-pressed="${!!t}"><div class="riga fine" style="margin:0"><div><strong>${esc(p.n)}</strong><br><span class="piccolo tenue">${v.ciSta?'ci sta':''}${v.ciSta&&v.miSposta?', ':''}${v.miSposta?'mi sposterebbe':''}</span></div>
-      <button class="btn ${t?'':'vuoto'}" data-act="tasca" data-l="${p.id}" ${!t&&S.tasca.length>=3?'disabled':''}>${t?'In tasca':'Metti in tasca'}</button></div>
-      ${t?`<label class="campo" for="tq-${p.id}">Perché lì</label><textarea id="tq-${p.id}" data-in="tasca" data-l="${p.id}">${esc(t.perche||'')}</textarea>`:''}</div>`; }).join('')}
-  <div class="riga fine"><button class="btn vuoto" data-act="a-luoghi">Ai luoghi</button><button class="btn" data-act="a-altri">Avanti</button></div>`;
+  const pieno = S.tasca.length >= 3, fuori = pos.filter(p=>!S.tasca.some(t=>t.id===p.id));
+  const tasca = i => { const t = S.tasca[i]; if (!t) return `<div class="tasca vuota">Tasca ${i+1}</div>`;
+    const p = LUOGO[t.id];
+    return `<div class="tasca piena"><div class="riga fine" style="margin:0"><strong>${esc(p.n)}</strong><button class="btn vuoto" data-act="tasca" data-l="${p.id}" aria-label="Togli ${esc(p.n)} dalla tasca">Togli</button></div>
+      <label class="campo" for="tq-${p.id}">Perché lì, in una frase</label><textarea id="tq-${p.id}" data-in="tasca" data-l="${p.id}">${esc(t.perche||'')}</textarea></div>`; };
+  return `${cammino()}<h2>Tre luoghi in tasca</h2>
+  <p>Tra i luoghi a cui hai detto sì, tienine tre: quelli per cui partiresti domani. Per ognuno, una frase: perché lì.</p>
+  <div class="tasche">${[0,1,2].map(tasca).join('')}</div>
+  <h3 class="gruppo">I tuoi sì (${pos.length})</h3>
+  <p class="piccolo tenue">${pieno?'Tasche piene: togline uno per cambiare.':'Tocca un luogo per metterlo in tasca.'}</p>
+  <div class="chips">${fuori.map(p=>{ const v = voto(p.id);
+    return `<button class="chip" data-act="tasca" data-l="${p.id}" ${pieno?'disabled':''}>${esc(p.n)} <span class="piccolo tenue">${v.ciSta&&v.miSposta?'ci sta, mi sposta':v.ciSta?'ci sta':'mi sposta'}</span></button>`; }).join('')}</div>
+  <div class="riga fine"><button class="btn vuoto" data-act="a-luoghi">Ai luoghi</button><button class="btn" data-act="a-piazze">Avanti</button></div>`;
+}
+function vPiazze(){
+  const pr = profilo(S.carte), punteggio = p => (vicinanza(pr,p)??0) + (spostamento(pr,p)??0);
+  const lista = SPAZI_PUBBLICI.slice().sort((a,b)=>punteggio(b)-punteggio(a));
+  const n = SPAZI_PUBBLICI.filter(p=>S.piazze[p.id]).length;
+  return `${cammino()}<h2>Piazze e giardini</h2>
+  <p>Spazi pubblici che conosciamo e ti suggeriamo, se Firenze non la conosci. Non è un voto: segna quelli che ti interessano, così sappiamo dove guardare insieme.</p>
+  <p class="piccolo tenue">Scorri verso destra: mi interessa. Verso sinistra: lo togli.</p>
+  <div class="barra-fissa" role="status">Ti interessano: ${n} di ${SPAZI_PUBBLICI.length}</div>
+  <ul class="lista-luoghi">${lista.map(p=>`<li>${schedaLuogo(p, 'interesse')}</li>`).join('')}</ul>
+  <div class="riga fine"><button class="btn vuoto" data-act="a-tasca">Indietro</button><button class="btn" data-act="a-altri">Avanti</button></div>`;
 }
 function vCitta(){
   const c = S.citta;
@@ -1175,9 +1256,7 @@ function vCitta(){
   <p class="domanda" id="q-filo">Che filo lega il festival? Due strati al massimo.</p>
   <div class="chips" role="group" aria-labelledby="q-filo">${Object.entries(STRATI).map(([k,s])=>
     `<button class="chip" aria-pressed="${c.filo.includes(k)}" data-act="filo" data-v="${k}"><span class="punto" style="background:${s.col}"></span>${esc(s.t)}</button>`).join('')}</div>
-  <div class="scala"><label class="domanda" for="disp" style="display:block">I luoghi del festival sono…</label>
-    <input type="range" id="disp" min="0" max="100" step="5" value="${c.dispersione}" data-in="dispersione">
-    <div class="estremi"><span>una costellazione raccolta, a piedi</span><span>punti sparsi in tutta la città</span></div></div>
+  ${scalaHTML('disp', 'I luoghi del festival sono…', c.dispersione, 'una costellazione raccolta, a piedi', 'punti sparsi in tutta la città', 'data-in="dispersione"')}
   <p class="domanda" id="q-tram">La tramvia come filo che cuce i luoghi?</p>
   <div class="chips" role="group" aria-labelledby="q-tram">${['Sì','Forse','No'].map(o=>`<button class="chip" aria-pressed="${c.tramvia===o}" data-act="tramvia" data-v="${o}">${o}</button>`).join('')}</div>
   <div class="riga fine"><button class="btn vuoto" data-act="a-altri">Indietro</button><button class="btn" data-act="a-invio">Avanti</button></div>`;
@@ -1231,11 +1310,11 @@ function vAltri(){
   const nota = sc.length ? `<p>${sc.map(k=>`<span class="punto" style="background:${STRATI[k].col}"></span>${esc(STRATI[k].t)}`).join(', ')}: tra i luoghi della lista ${sc.length>1?'compaiono':'compare'} poco o niente. Se la tua pratica va lì, questo è il posto per dirlo.</p>` : '';
   const conPunto = S.altri.filter(a=>a.lat!=null);
   return `${cammino()}<h2>Altri luoghi</h2>
-  <p>Luoghi che non stanno in nessuna lista: una piazza, una riva, un cortile, una fabbrica abbandonata. Tocca la mappa per segnare un punto, trascinalo per spostarlo.</p>${nota}
+  <p>Luoghi che non stanno in nessuna delle nostre liste: una riva, un cortile, una fabbrica abbandonata. Tocca la mappa per segnare un punto, trascinalo per spostarlo.</p>${nota}
   <div id="mappa" class="mappa" role="application" aria-label="Mappa di Firenze: tocca per proporre un luogo"></div>
   <div class="riga"><button class="btn vuoto" data-act="altro-nuovo">Proponi un luogo senza punto</button></div>
   ${S.altri.map(a=>propostaHTML(a, a.lat!=null ? conPunto.indexOf(a)+1 : 0)).join('')}
-  <div class="riga fine"><button class="btn vuoto" data-act="a-tasca">Indietro</button><button class="btn" data-act="a-citta">Avanti</button></div>`;
+  <div class="riga fine"><button class="btn vuoto" data-act="a-piazze">Indietro</button><button class="btn" data-act="a-citta">Avanti</button></div>`;
 }
 function iconaPin(n, sel){ return L.divIcon({className:'', html:`<div class="pin${sel?' sel':''}"><span>${n}</span></div>`, iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-28]}); }
 /* Sfondo: tessere ufficiali di OpenStreetMap, senza chiave. Uso leggero (pochi utenti) consentito, attribuzione obbligatoria. */
@@ -1243,8 +1322,8 @@ function sfondo(m){
   let avvisato = false;
   const l = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     {maxZoom:19, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'}).addTo(m);
-  l.on('tileerror', ()=>{ if (avvisato) return; avvisato = true;
-    const el = m.getContainer(); const n = document.createElement('div'); n.className = 'avviso'; n.style.margin = '0 0 .6rem';
+  l.on('tileerror', ()=>{ const el = m.getContainer(); if (avvisato || !el.isConnected) return; avvisato = true;
+    const n = document.createElement('div'); n.className = 'avviso'; n.style.margin = '0 0 .6rem';
     n.textContent = 'Lo sfondo della mappa non si è caricato. I punti che segni vengono comunque salvati; puoi anche usare “Proponi un luogo senza punto”.';
     el.parentNode.insertBefore(n, el); });
 }
@@ -1271,35 +1350,60 @@ function montaMappa(){
 /* ============================================================
    Swipe e voti
    ============================================================ */
-function montaSwipe(){
-  const el = document.getElementById('carta-luogo'); if (!el) return;
-  let x0 = null, id = null;
-  el.addEventListener('pointerdown', e=>{ if (e.target.closest('button,a,input,label,textarea')) return; x0 = e.clientX; id = e.pointerId; });
-  el.addEventListener('pointermove', e=>{ if (x0===null || e.pointerId!==id) return; const dx = e.clientX-x0; el.style.transform = `translateX(${dx*.6}px) rotate(${dx*.02}deg)`; });
-  el.addEventListener('pointerup', e=>{ if (x0===null) return; const dx = e.clientX-x0; x0 = null; el.style.transform = '';
-    if (Math.abs(dx) > 90) vota(S.ordineLuoghi[S.iLuogo], dx>0 ? 'ciSta' : 'no'); });
-  el.addEventListener('pointercancel', ()=>{ x0=null; el.style.transform=''; });
-}
 function vota(id, k){
   const v = S.luoghi[id] || (S.luoghi[id] = {});
-  if (k==='ciSta' || k==='miSposta'){ v[k] = !v[k]; v.no = false; v.ignoto = false; }
-  else { const prima = v[k]; v.ciSta = v.miSposta = v.no = v.ignoto = false; v[k] = !prima; delete v.perche; delete v.conosco;
-    S.tasca = S.tasca.filter(t=>t.id!==id); }
+  if (k==='ciSta' || k==='miSposta'){ v[k] = !v[k]; v.no = false; }
+  else { const prima = v.no; v.ciSta = v.miSposta = false; v.no = !prima; delete v.conosco; }
   if (!positivo(v)) S.tasca = S.tasca.filter(t=>t.id!==id);
-  salva();
-  if (S.modo==='coperte' && (k==='no'||k==='ignoto') && ascoltato(v)) { avanzaLuogo(); return; }
-  const y = window.scrollY; render(); window.scrollTo({top:y});
+  salva(); const y = window.scrollY; render(); window.scrollTo({top:y});
+  const el = document.querySelector(`.luogo[data-l="${id}"]`); el?.classList.add('appena');
 }
-function avanzaLuogo(){ if (S.iLuogo < S.ordineLuoghi.length-1){ S.iLuogo++; salva(); render(); window.scrollTo({top:0}); } else vai('tasca'); }
+/* gesto sulle schede: nei luoghi, a destra "ci sta" e a sinistra "non per me"; nelle piazze, a destra "mi interessa" e a sinistra lo toglie */
+const imposta = (id, si) => { const y = window.scrollY; S.piazze[id] = si; if (!si) delete S.piazze[id]; salva(); render(); window.scrollTo({top:y});
+  if (si) document.querySelector(`.luogo[data-l="${id}"]`)?.classList.add('appena'); };
+let gesto = null;
+document.addEventListener('pointerdown', e=>{
+  if (REGIA || !['luoghi','piazze'].includes(S.passo) || (e.pointerType==='mouse' && e.button!==0)) return;
+  const el = e.target.closest('.luogo'); if (!el || e.target.closest('button,a,input,label')) return;
+  gesto = {el, x0:e.clientX, y0:e.clientY, dx:0, asse:null, pid:e.pointerId};
+});
+document.addEventListener('pointermove', e=>{
+  if (!gesto || e.pointerId!==gesto.pid) return;
+  const dx = e.clientX-gesto.x0, dy = e.clientY-gesto.y0;
+  if (!gesto.asse){ if (Math.hypot(dx,dy) < 8) return;
+    gesto.asse = Math.abs(dx) > Math.abs(dy)*1.2 ? 'x' : 'y';
+    if (gesto.asse==='x') gesto.el.classList.add('trascina'); }
+  if (gesto.asse!=='x') return;
+  gesto.dx = dx; gesto.el.style.transform = `translateX(${dx}px)`;
+  const [destra, sinistra] = S.passo==='piazze' ? ['interessa','togli'] : ['si','no'];
+  if (dx > 60) gesto.el.dataset.verso = destra; else if (dx < -60) gesto.el.dataset.verso = sinistra; else delete gesto.el.dataset.verso;
+});
+const fineGesto = ()=>{ if (!gesto) return; const {el, dx, asse} = gesto; gesto = null; if (asse!=='x') return;
+  el.classList.remove('trascina'); el.style.transform = ''; delete el.dataset.verso;
+  const id = el.dataset.l;
+  if (S.passo==='piazze'){ if (dx > 90 && !S.piazze[id]) imposta(id, true); else if (dx < -90 && S.piazze[id]) imposta(id, false); return; }
+  const v = voto(id);
+  if (dx > 90 && !v.ciSta) vota(id, 'ciSta'); else if (dx < -90 && !v.no) vota(id, 'no'); };
+document.addEventListener('pointerup', fineGesto); document.addEventListener('pointercancel', fineGesto);
+/* scale: si impostano toccando o trascinando in qualunque punto della linea (anche su iPhone) */
+document.addEventListener('pointerdown', e=>{
+  const r = e.target; if (REGIA || !r.matches?.('.scala input[type=range]')) return;
+  e.preventDefault(); r.setPointerCapture(e.pointerId);
+  const imposta = ev => { const b = r.getBoundingClientRect(), f = Math.min(1, Math.max(0, (ev.clientX-b.left)/b.width));
+    r.value = Math.round(f*20)*5; r.dispatchEvent(new Event('input', {bubbles:true})); };
+  imposta(e);
+  const muovi = ev => imposta(ev), fine = () => { r.removeEventListener('pointermove', muovi); r.removeEventListener('pointerup', fine); r.removeEventListener('pointercancel', fine); };
+  r.addEventListener('pointermove', muovi); r.addEventListener('pointerup', fine); r.addEventListener('pointercancel', fine);
+});
 
 /* ============================================================
    Invio
    ============================================================ */
 function payload(){
-  return { v:3, nome:S.nome.trim(), quando:new Date().toISOString(), modo:S.modo,
+  return { v:8, nome:S.nome.trim(), quando:new Date().toISOString(),
     carte: Object.fromEntries(CARTE.map(c=>[c.id, {stato:statoCarta(c.id), r:(S.carte[c.id]||{}).r||{}}])),
-    luoghi: Object.fromEntries(Object.entries(S.luoghi).filter(([id,v])=>LUOGO[id] && ascoltato(v)).map(([id,v])=>[id,{ciSta:!!v.ciSta, miSposta:!!v.miSposta, no:!!v.no, ignoto:!!v.ignoto, perche:v.perche||'', conosco:!!v.conosco}])),
-    tasca: S.tasca.filter(t=>LUOGO[t.id]), altri: S.altri.filter(altroPieno).map(({id,...x})=>x),
+    luoghi: Object.fromEntries(Object.entries(S.luoghi).filter(([id,v])=>LUOGO[id] && ascoltato(v)).map(([id,v])=>[id,{ciSta:!!v.ciSta, miSposta:!!v.miSposta, no:!!v.no, conosco:!!v.conosco}])),
+    tasca: S.tasca.filter(t=>LUOGO[t.id]), piazze: Object.keys(S.piazze).filter(id=>SPAZIO_PUBBLICO[id]), altri: S.altri.filter(altroPieno).map(({id,...x})=>x),
     citta: S.citta, elencoLuoghi: LUOGHI.map(p=>p.id) };
 }
 function scarica(nome, contenuto, tipo){
@@ -1331,27 +1435,31 @@ document.addEventListener('click', e=>{
   const t = e.target.closest('[data-act]'); if (!t || REGIA) return;
   const d = t.dataset;
   switch(d.act){
-    case 'inizia': vai(S.modo ? 'carte' : 'modo'); break;
-    case 'modo': S.modo = d.v; S.cartaAperta = null; vai('carte'); break;
-    case 'indietro-modo': vai('modo'); break;
-    case 'apri': S.cartaAperta = d.c; salva(); render(); scrollTo({top:0}); break;
-    case 'al-tavolo': S.cartaAperta = null; salva(); render(); scrollTo({top:0}); break;
-    case 'carta-prec': if (S.iCarta>0){ S.iCarta--; salva(); render(); scrollTo({top:0}); } else vai('modo'); break;
-    case 'carta-succ': if (S.iCarta<CARTE.length-1){ S.iCarta++; salva(); render(); scrollTo({top:0}); } else { costruisciOrdine(); vai('luoghi'); } break;
+    case 'inizia': vai('carte'); break;
+    case 'a-copertina': vai('copertina'); break;
+    case 'carta-vai': vaiCarta(Number(d.i)); break;
+    case 'carta-prec': vaiCarta(S.cartaCorrente-1); break;
+    case 'carta-succ': vaiCarta(S.cartaCorrente+1); break;
     case 'chip': {
       const r = rispostaCarta(d.c).r;
       if (d.t==='multi'){ const s = new Set(r[d.d]||[]); s.has(d.v)?s.delete(d.v):s.add(d.v); r[d.d] = [...s]; t.setAttribute('aria-pressed', String(s.has(d.v))); }
       else { r[d.d] = r[d.d]===d.v ? null : d.v; t.parentElement.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed', String(x===t && r[d.d]===d.v))); }
-      salva(); break; }
-    case 'aperta': { const c = rispostaCarta(d.c); c.aperta = !c.aperta; salva(); render(); break; }
-    case 'a-luoghi': costruisciOrdine(); vai('luoghi'); break;
+      salva(); aggiornaMazzo(d.c); break; }
+    case 'aperta': { const c = rispostaCarta(d.c); c.aperta = !c.aperta; salva();
+      t.closest('.carta').classList.toggle('aperta', c.aperta); t.textContent = c.aperta ? 'Riapri la carta' : 'Ancora aperta';
+      aggiornaMazzo(d.c); break; }
+    case 'a-luoghi': { const manca = carteMancanti();
+      if (S.passo==='carte' && manca.length){ vaiCarta(CARTE.indexOf(manca[0])); break; }
+      vai('luoghi'); break; }
+    case 'passo-vai': vai(PASSI[Number(d.i)]); break;
+    case 'a-piazze': vai('piazze'); break;
+    case 'a-tasca': vai('tasca'); break;
     case 'a-carte': vai('carte'); break;
     case 'voto': vota(d.l, d.v); break;
-    case 'filtro': S.filtro = d.v || null; salva(); render(); break;
-    case 'luogo-prec': if (S.iLuogo>0){ S.iLuogo--; salva(); render(); } else vai('carte'); break;
-    case 'luogo-succ': avanzaLuogo(); break;
-    case 'a-tasca': vai('tasca'); break;
-    case 'tasca': { const i = S.tasca.findIndex(x=>x.id===d.l); if (i>=0) S.tasca.splice(i,1); else if (S.tasca.length<3) S.tasca.push({id:d.l, perche:''}); salva(); const y=scrollY; render(); scrollTo({top:y}); break; }
+    case 'interesse': imposta(d.l, !S.piazze[d.l]); break;
+    case 'tasca': { const i = S.tasca.findIndex(x=>x.id===d.l);
+      if (i>=0) S.tasca.splice(i,1); else if (S.tasca.length<3){ S.tasca.push({id:d.l, perche:''}); navigator.vibrate?.(12); }
+      salva(); const y=scrollY; render(); scrollTo({top:y}); document.getElementById('tq-'+d.l)?.focus({preventScroll:true}); break; }
     case 'a-citta': vai('citta'); break;
     case 'a-altri': S.altri = S.altri.filter(a=>altroPieno(a) || a.id===S.altroAperto); vai('altri'); break;
     case 'altro-nuovo': { const a = nuovoAltro(null, null);
@@ -1370,22 +1478,22 @@ document.addEventListener('click', e=>{
     case 'scarica-json': scarica(`firenze-si-ascolta_${nomeFile()}.json`, JSON.stringify(payload(),null,1), 'application/json'); break;
   }
 });
+const scalaToccata = r => { r.classList.remove('vuota'); r.parentElement.querySelector('.suggerimento')?.remove(); };
+document.addEventListener('keydown', e=>{
+  if (REGIA || S.passo!=='carte' || e.target.matches('input,textarea')) return;
+  if (e.key==='ArrowRight') vaiCarta(S.cartaCorrente+1); else if (e.key==='ArrowLeft') vaiCarta(S.cartaCorrente-1);
+});
+window.addEventListener('resize', ()=>{ if (!REGIA && S.passo==='carte') vaiCarta(S.cartaCorrente, false); });
 document.addEventListener('input', e=>{
   const t = e.target, k = t.dataset.in; if (!k || REGIA) return;
   if (k==='nome'){ S.nome = t.value; const b = document.querySelector('[data-act=inizia]'); if (b) b.disabled = !t.value.trim(); }
-  else if (k==='carta') rispostaCarta(t.dataset.c).r[t.dataset.d] = t.type==='range' ? Number(t.value) : t.value;
-  else if (k==='perche') S.luoghi[t.dataset.l].perche = t.value;
+  else if (k==='carta'){ rispostaCarta(t.dataset.c).r[t.dataset.d] = Number(t.value); scalaToccata(t); salva(); aggiornaMazzo(t.dataset.c); return; }
   else if (k==='conosco') S.luoghi[t.dataset.l].conosco = t.checked;
   else if (k==='tasca'){ const x = S.tasca.find(x=>x.id===t.dataset.l); if (x) x.perche = t.value; }
-  else if (k==='dispersione') S.citta.dispersione = Number(t.value);
+  else if (k==='dispersione'){ S.citta.dispersione = Number(t.value); scalaToccata(t); }
   else if (k==='altro'){ const a = S.altri.find(x=>x.id===t.dataset.id); if (a) a[t.dataset.k] = t.value; }
   salva();
 });
-document.addEventListener('keydown', e=>{
-  if (REGIA || S.passo!=='luoghi' || S.modo!=='coperte' || e.target.matches('input,textarea')) return;
-  const m = {'1':'ciSta','2':'miSposta','3':'no','4':'ignoto'}[e.key]; if (m) vota(S.ordineLuoghi[S.iLuogo], m);
-});
-
 /* ============================================================
    REGIA (?regia)
    ============================================================ */
@@ -1394,7 +1502,7 @@ const R = { risposte:[], escludi:new Set(), fissa:new Set(), N:Math.min(12,MAX_L
 
 function aggiungiRisposte(arr){
   const per = new Map(R.risposte.map(r=>[norm(r.nome), r]));
-  for (const r of arr){ if (!r || r.v!==3 || !r.nome || !r.luoghi || !Object.keys(r.luoghi).length) continue;
+  for (const r of arr){ if (!r || r.v!==8 || !r.nome || !r.luoghi || !Object.keys(r.luoghi).length) continue;
     const k = norm(r.nome), v = per.get(k); if (!v || (r.quando||'') > (v.quando||'')) per.set(k, r); }
   R.risposte = [...per.values()].sort((a,b)=>a.nome.localeCompare(b.nome,'it'));
 }
@@ -1405,16 +1513,15 @@ function lineaDefault(){
 function statLuoghi(){
   const prof = R.risposte.map(r=>[r, profilo(r.carte)]);
   return LUOGHI.map(p=>{
-    const s = {p, ciSta:[], miSposta:[], pos:[], tasca:[], no:0, ignoto:0, conosce:[], perche:[], implicito:0, punteggio:0};
+    const s = {p, ciSta:[], miSposta:[], pos:[], tasca:[], no:0, conosce:[], perche:[], implicito:0, punteggio:0};
     for (const [r,pr] of prof){
       const v = r.luoghi[p.id], tq = (r.tasca||[]).find(t=>t.id===p.id);
       if (tq){ s.tasca.push(r.nome); if (tq.perche) s.perche.push([r.nome, tq.perche, true]); }
       if (!v){ s.implicito += Math.max(vicinanza(pr,p)??0, spostamento(pr,p)??0); continue; }
       if (v.ciSta) s.ciSta.push(r.nome); if (v.miSposta) s.miSposta.push(r.nome);
       if (v.ciSta||v.miSposta) s.pos.push(r.nome);
-      if (v.no) s.no++; if (v.ignoto) s.ignoto++;
+      if (v.no) s.no++;
       if (v.conosco) s.conosce.push(r.nome);
-      if (v.perche && !tq) s.perche.push([r.nome, v.perche, false]);
     }
     return s; });
 }
@@ -1480,6 +1587,9 @@ function barre(c, tot, etich){
   return `<table>${e.map(([k,v])=>`<tr><td>${esc(etich?etich(k):k)}</td><td class="n">${v}</td><td style="width:40%"><span class="barra" style="width:${Math.round(100*v/Math.max(1,tot))}%"></span></td></tr>`).join('')}</table>`;
 }
 const etichettaOpz = d => k => { const o = (d.opz||[]).map(kv).find(x=>x[0]===k); return o ? o[1] : k; };
+const media = (vals, sx, dx) => { const v = vals.filter(x=>typeof x==='number');
+  return v.length ? `Media ${Math.round(v.reduce((a,b)=>a+b,0)/v.length)} su 100 (0 ${esc(sx)}, 100 ${esc(dx)}), ${v.length} risposte.` : 'Nessuna risposta.'; };
+const valutazione = p => p.f ? `${p.f}${p.fm!=null?`, facilità ${p.fm}%`:''}` : '';
 const nomi = a => a.length ? esc(a.join(', ')) : '<span class="tenue">nessuno</span>';
 
 function renderRegia(){
@@ -1518,7 +1628,7 @@ function renderRegia(){
    <p>Scelti soprattutto come spostamento: ${nSposta} di ${P.scelti.length}. Accessibilità da verificare: ${daVerificare}.</p>
    ${fuori.size?`<p class="avviso">${fuori.size} luoghi votati non sono più nella lista (nomi cambiati dopo l’invio?).</p>`:''}
    <div class="tabella"><table><tr><th>Luogo</th><th>Entra per</th><th>Ci sta</th><th>Mi sposta</th><th>In tasca</th><th>Contatti</th><th>Strati</th></tr>
-   ${P.scelti.map(s=>`<tr><td><strong>${esc(s.p.n)}</strong><br><span class="tenue piccolo">${esc(s.p.z)}${s.p.a?', in piano':''}${s.p.x?'<br>'+esc(s.p.x):''}</span></td><td>${P.motivo[s.p.id]}</td>
+   ${P.scelti.map(s=>`<tr><td><strong>${esc(s.p.n)}</strong><br><span class="tenue piccolo">${esc(s.p.z)}${s.p.a?', in piano':''}<br>Valutazione: ${esc(valutazione(s.p))}${s.p.x?'<br>'+esc(s.p.x):''}</span></td><td>${P.motivo[s.p.id]}</td>
      <td>${nomi(s.ciSta)}</td><td>${nomi(s.miSposta)}</td><td><strong>${esc(s.tasca.join(', '))}</strong></td><td>${esc(s.conosce.join(', '))}</td>
      <td class="piccolo">${s.p.l.map(l=>`<span class="punto" style="background:${STRATI[l].col}" title="${esc(STRATI[l].t)}"></span>${esc(STRATI[l].t)}`).join('<br>')}</td></tr>
      ${s.perche.length?`<tr><td></td><td colspan="6" class="piccolo">${s.perche.map(([who,txt,tq])=>`<span class="tenue">${esc(who)}${tq?' (in tasca)':''}:</span> ${esc(txt)}`).join('<br>')}</td></tr>`:''}`).join('')}</table></div>
@@ -1528,29 +1638,32 @@ function renderRegia(){
    <div class="riga"><button class="btn" data-r="csv">Scarica CSV</button><button class="btn vuoto" data-r="copia">Copia la mappa come testo</button></div></section>
 
   <section><h2>Tutti i luoghi</h2><p class="piccolo tenue">Escludi i luoghi non disponibili; fissa quelli già confermati. Punti = 3 per tasca + 2 per sì + 0,5 per contatto + 0,3 per la vicinanza calcolata di chi non l’ha ascoltato + il peso del filo.</p>
-   <div class="tabella"><table><tr><th>Luogo</th><th class="n">Punti</th><th class="n">Ci sta</th><th class="n">Mi sposta</th><th class="n">Tasca</th><th class="n">No</th><th class="n">Non conosciuto</th><th class="n">Implicito</th><th>Escludi</th><th>Fissa</th></tr>
-   ${P.st.slice().sort((a,b)=>b.punteggio-a.punteggio).map(s=>`<tr${P.scelti.includes(s)?' style="font-weight:700"':''}><td>${esc(s.p.n)}</td><td class="n">${s.punteggio.toFixed(1)}</td>
-     <td class="n">${s.ciSta.length}</td><td class="n">${s.miSposta.length}</td><td class="n">${s.tasca.length}</td><td class="n">${s.no}</td><td class="n">${s.ignoto}</td><td class="n">${s.implicito.toFixed(1)}</td>
+   <div class="tabella"><table><tr><th>Luogo</th><th>Valutazione</th><th class="n">Punti</th><th class="n">Ci sta</th><th class="n">Mi sposta</th><th class="n">Tasca</th><th class="n">No</th><th class="n">Implicito</th><th>Escludi</th><th>Fissa</th></tr>
+   ${P.st.slice().sort((a,b)=>b.punteggio-a.punteggio).map(s=>`<tr${P.scelti.includes(s)?' style="font-weight:700"':''}><td>${esc(s.p.n)}</td><td class="piccolo">${esc(valutazione(s.p))}</td><td class="n">${s.punteggio.toFixed(1)}</td>
+     <td class="n">${s.ciSta.length}</td><td class="n">${s.miSposta.length}</td><td class="n">${s.tasca.length}</td><td class="n">${s.no}</td><td class="n">${s.implicito.toFixed(1)}</td>
      <td><input type="checkbox" aria-label="Escludi ${esc(s.p.n)}" data-rx="escludi" data-l="${s.p.id}" ${R.escludi.has(s.p.id)?'checked':''}></td>
      <td><input type="checkbox" aria-label="Fissa ${esc(s.p.n)}" data-rx="fissa" data-l="${s.p.id}" ${R.fissa.has(s.p.id)?'checked':''}></td></tr>`).join('')}</table></div></section>
+
+  <section><h2>Piazze e giardini: chi è interessato</h2>
+   <div class="tabella"><table><tr><th>Spazio</th><th>Zona</th><th class="n">Interessati</th><th>Chi</th></tr>
+   ${SPAZI_PUBBLICI.map(p=>({p, chi:R.risposte.filter(r=>(r.piazze||[]).includes(p.id)).map(r=>r.nome)})).sort((a,b)=>b.chi.length-a.chi.length)
+     .map(({p,chi})=>`<tr><td>${esc(p.n)}</td><td>${esc(p.z)}</td><td class="n">${chi.length}</td><td>${nomi(chi)}</td></tr>`).join('')}</table></div></section>
 
   <section><h2>La città che vogliono</h2><div class="griglia2">
    <div><h3>Il filo</h3>${barre(conteggi(r=>r.citta?.filo), n, k=>STRATI[k]?.t||k)}</div>
    <div><h3>Tramvia</h3>${barre(conteggi(r=>r.citta?.tramvia), n)}
-     <h3>Raccolta o sparsa</h3><p>Media ${Math.round(R.risposte.reduce((a,r)=>a+(r.citta?.dispersione??50),0)/n)} su 100 (0 raccolta, 100 sparsa).</p></div>
+     <h3>Raccolta o sparsa</h3><p>${media(R.risposte.map(r=>r.citta?.dispersione), 'raccolta', 'sparsa')}</p></div>
    <div><h3>Strati degli altri luoghi</h3>${barre(conteggi(r=>(r.altri||[]).flatMap(a=>a.strati||[])), n, k=>STRATI[k]?.t||k)}</div></div></section>
   ${sezioneAltri()}
 
   <section><h2>Profilo del festival</h2><div class="griglia2">
-   ${CARTE.flatMap(c=>c.domande.filter(d=>d.tipo!=='testo').map(d=>{
-     if (d.tipo==='scala'){ const v = R.risposte.map(r=>r.carte?.[c.id]?.r?.[d.id]).filter(x=>typeof x==='number');
-       return `<div><h3>${esc(c.titolo)}</h3><p class="domanda">${esc(d.testo)}</p><p>${v.length?`Media ${Math.round(v.reduce((a,b)=>a+b,0)/v.length)} (0 ${esc(d.sx)}, 100 ${esc(d.dx)}).`:'Nessuna risposta.'}</p></div>`; }
+   ${CARTE.flatMap(c=>c.domande.map(d=>{
+     if (d.tipo==='scala') return `<div><h3>${esc(c.titolo)}</h3><p class="domanda">${esc(d.testo)}</p><p>${media(R.risposte.map(r=>r.carte?.[c.id]?.r?.[d.id]), d.sx, d.dx)}</p></div>`;
      return `<div><h3>${esc(c.titolo)}</h3><p class="domanda">${esc(d.testo)}</p>${barre(conteggi(r=>r.carte?.[c.id]?.r?.[d.id]), n, etichettaOpz(d))}</div>`;
    })).join('')}</div></section>
 
-  <section><h2>Note</h2>${R.risposte.map(r=>`<details style="margin-top:.5rem"><summary><strong>${esc(r.nome)}</strong> <span class="tenue piccolo">modo ${esc(r.modo||'')}</span></summary>
-    ${CARTE.map(c=>{ const x = r.carte?.[c.id]; if (!x) return ''; const nota = x.r?.nota;
-      return (x.stato==='aperta'||nota) ? `<p><span class="etichetta">${esc(c.titolo)}</span> ${x.stato==='aperta'?'<em>ancora aperta</em> ':''}${nota?esc(nota):''}</p>` : ''; }).join('')}
+  <section><h2>Carte aperte e tasche</h2>${R.risposte.map(r=>`<details style="margin-top:.5rem"><summary><strong>${esc(r.nome)}</strong></summary>
+    ${CARTE.filter(c=>r.carte?.[c.id]?.stato==='aperta').map(c=>`<p><span class="etichetta">${esc(c.titolo)}</span> <em>ancora aperta</em></p>`).join('')}
     ${(r.tasca||[]).map(t=>`<p><span class="etichetta">in tasca</span> <strong>${esc(LUOGO[t.id]?.n||t.id)}</strong>: ${esc(t.perche||'')}</p>`).join('')}</details>`).join('')}</section>`;
   app.innerHTML = h; montaDrop(); montaMappaRegia();
 }
@@ -1586,7 +1699,7 @@ function csvAltri(){
 function montaDrop(){
   const dz = document.getElementById('drop'), fi = document.getElementById('file');
   const leggi = async files => { const arr = []; R.msg = '';
-    for (const f of files){ try{ const j = JSON.parse(await f.text()); if (j.v!==3) R.msg = `${f.name}: versione del questionario diversa, ignorato.`; arr.push(j); }catch(e){ R.msg = `File non leggibile: ${f.name}`; } }
+    for (const f of files){ try{ const j = JSON.parse(await f.text()); if (j.v!==8) R.msg = `${f.name}: versione del questionario diversa, ignorato.`; arr.push(j); }catch(e){ R.msg = `File non leggibile: ${f.name}`; } }
     aggiungiRisposte(arr); R.linea = null; renderRegia(); };
   if (dz){ dz.addEventListener('dragover', e=>{e.preventDefault(); dz.classList.add('sopra');}); dz.addEventListener('dragleave', ()=>dz.classList.remove('sopra'));
     dz.addEventListener('drop', e=>{ e.preventDefault(); leggi([...e.dataTransfer.files]); }); }
@@ -1604,13 +1717,13 @@ function datiProva(){
     mescola(LUOGHI).slice(0, Math.min(LUOGHI.length, 20+Math.floor(Math.random()*30))).forEach(p=>{
       const vi = vicinanza(pr,p)??0, sp = spostamento(pr,p)??0, x = Math.random();
       const ciSta = x < vi*0.55, miSposta = Math.random() < sp*0.45;
-      luoghi[p.id] = (ciSta||miSposta) ? {ciSta, miSposta, no:false, ignoto:false, perche:'', conosco:Math.random()<.1}
-        : Math.random()<.8 ? {no:true} : {ignoto:true}; });
+      if (ciSta||miSposta) luoghi[p.id] = {ciSta, miSposta, no:false, conosco:Math.random()<.1};
+      else if (Math.random()<.6) luoghi[p.id] = {ciSta:false, miSposta:false, no:true, conosco:false}; });
     const positivi = Object.keys(luoghi).filter(id=>luoghi[id].ciSta||luoghi[id].miSposta);
     const nomiA = ['Riva sotto la pescaia','Ex fabbrica in disuso','Cortile di un condominio','Sottopasso della stazione'];
     const altri = Array.from({length:Math.floor(Math.random()*4)}, (_,j)=>({lat: j===3?null:+(43.755+Math.random()*0.04).toFixed(6), lng: j===3?null:+(11.21+Math.random()*0.08).toFixed(6),
       nome:nomiA[j], tipo:['fiume','abbandonato','insolito','pubblico'][j], strati:pick(Object.keys(STRATI),2), perche:'(prova)', chiedere:['si','no','nessuno'][j%3]}));
-    return {v:3, nome:nome+' (prova)', altri, quando:new Date().toISOString(), modo:'coperte', carte, luoghi,
+    return {v:8, nome:nome+' (prova)', altri, piazze:pick(SPAZI_PUBBLICI.map(p=>p.id), Math.floor(Math.random()*5)), quando:new Date().toISOString(), carte, luoghi,
       tasca: pick(positivi, Math.min(3, positivi.length)).map(id=>({id, perche:'(prova)'})),
       citta:{filo:pick(Object.keys(STRATI),2), dispersione:Math.round(Math.random()*100), tramvia:['Sì','Forse','No'][Math.floor(Math.random()*3)]}};
   });
@@ -1620,8 +1733,8 @@ function testoMappa(P){
 }
 function csvMappa(P){
   const q = v => `"${String(v??'').replace(/"/g,'""')}"`;
-  return ['luogo,zona,tipo,strati,premessa,link,accesso_in_piano,entra_per,ci_sta,mi_sposta,in_tasca,contatti,nota']
-    .concat(P.scelti.map(s=>[s.p.n,s.p.z,TIPI[s.p.t],s.p.l.map(l=>STRATI[l].t).join('; '),s.p.p,s.p.u,s.p.a?'sì':'da verificare',P.motivo[s.p.id],s.ciSta.join('; '),s.miSposta.join('; '),s.tasca.join('; '),s.conosce.join('; '),s.p.x||''].map(q).join(','))).join('\n');
+  return ['luogo,valutazione_interna,zona,tipo,strati,premessa,link,accesso_in_piano,entra_per,ci_sta,mi_sposta,in_tasca,contatti,nota']
+    .concat(P.scelti.map(s=>[s.p.n,valutazione(s.p),s.p.z,TIPI[s.p.t],s.p.l.map(l=>STRATI[l].t).join('; '),s.p.p,s.p.u,s.p.a?'sì':'da verificare',P.motivo[s.p.id],s.ciSta.join('; '),s.miSposta.join('; '),s.tasca.join('; '),s.conosce.join('; '),s.p.x||''].map(q).join(','))).join('\n');
 }
 if (REGIA){
   document.addEventListener('click', async e=>{
