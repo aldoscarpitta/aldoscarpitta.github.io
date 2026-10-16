@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-16T17:59:05.364Z",
+  "updated": "2026-10-16T17:59:14.622Z",
   "calls": [
     {
       "id": 4,
@@ -387,6 +387,21 @@
       "deadline": "2026-12-30",
       "status": "curious",
       "url": "https://gnamamidakisfoundation.org/en/vraveio-technis/",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1792173554621,
+      "title": "Call for Audio and Audiovisual works | The Night With",
+      "org": "",
+      "deadline": "2027-01-08",
+      "status": "curious",
+      "url": "https://thenightwith.com/2026/09/24/call-for-audio-and-audiovisual-works/",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
