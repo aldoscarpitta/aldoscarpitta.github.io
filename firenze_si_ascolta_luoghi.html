@@ -829,8 +829,8 @@ label.campo{display:block;font-weight:700;margin:.8rem 0 .35rem}
 .luogo .nome{font-family:var(--f-display);font-size:clamp(1.3rem,5.5vw,1.7rem);font-weight:800;line-height:1.05;margin:.1rem 0 .3rem}
 .luogo .premessa{margin:.6rem 0 .7rem}
 .luogo[data-verso]::after{position:absolute;top:.7rem;font-weight:800;border-radius:6px;padding:.1rem .5rem;border:2px solid;background:var(--carta2)}
-.luogo[data-verso=si]{border-color:var(--ok)} .luogo[data-verso=si]::after{content:'Ci sta';color:var(--ok);left:.8rem}
-.luogo[data-verso=no]{opacity:.6} .luogo[data-verso=no]::after{content:'Non per me';color:var(--tenue);right:.8rem}
+.luogo[data-verso=si]{border-color:var(--ok)} .luogo[data-verso=si]::after{content:'Come lavoro oggi';color:var(--ok);left:.8rem}
+.luogo[data-verso=no]{opacity:.6} .luogo[data-verso=no]::after{content:'Nessuna delle due';color:var(--tenue);right:.8rem}
 .luogo[data-verso=interessa]{border-color:var(--ok)} .luogo[data-verso=interessa]::after{content:'Mi interessa';color:var(--ok);left:.8rem}
 .luogo[data-verso=togli]{opacity:.6} .luogo[data-verso=togli]::after{content:'Non mi interessa';color:var(--tenue);right:.8rem}
 .voti.uno{grid-template-columns:1fr}
@@ -839,7 +839,8 @@ label.campo{display:block;font-weight:700;margin:.8rem 0 .35rem}
 .strati{display:flex;flex-wrap:wrap;gap:.3rem .8rem;font-size:.88rem;margin:.2rem 0 .6rem}
 .badge{display:inline-block;border-radius:6px;padding:.1rem .5rem;font-size:.85rem;font-weight:700;margin:0 .3rem .3rem 0;border:2px solid}
 .badge.vicino{color:var(--vicino);border-color:var(--vicino)} .badge.sposta{color:var(--sposta);border-color:var(--sposta)}
-.voti{display:grid;grid-template-columns:repeat(3,1fr);gap:.45rem;margin:.9rem 0 .4rem}
+.voti{display:grid;grid-template-columns:repeat(2,1fr);gap:.45rem;margin:.3rem 0 .4rem}
+.voti .chip.nessuna{grid-column:1 / -1;min-height:44px;font-weight:400}
 .voti .chip{text-align:center;display:flex;align-items:center;justify-content:center;font-weight:700;border-radius:10px;min-height:52px;padding:.4rem .3rem}
 .check{display:flex;gap:.5rem;align-items:center;min-height:44px;cursor:pointer}
 .check input{width:22px;height:22px;accent-color:var(--inchiostro)}
@@ -958,9 +959,9 @@ const CARTE = [
    {id:'quanti', tipo:'uno', testo:'Quante persone alla volta?', opz:[['1','Una'],['8','Da 2 a 8'],['25','Da 9 a 25'],['tutti','Pubblico aperto, chi passa']], lega:true},
    {id:'con', tipo:'multi', testo:'Con chi ti piacerebbe lavorare?', opz:CON.map(c=>[c[0],c[1]]), lega:true},
    {id:'fuori', tipo:'multi', testo:'Chi lascia fuori, oggi, la tua pratica?', opz:['Chi non sente','Chi non vede','Chi non cammina o non sta in piedi a lungo','Chi non parla italiano','Chi sta male nella folla','Non lo so ancora']}]},
- {id:'ricerca', titolo:'La tua ricerca', ancora:'Com’è oggi, e dove potrebbe andare.', domande:[
+ {id:'ricerca', titolo:'La tua ricerca', ancora:'Com’è oggi, e quali direzioni potrebbe esplorare.', domande:[
    {id:'oggi', tipo:'multi', testo:'Su che cosa lavora oggi la tua pratica?', opz:opzStrati, lega:true},
-   {id:'verso', tipo:'multi', testo:'Verso dove vorresti spostarla?', opz:opzStrati, lega:true}]},
+   {id:'verso', tipo:'multi', testo:'Quali nuove direzioni vorresti esplorare?', opz:opzStrati, lega:true}]},
  {id:'tempo', titolo:'Il tempo', ancora:'Si entra, si resta, si esce.', domande:[
    {id:'forma', tipo:'uno', testo:'Che forma ha il tempo della tua pratica?', opz:['Un appuntamento, con inizio e fine','Durazionale: si entra e si esce','Una consegna, poi il tempo è di chi partecipa']},
    {id:'durata', tipo:'uno', testo:'Quanto dura per chi la attraversa?', opz:['Meno di 15 minuti','15–45 minuti','45–90 minuti','Mezza giornata o più']},
@@ -1070,7 +1071,7 @@ function vai(passo){
 }
 
 /* ordine dei luoghi: quelli già ascoltati restano in testa; poi, a turno,
-   il più vicino alla pratica, quello che più la sposta, uno a caso */
+   il più vicino a come lavora oggi, quello più verso nuove direzioni, uno a caso */
 function costruisciOrdine(){
   const pr = profilo(S.carte), firma = JSON.stringify(pr);
   if (S.ordineLuoghi.length && S.firma === firma) return;       // non rimescolare se la pratica non è cambiata
@@ -1190,11 +1191,11 @@ function aggiornaMazzo(cid){
 }
 function badgeHTML(p){
   const pr = profilo(S.carte), vi = vicinanza(pr,p), sp = spostamento(pr,p); let h = '';
-  if (vi!==null && vi>=SOGLIA_VICINO) h += `<span class="badge vicino">Vicino a come lavori</span>`;
-  if (sp!==null && sp>=SOGLIA_SPOSTA) h += `<span class="badge sposta">Verso dove vuoi andare</span>`;
+  if (vi!==null && vi>=SOGLIA_VICINO) h += `<span class="badge vicino">Vicino a come lavori oggi</span>`;
+  if (sp!==null && sp>=SOGLIA_SPOSTA) h += `<span class="badge sposta">Verso nuove direzioni</span>`;
   return h ? `<div>${h}</div>` : '';
 }
-/* modo 'voto': luoghi da contattare (ci sta / mi sposta / non per me). modo 'interesse': piazze e giardini (mi interessa) */
+/* modo 'voto': luoghi da contattare (come lavoro oggi / esplorare nuove direzioni / nessuna delle due). modo 'interesse': piazze e giardini (mi interessa) */
 function schedaLuogo(p, modo){
   const v = modo==='voto' ? voto(p.id) : {}, interessa = modo==='interesse' && !!S.piazze[p.id];
   return `<article class="luogo" data-l="${p.id}" aria-label="${esc(p.n)}">
@@ -1203,10 +1204,11 @@ function schedaLuogo(p, modo){
     <p class="premessa">${esc(p.p)}</p>
     <div class="strati">${p.l.map(puntoStrato).join('')}</div>
     <p class="piccolo tenue">${esc(SPAZIO[p.s]||'')}, ${esc(CAPIENZA[p.c]||'')} (stima).${p.u?` <a href="${esc(p.u)}" target="_blank" rel="noopener">Apri sulla mappa</a>`:''}</p>
-    ${modo==='voto'?`<div class="voti" role="group" aria-label="La tua pratica e ${esc(p.n)}">
-     <button class="chip" aria-pressed="${!!v.ciSta}" data-act="voto" data-l="${p.id}" data-v="ciSta">Ci sta</button>
-     <button class="chip" aria-pressed="${!!v.miSposta}" data-act="voto" data-l="${p.id}" data-v="miSposta">Mi sposta</button>
-     <button class="chip" aria-pressed="${!!v.no}" data-act="voto" data-l="${p.id}" data-v="no">Non per me</button></div>
+    ${modo==='voto'?`<p class="domanda" id="st-${p.id}" style="margin-top:.8rem">Questo luogo è per… <span class="piccolo tenue" style="font-weight:400">(anche tutte e due)</span></p>
+    <div class="voti" role="group" aria-labelledby="st-${p.id}">
+     <button class="chip" aria-pressed="${!!v.ciSta}" data-act="voto" data-l="${p.id}" data-v="ciSta">come lavoro oggi</button>
+     <button class="chip" aria-pressed="${!!v.miSposta}" data-act="voto" data-l="${p.id}" data-v="miSposta">esplorare nuove direzioni</button>
+     <button class="chip nessuna" aria-pressed="${!!v.no}" data-act="voto" data-l="${p.id}" data-v="no">nessuna delle due</button></div>
     ${positivo(v)?`<label class="check"><input type="checkbox" data-in="conosco" data-l="${p.id}" ${v.conosco?'checked':''}> Conosco qualcuno lì</label>`:''}`
     :`<div class="voti uno"><button class="chip" aria-pressed="${interessa}" data-act="interesse" data-l="${p.id}">${interessa?'Mi interessa':'Mi interessa?'}</button></div>`}
   </article>`;
@@ -1215,15 +1217,15 @@ function vLuoghi(){
   if (!LUOGHI.length) return `${cammino()}<div class="avviso">La lista dei luoghi è vuota.</div><div class="riga"><button class="btn" data-act="a-piazze">Avanti</button></div>`;
   const n = LUOGHI.filter(p=>ascoltato(voto(p.id))).length, np = LUOGHI.filter(p=>positivo(voto(p.id))).length;
   return `${cammino()}<h2>I luoghi</h2>
-  <p>Per ogni luogo: la tua pratica ci sta, o ti sposterebbe altrove? Se un luogo non ti dice niente, salta. In cima quelli più vicini alla tua pratica o a dove vuoi portarla.</p>
-  <p class="piccolo tenue">Scorri un luogo verso destra: ci sta. Verso sinistra: non per me.</p>
-  <div class="barra-fissa" role="status">Con un sì: ${np} · Guardati: ${n} di ${LUOGHI.length}</div>
+  <p>Per ogni luogo: è per come lavori oggi, per esplorare nuove direzioni, o per nessuna delle due? Possono valere tutte e due. Se un luogo non ti dice niente, salta. In cima quelli più vicini a come lavori o alle direzioni che vuoi esplorare.</p>
+  <p class="piccolo tenue">Scorri un luogo verso destra: come lavoro oggi. Verso sinistra: nessuna delle due.</p>
+  <div class="barra-fissa" role="status">Scelti: ${np} · Guardati: ${n} di ${LUOGHI.length}</div>
   <ul class="lista-luoghi">${S.ordineLuoghi.filter(id=>LUOGO[id]).map(id=>`<li>${schedaLuogo(LUOGO[id], 'voto')}</li>`).join('')}</ul>
   <div class="riga fine"><button class="btn vuoto" data-act="a-carte">Alle carte</button><button class="btn" data-act="a-tasca">Avanti</button></div>`;
 }
 function vTasca(){
   const pos = S.ordineLuoghi.filter(id=>LUOGO[id] && positivo(voto(id))).map(id=>LUOGO[id]);
-  if (!pos.length) return `${cammino()}<h2>Tre luoghi in tasca</h2><div class="avviso">Ancora nessun luogo con un sì: torna ai luoghi e segna almeno quelli che ti sposterebbero.</div>
+  if (!pos.length) return `${cammino()}<h2>Tre luoghi in tasca</h2><div class="avviso">Ancora nessun luogo scelto: torna ai luoghi e segna almeno quelli dove esploreresti nuove direzioni.</div>
     <div class="riga"><button class="btn" data-act="a-luoghi">Ai luoghi</button></div>`;
   const pieno = S.tasca.length >= 3, fuori = pos.filter(p=>!S.tasca.some(t=>t.id===p.id));
   const tasca = i => { const t = S.tasca[i]; if (!t) return `<div class="tasca vuota">Tasca ${i+1}</div>`;
@@ -1231,12 +1233,12 @@ function vTasca(){
     return `<div class="tasca piena"><div class="riga fine" style="margin:0"><strong>${esc(p.n)}</strong><button class="btn vuoto" data-act="tasca" data-l="${p.id}" aria-label="Togli ${esc(p.n)} dalla tasca">Togli</button></div>
       <label class="campo" for="tq-${p.id}">Perché lì, in una frase</label><textarea id="tq-${p.id}" data-in="tasca" data-l="${p.id}">${esc(t.perche||'')}</textarea></div>`; };
   return `${cammino()}<h2>Tre luoghi in tasca</h2>
-  <p>Tra i luoghi a cui hai detto sì, tienine tre: quelli per cui partiresti domani. Per ognuno, una frase: perché lì.</p>
+  <p>Tra i luoghi che hai scelto, tienine tre: quelli per cui partiresti domani. Per ognuno, una frase: perché lì.</p>
   <div class="tasche">${[0,1,2].map(tasca).join('')}</div>
-  <h3 class="gruppo">I tuoi sì (${pos.length})</h3>
+  <h3 class="gruppo">I luoghi che hai scelto (${pos.length})</h3>
   <p class="piccolo tenue">${pieno?'Tasche piene: togline uno per cambiare.':'Tocca un luogo per metterlo in tasca.'}</p>
   <div class="chips">${fuori.map(p=>{ const v = voto(p.id);
-    return `<button class="chip" data-act="tasca" data-l="${p.id}" ${pieno?'disabled':''}>${esc(p.n)} <span class="piccolo tenue">${v.ciSta&&v.miSposta?'ci sta, mi sposta':v.ciSta?'ci sta':'mi sposta'}</span></button>`; }).join('')}</div>
+    return `<button class="chip" data-act="tasca" data-l="${p.id}" ${pieno?'disabled':''}>${esc(p.n)} <span class="piccolo tenue">${v.ciSta&&v.miSposta?'oggi e nuove direzioni':v.ciSta?'come lavoro oggi':'nuove direzioni'}</span></button>`; }).join('')}</div>
   <div class="riga fine"><button class="btn vuoto" data-act="a-luoghi">Ai luoghi</button><button class="btn" data-act="a-piazze">Avanti</button></div>`;
 }
 function vPiazze(){
@@ -1264,7 +1266,7 @@ function vCitta(){
 function vInvio(){
   const nC = CARTE.filter(c=>statoCarta(c.id)==='fatta').length, nL = LUOGHI.filter(p=>ascoltato(voto(p.id))).length, nP = LUOGHI.filter(p=>positivo(voto(p.id))).length;
   return `${cammino()}<h2>Invia</h2>
-  <p>${esc(S.nome)}. Carte: ${nC} su ${CARTE.length}. Luoghi ascoltati: ${nL} su ${LUOGHI.length}, con un sì: ${nP}. In tasca: ${S.tasca.length}. Altri luoghi proposti: ${S.altri.filter(altroPieno).length}.</p>
+  <p>${esc(S.nome)}. Carte: ${nC} su ${CARTE.length}. Luoghi guardati: ${nL} su ${LUOGHI.length}, scelti: ${nP}. In tasca: ${S.tasca.length}. Altri luoghi proposti: ${S.altri.filter(altroPieno).length}.</p>
   <div id="esito">${S.inviato?`<div class="esito-ok">Arrivato. Le risposte di tutte e tutti comporranno la mappa; la guardiamo insieme.</div>`:''}</div>
   <div class="riga"><button class="btn" data-act="invia" id="b-invia">${S.inviato?'Invia di nuovo':'Invia'}</button><button class="btn vuoto" data-act="a-citta">Indietro</button></div>
   <div id="riserva" class="${SCRIPT_URL?'nascosto':''}">
@@ -1358,7 +1360,7 @@ function vota(id, k){
   salva(); const y = window.scrollY; render(); window.scrollTo({top:y});
   const el = document.querySelector(`.luogo[data-l="${id}"]`); el?.classList.add('appena');
 }
-/* gesto sulle schede: nei luoghi, a destra "ci sta" e a sinistra "non per me"; nelle piazze, a destra "mi interessa" e a sinistra lo toglie */
+/* gesto sulle schede: nei luoghi, a destra "come lavoro oggi" e a sinistra "nessuna delle due"; nelle piazze, a destra "mi interessa" e a sinistra lo toglie */
 const imposta = (id, si) => { const y = window.scrollY; S.piazze[id] = si; if (!si) delete S.piazze[id]; salva(); render(); window.scrollTo({top:y});
   if (si) document.querySelector(`.luogo[data-l="${id}"]`)?.classList.add('appena'); };
 let gesto = null;
@@ -1529,7 +1531,7 @@ function statLuoghi(){
    1. ognuno ha nella mappa almeno uno dei luoghi che ha messo in tasca (o, se non ne ha, un suo sì)
    2. assegnabilità: esiste un modo di dare a ciascuno un luogo diverso tra i suoi sì
    3. ognuno ha almeno K sì nella mappa
-   4. quota "mi sposterebbe": almeno un terzo dei luoghi è stato scelto soprattutto come spostamento
+   4. quota "nuove direzioni": almeno un terzo dei luoghi è stato scelto soprattutto per esplorare nuove direzioni
    5. riempimento per punteggio
    Il calcolo propone; la regia esclude, fissa e decide. */
 function proponi(){
@@ -1574,7 +1576,7 @@ function proponi(){
   // 4
   if (R.quotaSposta){ const quota = Math.ceil(R.N/3);
     for (const s of disp.filter(s=>!dentro(s.p.id) && s.sposta).sort((a,b)=>b.punteggio-a.punteggio)){
-      if (scelti.filter(x=>x.sposta).length >= quota || scelti.length >= R.N) break; prendi(s,'spostamento'); } }
+      if (scelti.filter(x=>x.sposta).length >= quota || scelti.length >= R.N) break; prendi(s,'nuove direzioni'); } }
   // 5
   for (const s of disp.filter(s=>!dentro(s.p.id) && s.pos.length).sort((a,b)=>b.punteggio-a.punteggio)){ if (scelti.length >= R.N) break; prendi(s,'desiderio'); }
   const copertura = Object.fromEntries(nomi.map(n=>[n,{pos:scelti.filter(s=>pos(n,s.p.id)).map(s=>s.p.n), tasca:scelti.filter(s=>inTasca(n,s.p.id)).map(s=>s.p.n)}]));
@@ -1617,7 +1619,7 @@ function renderRegia(){
     <div class="scala"><label class="domanda" for="pN" style="display:block">Luoghi nella mappa: ${R.N}</label><input type="range" id="pN" min="${Math.min(9,MAX_LISTA)}" max="${MAX_LISTA}" value="${R.N}" data-rp="N"></div>
     <div class="scala"><label class="domanda" for="pK" style="display:block">Sì garantiti a ciascuno: ${R.K}</label><input type="range" id="pK" min="1" max="3" value="${R.K}" data-rp="K"></div>
     <div class="scala"><label class="domanda" for="pL" style="display:block">Peso del filo: ${R.pesoLinea.toFixed(1)}</label><input type="range" id="pL" min="0" max="3" step="0.5" value="${R.pesoLinea}" data-rp="pesoLinea"></div></div>
-   <label class="check"><input type="checkbox" data-rq="quota" ${R.quotaSposta?'checked':''}> Almeno un terzo della mappa scelta come spostamento</label>
+   <label class="check"><input type="checkbox" data-rq="quota" ${R.quotaSposta?'checked':''}> Almeno un terzo della mappa scelta per esplorare nuove direzioni</label>
    <p class="domanda">Il filo del festival (preselezionati i due strati più votati)</p>
    <div class="chips">${Object.entries(STRATI).map(([k,s])=>`<button class="chip" aria-pressed="${(R.linea||[]).includes(k)}" data-r="linea" data-v="${k}"><span class="punto" style="background:${s.col}"></span>${esc(s.t)}</button>`).join('')}</div></section>
 
@@ -1625,9 +1627,9 @@ function renderRegia(){
    ${R.risposte.length > LUOGHI.length - R.escludi.size ? `<p class="avviso">Più persone che luoghi disponibili: un luogo a testa è impossibile.</p>`:''}
    ${P.senza.length?`<p class="avviso">Senza un luogo assegnabile tra i propri sì: ${esc(P.senza.join(', '))}. Alza il numero di luoghi, togli un’esclusione o parlatene.</p>`
      :`<p class="esito-ok">Esiste almeno un modo di dare a ciascuno un luogo diverso tra i propri sì.</p>`}
-   <p>Scelti soprattutto come spostamento: ${nSposta} di ${P.scelti.length}. Accessibilità da verificare: ${daVerificare}.</p>
+   <p>Scelti soprattutto per nuove direzioni: ${nSposta} di ${P.scelti.length}. Accessibilità da verificare: ${daVerificare}.</p>
    ${fuori.size?`<p class="avviso">${fuori.size} luoghi votati non sono più nella lista (nomi cambiati dopo l’invio?).</p>`:''}
-   <div class="tabella"><table><tr><th>Luogo</th><th>Entra per</th><th>Ci sta</th><th>Mi sposta</th><th>In tasca</th><th>Contatti</th><th>Strati</th></tr>
+   <div class="tabella"><table><tr><th>Luogo</th><th>Entra per</th><th>Come lavora oggi</th><th>Nuove direzioni</th><th>In tasca</th><th>Contatti</th><th>Strati</th></tr>
    ${P.scelti.map(s=>`<tr><td><strong>${esc(s.p.n)}</strong><br><span class="tenue piccolo">${esc(s.p.z)}${s.p.a?', in piano':''}<br>Valutazione: ${esc(valutazione(s.p))}${s.p.x?'<br>'+esc(s.p.x):''}</span></td><td>${P.motivo[s.p.id]}</td>
      <td>${nomi(s.ciSta)}</td><td>${nomi(s.miSposta)}</td><td><strong>${esc(s.tasca.join(', '))}</strong></td><td>${esc(s.conosce.join(', '))}</td>
      <td class="piccolo">${s.p.l.map(l=>`<span class="punto" style="background:${STRATI[l].col}" title="${esc(STRATI[l].t)}"></span>${esc(STRATI[l].t)}`).join('<br>')}</td></tr>
@@ -1638,7 +1640,7 @@ function renderRegia(){
    <div class="riga"><button class="btn" data-r="csv">Scarica CSV</button><button class="btn vuoto" data-r="copia">Copia la mappa come testo</button></div></section>
 
   <section><h2>Tutti i luoghi</h2><p class="piccolo tenue">Escludi i luoghi non disponibili; fissa quelli già confermati. Punti = 3 per tasca + 2 per sì + 0,5 per contatto + 0,3 per la vicinanza calcolata di chi non l’ha ascoltato + il peso del filo.</p>
-   <div class="tabella"><table><tr><th>Luogo</th><th>Valutazione</th><th class="n">Punti</th><th class="n">Ci sta</th><th class="n">Mi sposta</th><th class="n">Tasca</th><th class="n">No</th><th class="n">Implicito</th><th>Escludi</th><th>Fissa</th></tr>
+   <div class="tabella"><table><tr><th>Luogo</th><th>Valutazione</th><th class="n">Punti</th><th class="n">Come lavora oggi</th><th class="n">Nuove direzioni</th><th class="n">Tasca</th><th class="n">No</th><th class="n">Implicito</th><th>Escludi</th><th>Fissa</th></tr>
    ${P.st.slice().sort((a,b)=>b.punteggio-a.punteggio).map(s=>`<tr${P.scelti.includes(s)?' style="font-weight:700"':''}><td>${esc(s.p.n)}</td><td class="piccolo">${esc(valutazione(s.p))}</td><td class="n">${s.punteggio.toFixed(1)}</td>
      <td class="n">${s.ciSta.length}</td><td class="n">${s.miSposta.length}</td><td class="n">${s.tasca.length}</td><td class="n">${s.no}</td><td class="n">${s.implicito.toFixed(1)}</td>
      <td><input type="checkbox" aria-label="Escludi ${esc(s.p.n)}" data-rx="escludi" data-l="${s.p.id}" ${R.escludi.has(s.p.id)?'checked':''}></td>
@@ -1729,11 +1731,11 @@ function datiProva(){
   });
 }
 function testoMappa(P){
-  return `Firenze si ascolta, proposta di mappa (${P.scelti.length} luoghi)\n\n` + P.scelti.map((s,i)=>`${i+1}. ${s.p.n} (${s.p.z})\n   ${s.p.p}\n   ci sta: ${s.ciSta.join(', ')||'-'}; mi sposta: ${s.miSposta.join(', ')||'-'}; in tasca: ${s.tasca.join(', ')||'-'}`).join('\n');
+  return `Firenze si ascolta, proposta di mappa (${P.scelti.length} luoghi)\n\n` + P.scelti.map((s,i)=>`${i+1}. ${s.p.n} (${s.p.z})\n   ${s.p.p}\n   come lavora oggi: ${s.ciSta.join(', ')||'-'}; nuove direzioni: ${s.miSposta.join(', ')||'-'}; in tasca: ${s.tasca.join(', ')||'-'}`).join('\n');
 }
 function csvMappa(P){
   const q = v => `"${String(v??'').replace(/"/g,'""')}"`;
-  return ['luogo,valutazione_interna,zona,tipo,strati,premessa,link,accesso_in_piano,entra_per,ci_sta,mi_sposta,in_tasca,contatti,nota']
+  return ['luogo,valutazione_interna,zona,tipo,strati,premessa,link,accesso_in_piano,entra_per,come_lavora_oggi,nuove_direzioni,in_tasca,contatti,nota']
     .concat(P.scelti.map(s=>[s.p.n,valutazione(s.p),s.p.z,TIPI[s.p.t],s.p.l.map(l=>STRATI[l].t).join('; '),s.p.p,s.p.u,s.p.a?'sì':'da verificare',P.motivo[s.p.id],s.ciSta.join('; '),s.miSposta.join('; '),s.tasca.join('; '),s.conosce.join('; '),s.p.x||''].map(q).join(','))).join('\n');
 }
 if (REGIA){
