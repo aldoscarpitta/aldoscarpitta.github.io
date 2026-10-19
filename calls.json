@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-19T10:20:34.191Z",
+  "updated": "2026-10-19T10:21:09.191Z",
   "calls": [
     {
       "id": 4,
@@ -163,25 +163,6 @@
       "dateApprox": true,
       "fit": "Fee-free, studio access only — no fee, no subsistence. Value is the studio, budget the travel separately.",
       "notes": "Fee-free, studio only. Closing date approximate — confirm when the cycle opens.",
-      "history": [],
-      "lockedUntil": null,
-      "lockNote": "",
-      "url": ""
-    },
-    {
-      "id": 1785542185029,
-      "title": "Roberto Cimetta Fund — mobility grant",
-      "org": "Roberto Cimetta Fund",
-      "deadline": "2026-10-26",
-      "status": "curious",
-      "recurs": {
-        "type": "rolling",
-        "pattern": "~6wk",
-        "intervalDays": 42
-      },
-      "dateApprox": true,
-      "fit": "Travel grant, Mediterranean-gated. Trapani/Palermo ties make the geographic criterion arguable.",
-      "notes": "Rolling ~6-week cycles. Mediterranean-gated.",
       "history": [],
       "lockedUntil": null,
       "lockNote": "",
