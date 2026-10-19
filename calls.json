@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-19T10:20:26.895Z",
+  "updated": "2026-10-19T10:20:30.074Z",
   "calls": [
     {
       "id": 4,
@@ -107,21 +107,6 @@
       "deadline": "2027-02-10",
       "status": "interested",
       "url": "https://on-the-move.org/news/eu-japan-fest-mobility-support-2026",
-      "notes": "",
-      "history": [],
-      "recurs": null,
-      "lockedUntil": null,
-      "lockNote": "",
-      "fit": "",
-      "dateApprox": false
-    },
-    {
-      "id": 1785150361921,
-      "title": "Perform Europe Open Call for Touring Performing Arts",
-      "org": "",
-      "deadline": "2026-10-21",
-      "status": "interested",
-      "url": "https://performeurope.eu/open-call/",
       "notes": "",
       "history": [],
       "recurs": null,
