@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-23T06:32:50.285Z",
+  "updated": "2026-10-23T06:33:13.906Z",
   "calls": [
     {
       "id": 4,
@@ -65,12 +65,16 @@
       "id": 1783025037394,
       "title": "Open Calls - Klang Festival",
       "org": "",
-      "deadline": "2026-10-22",
+      "deadline": "2026-11-15",
       "status": "curious",
       "url": "https://klang.dk/en/open-calls",
       "notes": "",
       "history": [],
-      "recurs": null,
+      "recurs": {
+        "type": "window",
+        "pattern": "",
+        "opensDate": null
+      },
       "lockedUntil": null,
       "lockNote": "",
       "fit": "",
