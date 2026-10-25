@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-25T17:20:48.656Z",
+  "updated": "2026-10-25T17:20:55.306Z",
   "calls": [
     {
       "id": 4,
@@ -357,6 +357,21 @@
       "deadline": "2026-12-31",
       "status": "curious",
       "url": "https://on-the-move.org/news/kiruna-2029-european-capital-culture-artistic-projects-and-early-ideas-sweden",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1792948855306,
+      "title": "Cultivamos Cultura: ‘Bom Dia’ OASis Residency 2027 (Portugal) | On the Move",
+      "org": "",
+      "deadline": "2026-10-30",
+      "status": "interested",
+      "url": "https://on-the-move.org/news/cultivamos-cultura-bom-dia-oasis-residency-2027-portugal",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
