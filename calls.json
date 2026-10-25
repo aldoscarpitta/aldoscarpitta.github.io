@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-25T17:22:45.807Z",
+  "updated": "2026-10-25T17:22:56.907Z",
   "calls": [
     {
       "id": 4,
@@ -387,6 +387,21 @@
       "deadline": "2026-11-09",
       "status": "interested",
       "url": "https://on-the-move.org/news/dresden-university-technologythe-schaufler-foundation-schaufler-labtu-dresden-2027-residency",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1792948976906,
+      "title": "European Media Art Platform Residency Programme 2027 | On the Move",
+      "org": "",
+      "deadline": "2026-11-06",
+      "status": "interested",
+      "url": "https://on-the-move.org/news/european-media-art-platform-residency-programme-2027",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
