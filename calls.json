@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-25T17:21:45.971Z",
+  "updated": "2026-10-25T17:21:54.498Z",
   "calls": [
     {
       "id": 4,
@@ -372,6 +372,21 @@
       "deadline": "2026-10-30",
       "status": "interested",
       "url": "https://on-the-move.org/news/cultivamos-cultura-bom-dia-oasis-residency-2027-portugal",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1792948914497,
+      "title": "Dresden University of Technology/The Schaufler Foundation: Schaufler Lab@TU Dresden 2027 Residency (Germany) | On the Move",
+      "org": "",
+      "deadline": "2026-11-09",
+      "status": "interested",
+      "url": "https://on-the-move.org/news/dresden-university-technologythe-schaufler-foundation-schaufler-labtu-dresden-2027-residency",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
