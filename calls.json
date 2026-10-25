@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-25T17:23:47.773Z",
+  "updated": "2026-10-25T17:24:02.658Z",
   "calls": [
     {
       "id": 4,
@@ -402,6 +402,21 @@
       "deadline": "2026-11-06",
       "status": "interested",
       "url": "https://on-the-move.org/news/european-media-art-platform-residency-programme-2027",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1792949042657,
+      "title": "Sixi Museum: Sixi International Artist-In-Residence 2027 (China) | On the Move",
+      "org": "",
+      "deadline": "2026-11-15",
+      "status": "interested",
+      "url": "https://on-the-move.org/news/sixi-museum-sixi-international-artist-residence-2027-china",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
