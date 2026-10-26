@@ -2,6 +2,18 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
+<script>
+/* Browsers allow the microphone only on secure pages. This site also answers
+   on plain http://, where the page loads normally but cannot record -- the
+   cause of "Questo browser non può registrare". Move to https before anything
+   else runs. Local test addresses are left alone. */
+(function(){
+  var h = location.hostname;
+  if (location.protocol === 'http:' && h !== 'localhost' && h !== '127.0.0.1' && !/\.local$/.test(h)) {
+    location.replace('https://' + location.host + location.pathname + location.search + location.hash);
+  }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <title>Aggiungi un suono</title>
@@ -220,7 +232,20 @@ function pickType(){
 $('#rec').addEventListener('click', async ()=>{
   if(media && media.state==='recording'){ media.stop(); return; }
   if(!navigator.mediaDevices || !window.MediaRecorder){
-    msg('Questo browser non può registrare. Usa «Scegli un suono».','bad'); return;
+    // Say what to do, not just that it failed. The usual causes are an app's
+    // built-in browser (Instagram, Facebook, some QR readers) or a page that
+    // was not opened from its web address.
+    const ua = navigator.userAgent || '';
+    const inApp = /Instagram|FBAN|FBAV|FB_IAB|Line\/|Snapchat|TikTok|MicroMessenger/i.test(ua);
+    if (DEBUG) {
+      msg('DEBUG: secure ' + window.isSecureContext + ', protocol ' + location.protocol
+        + ', mediaDevices ' + !!navigator.mediaDevices + ', MediaRecorder ' + !!window.MediaRecorder
+        + ' — ' + ua.slice(0, 90), 'bad'); return;
+    }
+    msg(inApp
+      ? 'Questa app non lascia registrare. Apri il link in Safari o Chrome, oppure usa «Scegli un suono».'
+      : 'Questo browser non può registrare qui. Apri il link in Safari o Chrome, oppure usa «Scegli un suono».',
+      'bad'); return;
   }
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
