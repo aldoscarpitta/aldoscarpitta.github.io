@@ -255,7 +255,7 @@ var MAX_VOICES = 32;
 var FILT_LP_TOP = 20000;              /* parked: transparent, and above Nyquist-clamp on any real device */
 var FILT_LP_BOT = 140;
 var FILT_HP_BOT = 20;                 /* parked */
-var FILT_HP_TOP = 1200;
+var FILT_HP_TOP = 1400;
 var FILT_TAPER_LP = 0.25;
 var FILT_TAPER_HP = 0.60;
 var FILT_Q = Math.SQRT1_2;            /* 0.7071, no resonant peak */
@@ -338,7 +338,7 @@ var FILT_HP_DB = [0,  0,  0.85, 3.11, 5.40, 8.53, 12.74, 15.68, 18.35];
    dB BELOW the centre peak, never above.
    --------------------------------------------------------------- */
 
-var REL_MIN = 0.3;                   /* audible length at full right, as a fraction of natural */
+var REL_MIN = 0.1;                   /* audible length at full right, as a fraction of natural */
 var REL_T45 = 1.490;                  /* seconds to -45 dB at playbackRate 1.0, measured */
 var REL_BYPASS = 0.995;               /* above this, no envelope at all */
 
@@ -389,7 +389,7 @@ var REL_MK_DB   = [2.94, 1.80, 1.06, 0.55, 0.28, 0.10, 0.01, 0,    0];
 
 var F_G3 = 196.0;                     /* the sample's fundamental after SAMPLE_TRIM */
 
-var SHIM_LEVEL = 0.07;                /* at full right, relative to the brick's own gain */
+var SHIM_LEVEL = 0.1;                /* at full right, relative to the brick's own gain */
 var SHIM_MULT = 8;                    /* three octaves up */
 var SHIM_BEAT_MIN = 1.2, SHIM_BEAT_MAX = 3.5;   /* Hz between the two sines */
 var SHIM_ATTACK = 0.025;
