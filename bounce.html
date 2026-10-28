@@ -346,6 +346,60 @@ var REL_BYPASS = 0.995;               /* above this, no envelope at all */
 var REL_MK_FRAC = [0.08, 0.11, 0.15, 0.21, 0.28, 0.39, 0.53, 0.74, 1.0];
 var REL_MK_DB   = [2.94, 1.80, 1.06, 0.55, 0.28, 0.10, 0.01, 0,    0];
 
+/* ---------------------------------------------------------------
+   LAYERS
+
+   Each strike off-centre adds one synthesised layer, its amplitude
+   proportional to slider distance (linear in t), taken at the strike:
+
+     right  SHIMMER  two sines three octaves above the brick's own
+                     fundamental, split by 1.2-3.5 Hz so they beat.
+                     Soft 25 ms attack, rings to -60 dB in 2.4 s --
+                     a halo over the now-dry strike.
+     left   SUB      one sine an octave below the fundamental, 6 ms
+                     attack, gone in 1.5 s -- a thump under the bell.
+
+   Both are OCTAVES of the fundamental and nothing else, so they stay
+   inside the G major collection and the wall remains consonant by
+   construction. (A fifth would not: on the Locrian row it lands on
+   C#.) The shimmer's beat rate is fixed per brick from its row and
+   column, not random, so a run of neighbouring bricks does not pulse
+   in lockstep and the game's random sequence is untouched.
+
+   The layers bypass the filter and its makeup and enter just before
+   the limiter, at MASTER_GAIN. They would pass the filter anyway (a
+   sub under a lowpass, a shimmer over a highpass), and keeping them
+   out of the +18 dB highpass makeup lets their level be set once.
+
+   LEVEL, measured on the same 12 swarm renders as the makeups
+   (layer RMS against the filtered sample, worst-case peak against
+   the centre peak):
+
+     slider   -100  -75   -50   -25    25    50    75   100
+     layer    -4.8  -7.9 -11.9 -18.4 -26.5 -15.9  -7.9  -5.5 dB
+     peak     +0.7  +0.1  -0.6  -0.5  -3.4  -5.1  -5.9  -2.1 dB
+
+   So both stay under the bell at full travel. The one exception to
+   "the slider never makes the master hotter than centre" is the last
+   quarter of the left travel, by at most 0.72 dB: the lowpass side
+   had no headroom left, and a sub that is audible at all costs some.
+   The soft limiter absorbs it. SUB_LEVEL 0.15 would hold +0.40 dB at
+   the cost of sitting 9 dB under the bell instead of 5.
+   --------------------------------------------------------------- */
+
+var F_G3 = 196.0;                     /* the sample's fundamental after SAMPLE_TRIM */
+
+var SHIM_LEVEL = 0.07;                /* at full right, relative to the brick's own gain */
+var SHIM_MULT = 8;                    /* three octaves up */
+var SHIM_BEAT_MIN = 1.2, SHIM_BEAT_MAX = 3.5;   /* Hz between the two sines */
+var SHIM_ATTACK = 0.025;
+var SHIM_TAU = 0.35;                  /* -60 dB at 2.4 s */
+
+var SUB_LEVEL = 0.25;                 /* at full left */
+var SUB_MULT = 0.5;                   /* one octave down */
+var SUB_ATTACK = 0.006;
+var SUB_TAU = 0.22;                   /* -60 dB at 1.5 s */
+
 /* tangram palette, cool at the top to pale at the bottom */
 var ROW_COLORS = [
   '#73bcc3',  /* teal */
@@ -402,7 +456,9 @@ function buildBricks() {
         alive: true,
         rate: Math.pow(2, semi / 12) * SAMPLE_TRIM,
         pan: (c / (COLS - 1) * 2 - 1) * PAN_WIDTH,
-        gain: Math.pow(10, (HIGH_TILT_DB * semi / 12) / 20)
+        gain: Math.pow(10, (HIGH_TILT_DB * semi / 12) / 20),
+        f0: F_G3 * Math.pow(2, semi / 12),
+        beat: SHIM_BEAT_MIN + ((c * 7 + r * 3) % 10) / 9 * (SHIM_BEAT_MAX - SHIM_BEAT_MIN)
       });
     }
   }
@@ -411,7 +467,7 @@ function buildBricks() {
 /* ---------------- sound ---------------- */
 
 var actx = null, abuf = null, master = null;
-var lpf = null, hpf = null, makeup = null;
+var lpf = null, hpf = null, makeup = null, layerBus = null;
 var voices = 0, soundOn = true;
 var filtPos = 0, filtTarget = 0;      /* slider units; filtPos glides toward filtTarget */
 
@@ -458,6 +514,11 @@ function initAudio() {
   hpf.connect(makeup);
   makeup.connect(lim);
   lim.connect(actx.destination);
+
+  /* shimmer and sub enter here: after the filter, before the limiter */
+  layerBus = actx.createGain();
+  layerBus.gain.value = MASTER_GAIN;
+  layerBus.connect(lim);
 
   applyFilter();   /* adopt whatever the slider already reads */
 
@@ -522,6 +583,45 @@ function playBrick(b) {
     g.gain.setTargetAtTime(0, t0, tau);
     s.stop(t0 + Math.min(nat * frac * 4 / 3, abuf.duration / b.rate));
   }
+
+  playLayer(b, t0, filtPos);
+}
+
+/* shimmer on the right, sub on the left, nothing at centre */
+function playLayer(b, t0, pos) {
+  if (!layerBus || pos === 0) return;
+  var t = Math.abs(pos) / 100;
+  if (pos > 0) {
+    var f = b.f0 * SHIM_MULT, a = SHIM_LEVEL * t * b.gain / 2;
+    layerTone(f - b.beat / 2, a, b.pan, t0, SHIM_ATTACK, SHIM_TAU);
+    layerTone(f + b.beat / 2, a, b.pan, t0, SHIM_ATTACK, SHIM_TAU);
+  } else {
+    layerTone(b.f0 * SUB_MULT, SUB_LEVEL * t * b.gain, b.pan, t0, SUB_ATTACK, SUB_TAU);
+  }
+}
+
+function layerTone(freq, amp, pan, t0, att, tau) {
+  try {
+    var o = actx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    var g = actx.createGain();
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(amp, t0 + att);
+    g.gain.setTargetAtTime(0, t0 + att, tau);
+    if (actx.createStereoPanner) {
+      var p = actx.createStereoPanner();
+      p.pan.value = pan;
+      o.connect(p);
+      p.connect(g);
+    } else {
+      o.connect(g);
+    }
+    g.connect(layerBus);
+    o.onended = function () { try { g.disconnect(); } catch (e) {} };
+    o.start(t0);
+    o.stop(t0 + att + tau * 6.9);      /* -60 dB */
+  } catch (e) {}
 }
 
 /* ---------------- filter ---------------- */
