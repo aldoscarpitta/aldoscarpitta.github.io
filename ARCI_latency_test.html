@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARCI latency test</title>
+<style>
+  :root {
+    color-scheme: light;
+    --paper: #eef0ea;
+    --ink: #1d2733;
+    --muted: #5b6672;
+    --rule: #c9cfc4;
+    --trace: #7a2e2e;
+    --ok: #2f5d3a;
+    --btn: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --paper: #161a1e;
+      --ink: #e4e7e1;
+      --muted: #9aa4ad;
+      --rule: #2c333a;
+      --trace: #d98a7a;
+      --ok: #8fc79c;
+      --btn: #20262c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 17px/1.55 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  }
+  main { max-width: 40rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .4rem; font-weight: 600; }
+  p { margin: 0 0 1rem; }
+  .muted { color: var(--muted); }
+  .clock {
+    font-variant-numeric: tabular-nums;
+    font-size: 2.6rem;
+    letter-spacing: .02em;
+    margin: 1.6rem 0 .2rem;
+    color: var(--trace);
+  }
+  ol.windows { list-style: none; padding: 0; margin: 1.5rem 0 2rem; border-top: 1px solid var(--rule); }
+  ol.windows li {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: .7rem 0; border-bottom: 1px solid var(--rule);
+  }
+  .span { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .9rem; }
+  a.btn {
+    flex: none;
+    display: inline-block; padding: .45rem .9rem;
+    border: 1px solid var(--ink); border-radius: 3px;
+    background: var(--btn); color: var(--ink); text-decoration: none;
+  }
+  a.btn:hover { background: var(--ink); color: var(--paper); }
+  a.btn:focus-visible { outline: 3px solid var(--trace); outline-offset: 2px; }
+  .control a.btn { border-color: var(--ok); color: var(--ok); }
+  h2 { font-size: 1.15rem; margin: 2rem 0 .5rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>How far behind is Arcidosso?</h1>
+  <p class="muted">Station IV.ARCI, vertical channel HHZ. Each button asks INGV for one minute of ground motion, ending that long ago.</p>
+
+  <div class="clock" id="clock">--:--:--</div>
+  <p class="muted">Current time in UTC (Italian time minus one hour in winter).</p>
+
+  <h2>Start with the control</h2>
+  <ol class="windows">
+    <li class="control"><span>One minute from yesterday<br><span class="span" id="span-control"></span></span><a class="btn" id="btn-control" target="_blank" rel="noopener">Request</a></li>
+  </ol>
+  <p>A file should download (it may be called <em>query</em> or end in <em>.mseed</em>; you can’t open it, and you don’t need to). If even this fails, the service is down or blocked: stop and tell me what the page said.</p>
+
+  <h2>Then go from the oldest to the newest</h2>
+  <ol class="windows" id="list"></ol>
+
+  <h2>What to report</h2>
+  <p>The <strong>shortest</strong> delay that still downloaded a file, and the first one that showed an error page instead. Example: “10 minutes worked, 5 minutes said no data.”</p>
+</main>
+
+<script>
+  var BASE = "https://webservices.ingv.it/fdsnws/dataselect/1/query";
+  var DELAYS = [60, 30, 15, 10, 5, 3, 2, 1]; // minutes ago the window ends
+
+  function iso(d) { return d.toISOString().slice(0, 19); }
+  function hm(d) { return d.toISOString().slice(11, 16); }
+
+  function url(end) {
+    var start = new Date(end.getTime() - 60000);
+    return BASE + "?network=IV&station=ARCI&channel=HHZ"
+      + "&starttime=" + iso(start) + "&endtime=" + iso(end) + "&nodata=404";
+  }
+
+  var list = document.getElementById("list");
+  DELAYS.forEach(function (m) {
+    var li = document.createElement("li");
+    li.innerHTML = '<span>Ending ' + m + (m === 1 ? ' minute' : ' minutes') + ' ago<br>'
+      + '<span class="span" id="span-' + m + '"></span></span>'
+      + '<a class="btn" id="btn-' + m + '" target="_blank" rel="noopener">Request</a>';
+    list.appendChild(li);
+  });
+
+  function refresh() {
+    var now = new Date();
+    document.getElementById("clock").textContent = now.toISOString().slice(11, 19);
+
+    var ctrlEnd = new Date(now.getTime() - 24 * 3600 * 1000);
+    document.getElementById("btn-control").href = url(ctrlEnd);
+    document.getElementById("span-control").textContent =
+      "UTC " + hm(new Date(ctrlEnd.getTime() - 60000)) + "–" + hm(ctrlEnd) + ", yesterday";
+
+    DELAYS.forEach(function (m) {
+      var end = new Date(now.getTime() - m * 60000);
+      document.getElementById("btn-" + m).href = url(end);
+      document.getElementById("span-" + m).textContent =
+        "UTC " + hm(new Date(end.getTime() - 60000)) + "–" + hm(end);
+    });
+  }
+
+  refresh();
+  setInterval(refresh, 1000);
+</script>
+</body>
+</html>
