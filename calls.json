@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-11-01T15:20:39.045Z",
+  "updated": "2026-11-01T15:20:48.028Z",
   "calls": [
     {
       "id": 4,
@@ -393,6 +393,21 @@
       "deadline": "2026-11-15",
       "status": "interested",
       "url": "https://on-the-move.org/news/sixi-museum-sixi-international-artist-residence-2027-china",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
+    },
+    {
+      "id": 1793546448027,
+      "title": "Application – Berliner Künstlerprogramm des DAAD",
+      "org": "",
+      "deadline": "2026-12-15",
+      "status": "interested",
+      "url": "https://www.berliner-kuenstlerprogramm.de/en/application/",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
