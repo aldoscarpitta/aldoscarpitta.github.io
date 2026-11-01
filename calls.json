@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-11-01T15:20:48.028Z",
+  "updated": "2026-11-01T15:21:01.688Z",
   "calls": [
     {
       "id": 4,
@@ -117,23 +117,6 @@
       "lockedUntil": null,
       "lockNote": "",
       "fit": "",
-      "dateApprox": false
-    },
-    {
-      "id": 1785542185026,
-      "title": "DAAD Berliner Künstlerprogramm",
-      "org": "DAAD, Berlin",
-      "deadline": "2026-12-15",
-      "status": "observe",
-      "recurs": {
-        "type": "annual-fixed",
-        "pattern": "opens ~mid-Oct, closes 15 Dec"
-      },
-      "fit": "Pays. Capstone-tier — the one that reframes the CV.",
-      "notes": "Opens ~mid-Oct, closes 15 Dec.",
-      "history": [],
-      "lockedUntil": null,
-      "lockNote": "",
       "dateApprox": false
     },
     {
