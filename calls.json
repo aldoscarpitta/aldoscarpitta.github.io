@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-11-01T15:18:51.985Z",
+  "updated": "2026-11-01T15:18:59.585Z",
   "calls": [
     {
       "id": 4,
@@ -288,21 +288,6 @@
       "deadline": "2026-12-01",
       "status": "interested",
       "url": "about:home",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1790624337106,
-      "title": "Tempo Reale – Call per Magnetica 2027 – MeetHub",
-      "org": "",
-      "deadline": "2026-10-25",
-      "status": "interested",
-      "url": "https://www.meethub.it/call-magnetica-2027/",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
