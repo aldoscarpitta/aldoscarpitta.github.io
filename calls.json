@@ -1,6 +1,6 @@
 {
   "schema": 3,
-  "updated": "2026-10-25T17:33:27.893Z",
+  "updated": "2026-11-01T15:18:51.985Z",
   "calls": [
     {
       "id": 4,
@@ -212,7 +212,7 @@
       "id": 1785759516466,
       "title": "Dysographies - Trapani Distribution",
       "org": "",
-      "deadline": "2026-10-31",
+      "deadline": "2027-10-31",
       "status": "observe",
       "url": "",
       "notes": "Mario Ciotta, Tonnara Tipa, Cultural Café",
@@ -225,7 +225,13 @@
         "pattern": "",
         "opensDate": null
       },
-      "history": []
+      "history": [
+        {
+          "cycle": "2026-10-31",
+          "dateApplied": null,
+          "outcome": "skipped"
+        }
+      ]
     },
     {
       "id": 1786478576133,
