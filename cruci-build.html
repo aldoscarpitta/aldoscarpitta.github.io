@@ -40,6 +40,13 @@ button,input,select,textarea{font:inherit;color:inherit}
 .cell.lock::after{content:"";position:absolute;right:2px;bottom:2px;width:5px;height:5px;border-radius:50%;background:var(--blue)}
 .cell small{position:absolute;top:1px;left:2px;font-size:clamp(.38rem,.9vw,.55rem);line-height:1;color:var(--gmut)}
 .cell span{font-weight:700;font-size:clamp(.6rem,1.6vw,1rem)}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:7px;overflow:hidden}.seg button{border:none;background:var(--surface);padding:5px 12px;cursor:pointer;font-weight:600}.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}#grid.blackmode .cell{cursor:crosshair}
+.fgrid{display:grid;gap:0;margin:12px 0}
+.fgrid>div{position:relative}
+.fc{background:#fff;color:#1E2124;outline:1px solid #1E2124;display:grid;place-items:center}
+.fc.pool{background:#E3EFE3}
+.fc small{position:absolute;top:0;left:1px;font-size:.5rem;line-height:1;color:#6B7177}
+.fc span{font-weight:700;font-size:clamp(.5rem,1.4vw,.85rem)}
 .legend{font-size:.78rem;color:var(--muted);margin-top:8px;display:flex;flex-wrap:wrap;gap:4px 14px}
 .legend i{display:inline-block;width:.9em;height:.9em;vertical-align:-.1em;margin-right:4px;border:1px solid var(--rule)}
 .tabs{display:flex;gap:4px;border-bottom:2px solid var(--ink);flex-wrap:wrap}
@@ -79,12 +86,15 @@ code{font-size:.95em}
 <div id="metrics"></div><div id="flash" hidden style="position:fixed;right:16px;bottom:16px;background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;z-index:20;font-size:.9rem"></div>
 <div class="main">
  <div class="gridwrap">
-  <div class="tools"><label class="chk"><input type="checkbox" id="bm"> Modalità caselle nere (clic = nera/bianca)</label><span class="muted">Tastiera: lettere · <kbd>Backspace</kbd> · frecce · <kbd>.</kbd> nera/bianca</span></div>
+  <div id="freearea" hidden></div>
+  <div id="gridarea">
+  <div class="tools"><button class="btn ghost sm" id="undo" title="Annulla (Ctrl+Z)">↶ Annulla</button> <span class="seg"><button data-mode="letters" aria-pressed="true">✎ Lettere</button><button data-mode="black" aria-pressed="false">■ Caselle nere</button></span><span class="muted">Tastiera: lettere · <kbd>Backspace</kbd> · frecce · <kbd>.</kbd> nera/bianca</span></div>
   <div id="grid" tabindex="0" role="grid" aria-label="Schema del cruciverba"></div>
   <div class="legend"><span><i style="background:#E3EFE3"></i>parola Amiata</span><span><i style="background:#DCE5F1"></i>parola selezionata</span><span><i style="background:#fff;box-shadow:inset 0 0 0 2px #B23A3A"></i>nessuna soluzione</span><span><i style="background:#F4E9CF"></i>lettera isolata</span><span>● bloccata</span><span style="color:var(--ko)">rosso ondulato: non valida</span></div>
+  </div>
  </div>
  <div>
-  <div class="tabs" role="tablist"><button data-t="slot">Parola selezionata</button><button data-t="want">Parole votate</button><button data-t="defs">Definizioni</button><button data-t="set">Schema e strumenti</button></div>
+  <div class="tabs" role="tablist"><button data-t="comp">Composizione</button><button data-t="free">Forma libera</button><button data-t="slot">Parola selezionata</button><button data-t="want">Parole votate</button><button data-t="defs">Definizioni</button><button data-t="set">Schema e strumenti</button></div>
   <div id="panel"></div>
  </div>
 </div>
@@ -156,9 +166,9 @@ function metrics(){
  const two=SL.filter(s=>s.len===2).length;
  const fullS=SL.filter(full);const words=fullS.map(pat);
  const pool=words.filter(w=>PM.has(w));const bad=fullS.filter(s=>!valid(pat(s)));
- const dead=SL.filter(s=>!full(s)&&countPat(pat(s),1).n===0);
+ const dead=SL.filter(s=>{const p=pat(s);return !full(s)&&/[A-Z]/.test(p)&&countPat(p,1).n===0;});
  let iso=0;for(let r=0;r<S.R;r++)for(let c=0;c<S.C;c++)if(!isB(r,c)&&!CELL[r+","+c])iso++;
- const dup=words.length-new Set(words).size;
+ const longW=words.filter(w=>w.length>2);const dup=longW.length-new Set(longW).size;
  const avg=pool.length?pool.reduce((a,w)=>a+PM.get(w).s,0)/pool.length:0;
  const want=POOL.filter(p=>p.s>=2);const wantIn=want.filter(p=>words.includes(p.w)).length;
  return {b,pct:100*b/(S.R*S.C),two,nw:words.length,ns:SL.length,pool:pool.length,bad,dead,iso,dup,avg,want:want.length,wantIn};
@@ -171,7 +181,7 @@ function render(){
  const deadCells=new Set();m.dead.forEach(s=>s.cells.forEach(([r,c])=>deadCells.add(r+","+c)));
  const selCells=new Set(sel?sel.cells.map(([r,c])=>r+","+c):[]);
  const poolCells=new Set();SL.filter(s=>full(s)&&PM.has(pat(s))).forEach(s=>s.cells.forEach(([r,c])=>poolCells.add(r+","+c)));
- const g=$("#grid");g.style.gridTemplateColumns=`repeat(${S.C},1fr)`;g.style.aspectRatio=`${S.C}/${S.R}`;
+ const g=$("#grid");g.style.gridTemplateColumns=`repeat(${S.C},1fr)`;g.style.gridTemplateRows=`repeat(${S.R},1fr)`;g.style.aspectRatio=`${S.C}/${S.R}`;
  let h="";
  for(let r=0;r<S.R;r++)for(let c=0;c<S.C;c++){const k=r+","+c;const v=S.g[r][c];
   if(v==="#"){h+=`<div class="cell b" data-r="${r}" data-c="${c}"></div>`;continue;}
@@ -180,6 +190,11 @@ function render(){
   h+=`<div class="${cls}" data-r="${r}" data-c="${c}">${sl?`<small>${sl.n}</small>`:""}<span>${esc(v)}</span></div>`;}
  g.innerHTML=h;
  const okB=m.pct<=S.maxB, okT=m.two<=S.maxTwo;
+ if(tab==="free"){const F=FS();const L=fBuild(F.pos);const fw=fWords(L);const fp=fw.filter(x=>PM.has(x.w)).length;const two=fw.filter(x=>x.w.length===2).length;
+  let cr=0;const cnt={};fw.forEach(x=>{for(let i=0;i<x.w.length;i++){const k=fKey(x.r+(x.d==="D"?i:0),x.c+(x.d==="A"?i:0));cnt[k]=(cnt[k]||0)+1;}});for(const k in cnt)if(cnt[k]>1)cr++;
+  const miss=[...F.words,...F.auto].filter(w=>!F.pos[w]).length;
+  $("#metrics").innerHTML=`<div class="m"><b>Forma libera</b></div><div class="m"><b>${fw.length}</b> parole · <b>${fp}</b> Amiata (${fw.length?Math.round(100*fp/fw.length):0}%)</div><div class="m"><b>${cr}</b> incroci</div><div class="m ${two<=S.maxTwo?"ok":"ko"}"><b>${two}</b> da due lettere</div><div class="m ${miss?"ko":"ok"}"><b>${miss}</b> parole non entrate</div><div class="m"><i>Voti: ${VSRC}</i></div>`;
+  renderTab();save();return;}
  $("#metrics").innerHTML=`
  <div class="m ${okB?"ok":"ko"}"><b>${m.b}</b> nere · ${m.pct.toFixed(1)}% <i>max ${S.maxB}%</i></div>
  <div class="m ${okT?"ok":"ko"}"><b>${m.two}</b> da due lettere <i>max ${S.maxTwo}</i></div>
@@ -194,18 +209,32 @@ function render(){
  renderTab();save();
 }
 function selSlot(){const k=S.sel.r+","+S.sel.c;const o=CELL[k];if(!o)return null;const i=o[S.sel.dir]!==undefined?o[S.sel.dir]:o[S.sel.dir==="A"?"D":"A"];if(i===undefined)return null;if(o[S.sel.dir]===undefined)S.sel.dir=SL[i].dir;return SL[i];}
-let tab="slot";
+let tab="comp";
 function renderTab(){document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===tab));
+ const isFree=tab==="free";$("#gridarea").hidden=isFree;$("#freearea").hidden=!isFree;
  const p=$("#panel");
  if(tab==="slot")p.innerHTML=slotPanel();
  else if(tab==="want")p.innerHTML=wantPanel();
  else if(tab==="defs")p.innerHTML=defsPanel();
+ else if(tab==="comp")p.innerHTML=compPanel();
+ else if(tab==="free"){p.innerHTML=freePanel();renderFreeArea();}
  else p.innerHTML=setPanel();}
 function srcLabel(w){const p=PM.get(w);if(p&&p.s===0)return `<span class="tag t-bad">votata 0: non la vuoi nello schema</span>`;if(p)return `<span class="tag t-pool">Amiata · schema ${p.s} · citata ${p.ci}</span>`;if(valid(w))return `<span class="tag t-com">comune</span>`;return `<span class="tag t-bad">non valida</span>`;}
+function fromHerePanel(){
+ const {r,c,dir}=S.sel;if(r>=S.R||c>=S.C)return "";
+ const thr=+($("#fhthr")?$("#fhthr").value:1);
+ const list=fromHere(r,c,dir,true,thr).slice(0,40);
+ let h=`<h3>Parole di qualsiasi lunghezza da questa casella (${dir==="A"?"verso destra":"verso il basso"})</h3>
+ <p class="muted">Prima le parole che hai votato di più. «Incroci» = lettere già presenti che la parola riusa. Le caselle nere all’inizio e alla fine vengono messe da sole; quelle in mezzo vengono tolte. La parola messa viene bloccata.</p>
+ <label class="chk">Voto schema da <select id="fhthr"><option value="1" ${thr===1?"selected":""}>1</option><option value="2" ${thr===2?"selected":""}>2</option><option value="3" ${thr===3?"selected":""}>3</option></select> in su</label>`;
+ if(!list.length)return h+`<p class="warn">Nessuna parola votata parte da qui senza rompere parole bloccate.</p>`;
+ h+=`<table class="cands"><thead><tr><th>Parola</th><th>Voto</th><th>Incroci</th><th>Cambia</th><th>Parole perse</th><th></th></tr></thead><tbody>`;
+ for(const x of list){h+=`<tr><td><b>${x.w}</b> <span class="muted">${x.L}</span></td><td>${x.p?x.p.s+" / "+x.p.ci:"—"}</td><td>${x.joins}</td><td>${x.changed} lettere${x.unb?" · "+x.unb+" nere tolte":""}${x.addB?" · "+x.addB+" nere messe":""}</td><td>${x.lost.length?x.lost.map(w=>w+(PM.has(w)?" ("+PM.get(w).s+")":"")).join(", "):"nessuna"}</td><td><button class="btn sm" data-here="${x.w}">Metti</button></td></tr>`;}
+ return h+`</tbody></table><hr style="border:none;border-top:1px solid var(--rule);margin:14px 0">`;}
 function lockPat(s){return s.cells.map(([r,c])=>locked(r,c)?S.g[r][c]:".").join("");}
 function slotOptions(s,onlyPool){
  const p=lockPat(s);const used=usedWords(s.i);const arr=BYLEN[s.len]||[];const cur=full(s)?pat(s):null;const out=[];
- for(const k of matchIdx(p)){const x=arr[k];if(onlyPool&&!x.pool)continue;if(used.has(x.w))continue;
+ for(const k of matchIdx(p)){const x=arr[k];if(onlyPool&&!x.pool)continue;if(x.w.length>2&&used.has(x.w))continue;
   const lost=new Set();s.cells.forEach(([r,c],i)=>{const v=S.g[r][c];if(v&&v!==x.w[i]){const o=CELL[r+","+c][s.dir==="A"?"D":"A"];if(o!==undefined&&full(SL[o]))lost.add(pat(SL[o]));}});
   const lostScore=[...lost].reduce((a,w)=>a+(PM.has(w)?1+2*PM.get(w).s:0.3),0);
   out.push({w:x.w,pool:x.pool,score:x.score,lost:[...lost],cost:lostScore});
@@ -213,8 +242,38 @@ function slotOptions(s,onlyPool){
  out.sort((a,b)=>a.cost-b.cost||b.score-a.score);
  return {cur,list:out.slice(0,60)};
 }
+function cellsFrom(r,c,dir,L){const out=[];for(let i=0;i<L;i++)out.push(dir==="A"?[r,c+i]:[r+i,c]);return out;}
+function fromHere(r,c,dir,onlyPool,thr){
+ const maxL=dir==="A"?S.C-c:S.R-r;const res=[];const used=usedWords();
+ const before=dir==="A"?[r,c-1]:[r-1,c];const bIn=before[0]>=0&&before[1]>=0;
+ const bVal=bIn?S.g[before[0]][before[1]]:"#";const bLock=bIn&&locked(before[0],before[1]);
+ if(bVal!=="#"&&bVal!==""&&bLock)return res;
+ for(let L=2;L<=maxL;L++){
+  const cells=cellsFrom(r,c,dir,L);const after=dir==="A"?[r,c+L]:[r+L,c];const aIn=after[0]<S.R&&after[1]<S.C;
+  const aVal=aIn?S.g[after[0]][after[1]]:"#";if(aIn&&aVal!=="#"&&aVal!==""&&locked(after[0],after[1]))continue;
+  const lockP=cells.map(([a,b])=>locked(a,b)?S.g[a][b]:".").join("");
+  for(const k of matchIdx(lockP)){const x=BYLEN[L][k];if(!x.pool&&onlyPool)continue;const p=PM.get(x.w);if(onlyPool&&(!p||p.s<thr))continue;if(used.has(x.w))continue;
+   let joins=0,changed=0,unb=0;const lost=new Set();
+   cells.forEach(([a,b],i)=>{const v=S.g[a][b];if(v==="#"){unb++;}else if(v===x.w[i]){joins++;}else if(v){changed++;const o=CELL[a+","+b]&&CELL[a+","+b][dir==="A"?"D":"A"];if(o!==undefined&&full(SL[o]))lost.add(pat(SL[o]));}});
+   const addB=[];if(bIn&&bVal!=="#")addB.push(before);if(aIn&&aVal!=="#")addB.push(after);
+   for(const [a,b] of addB){if(S.g[a][b]){const o=CELL[a+","+b]||{};for(const d of ["A","D"])if(o[d]!==undefined&&full(SL[o[d]]))lost.add(pat(SL[o[d]]));}}
+   const lostScore=[...lost].reduce((a,w)=>a+(PM.has(w)?1+2*PM.get(w).s:0.3),0);
+   res.push({w:x.w,L,p,joins,changed,unb,addB:addB.length,lost:[...lost],cost:lostScore*3+changed*0.5+unb*0.3,before:addB.some(([a,b])=>a===before[0]&&b===before[1])?before:null,after:aIn&&aVal!=="#"?after:null});}
+ }
+ res.sort((a,b)=>((b.p?b.p.s:0)-(a.p?a.p.s:0))||(b.joins-a.joins)||(a.cost-b.cost));
+ return res;}
+function putFromHere(w,r,c,dir){const L=w.length;const cells=cellsFrom(r,c,dir,L);const pre=S.g.map(x=>x.slice());
+ const before=dir==="A"?[r,c-1]:[r-1,c];const after=dir==="A"?[r,c+L]:[r+L,c];
+ cells.forEach(([a,b],i)=>{S.g[a][b]=w[i];const k=a+","+b;if(!S.locks.includes(k))S.locks.push(k);});
+ for(const [a,b] of [before,after]){if(a>=0&&b>=0&&a<S.R&&b<S.C&&!locked(a,b))S.g[a][b]="#";}
+ // clear crossing words broken by the change, so they can be refilled
+ computeSlots();const mine=new Set(cells.map(([a,b])=>a+","+b));
+ for(const sl of SL){if(!full(sl)||valid(pat(sl)))continue;if(sl.cells.every(([a,b])=>mine.has(a+","+b)))continue;
+  sl.cells.forEach(([a,b])=>{if(mine.has(a+","+b)||locked(a,b))return;const o=CELL[a+","+b]&&CELL[a+","+b][sl.dir==="A"?"D":"A"];if(o!==undefined&&full(SL[o])&&valid(pat(SL[o])))return;S.g[a][b]="";});}
+}
 function slotPanel(){
- const s=selSlot();if(!s)return `<p class="muted">Seleziona una casella bianca dello schema. Clic di nuovo sulla stessa casella per cambiare direzione.</p>`;
+ const s=selSlot();const fh=fromHerePanel();
+ if(!s)return fh||`<p class="muted">Seleziona una casella dello schema. Clic di nuovo sulla stessa casella per cambiare direzione.</p>`;
  const p=pat(s);const isFull=full(s);const w=isFull?p:null;
  let h=`<h3>${s.n} ${s.dir==="A"?"orizzontale":"verticale"} · ${s.len} lettere · <code>${esc(p.replace(/\./g,"·"))}</code></h3>`;
  if(w){const lk=s.cells.every(([r,c])=>locked(r,c));h+=`<p><b>${esc(w)}</b> ${srcLabel(w)}</p><p><button class="btn ghost" data-act="lock">${lk?"Sblocca":"Blocca"} la parola</button> <button class="btn ghost" data-act="clear">Togli la parola</button></p>`;}
@@ -222,11 +281,11 @@ function slotPanel(){
  const onlyPool=$("#onlypool")?$("#onlypool").checked:true;
  const o=slotOptions(s,onlyPool);
  h+=`<label class="chk"><input type="checkbox" id="onlypool" ${onlyPool?"checked":""}> Solo parole Amiata</label>`;
- if(!o.list.length)return h+`<p class="warn">Nessuna parola di questa lunghezza compatibile con le lettere bloccate.</p>`;
+ if(!o.list.length)return fh+h+`<p class="warn">Nessuna parola di questa lunghezza compatibile con le lettere bloccate.</p>`;
  h+=`<p class="muted">Alternative per questo posto, dalla meno costosa. «Parole perse» sono gli incroci che andrebbero rifatti (tra parentesi il tuo voto schema); «Incrocio più stretto» dice quante parole restano possibili nell’incrocio più difficile.</p><table class="cands"><thead><tr><th>Parola</th><th>Origine</th><th>Parole perse</th><th>Incrocio più stretto</th><th></th></tr></thead><tbody>`;
  for(const x of o.list){const im=x.lost.length?{min:null}:impact(s,x.w);const isCur=x.w===o.cur;
   h+=`<tr class="${im.min===0?"ko":""}"><td><b>${x.w}</b>${isCur?" ✓":""}</td><td>${srcLabel(x.w)}</td><td>${x.lost.length?x.lost.map(w=>w+(PM.has(w)?" ("+PM.get(w).s+")":"")).join(", "):"nessuna"}</td><td>${im.min===null?"—":im.min===0?"blocca un incrocio":im.min>=300?"300+":im.min}</td><td>${isCur?"":`<button class="btn sm" data-force="${x.w}" data-slot="${s.i}">Metti</button>`}</td></tr>`;}
- return h+"</tbody></table>";
+ return fh+h+"</tbody></table>";
 }
 function spotsFor(w){
  const out=[];const used=usedWords();if(used.has(w))return out;
@@ -279,6 +338,198 @@ function setPanel(){
  <h3>Esporta e riprendi</h3><p><button class="btn" data-act="export">Prepara il testo per Claude</button> <button class="btn ghost" data-act="copy">Copia</button> <span id="cps" class="muted"></span></p><textarea id="out" class="out" readonly></textarea>
  <p class="muted">Per riprendere su un altro dispositivo, incolla qui il testo esportato:</p><textarea id="imp" class="out"></textarea><p><button class="btn ghost" data-act="import">Importa</button></p>`;
 }
+
+// ---------- Composizione automatica
+function compWords(){S.comp=S.comp||[];return S.comp;}
+function wordCellsLocked(w){const p=(S.compPos||{})[w];if(!p)return false;return cellsFrom(p.r,p.c,p.dir,w.length).every(([a,b],i)=>a<S.R&&b<S.C&&S.g[a][b]===w[i]&&locked(a,b));}
+function arrange(){
+ S.compPos=S.compPos||{};const ws=compWords();const R=S.R,C=S.C;
+ const base=S.g.map((row,r)=>row.map((v,c)=>locked(r,c)?v:""));
+ const fixed=ws.filter(wordCellsLocked);const todo=ws.filter(w=>!fixed.includes(w));
+ const t0=performance.now();let best=null;
+ const vote=w=>PM.has(w)?PM.get(w).s:1;
+ while(performance.now()-t0<1500){
+  const G=base.map(r=>r.slice());const FB=new Set();const own={};const pos={};
+  // ends of fixed words
+  for(const w of fixed){const p=S.compPos[w];const L=w.length;const cl=cellsFrom(p.r,p.c,p.dir,L);cl.forEach(([a,b])=>{(own[a+","+b]=own[a+","+b]||new Set()).add(p.dir);});
+   for(const [a,b] of [p.dir==="A"?[p.r,p.c-1]:[p.r-1,p.c],p.dir==="A"?[p.r,p.c+L]:[p.r+L,p.c]])if(a>=0&&b>=0&&a<R&&b<C)FB.add(a+","+b);}
+  const order=todo.slice().sort((a,b)=>(b.length+vote(b)*2+Math.random()*4)-(a.length+vote(a)*2+Math.random()*4));
+  let score=0,placed=0,cross=0;const miss=[];
+  const anyLetters=()=>G.some(r=>r.some(v=>v&&v!=="#"));
+  for(const w of order){const L=w.length;let bst=null;const need=anyLetters();
+   for(const pass2 of [false,true]){if(bst)break;
+   for(const d of ["A","D"])for(let r=0;r<R;r++)for(let c=0;c<C;c++){
+    if(d==="A"&&c+L>C)continue;if(d==="D"&&r+L>R)continue;
+    const cl=cellsFrom(r,c,d,L);const bf=d==="A"?[r,c-1]:[r-1,c],af=d==="A"?[r,c+L]:[r+L,c];
+    let ok=true,x=0,adj=0;
+    for(const [a,b] of [bf,af]){if(a>=0&&b>=0&&a<R&&b<C){const v=G[a][b];if(v&&v!=="#"){ok=false;break;}}}
+    if(!ok)continue;
+    for(let i=0;i<L&&ok;i++){const [a,b]=cl[i];const k=a+","+b;const v=G[a][b];if(FB.has(k)||v==="#"){ok=false;break;}
+     if(v){if(v!==w[i]||(own[k]&&own[k].has(d))){ok=false;break;}x++;}
+     else{for(const [na,nb] of (d==="A"?[[a-1,b],[a+1,b]]:[[a,b-1],[a,b+1]])){if(na>=0&&nb>=0&&na<R&&nb<C){const nv=G[na][nb];if(nv&&nv!=="#")adj++;}}}}
+    if(!ok||x===L||adj>0)continue;
+    if(need&&x===0&&!pass2)continue;
+    const cen=Math.abs(r+(d==="D"?L/2:0)-R/2)+Math.abs(c+(d==="A"?L/2:0)-C/2);
+    const sc=x*10-adj*5-cen*0.3+Math.random()*3;
+    if(!bst||sc>(bst.sc))bst={sc:sc-(pass2?25:0),r,c,d,x,cl,bf,af};}}
+   if(!bst&&anyLetters()){ // allow a free placement far from others
+    miss.push(w);continue;}
+   if(!bst){miss.push(w);continue;}
+   bst.cl.forEach(([a,b],i)=>{G[a][b]=w[i];(own[a+","+b]=own[a+","+b]||new Set()).add(bst.d);});
+   for(const [a,b] of [bst.bf,bst.af])if(a>=0&&b>=0&&a<R&&b<C)FB.add(a+","+b);
+   pos[w]={r:bst.r,c:bst.c,dir:bst.d};placed++;cross+=bst.x;score+=bst.sc+30+vote(w)*5;}
+  // bbox compactness
+  let r0=R,r1=0,c0=C,c1=0;G.forEach((row,r)=>row.forEach((v,c)=>{if(v&&v!=="#"){r0=Math.min(r0,r);r1=Math.max(r1,r);c0=Math.min(c0,c);c1=Math.max(c1,c);}}));
+  score-=0.05*(r1-r0+1)*(c1-c0+1);
+  if(!best||score>best.score)best={score,G,FB,pos,miss,cross,placed};}
+ if(!best)return "Niente da disporre.";
+ S.g=best.G.map(r=>r.slice());for(const k of best.FB){const [a,b]=k.split(",").map(Number);if(!locked(a,b))S.g[a][b]="#";}
+ Object.assign(S.compPos,best.pos);
+ return `Disposte ${best.placed+fixed.length} parole su ${ws.length}, con ${best.cross} incroci nuovi.`+(best.miss.length?` Non entrate: ${best.miss.join(", ")}.`:"");
+}
+function fixAll(){for(const w of compWords()){const p=(S.compPos||{})[w];if(!p)continue;cellsFrom(p.r,p.c,p.dir,w.length).forEach(([a,b],i)=>{if(a<S.R&&b<S.C&&S.g[a][b]===w[i]){const k=a+","+b;if(!S.locks.includes(k))S.locks.push(k);}});}}
+function makes2(G,r,c){const R=G.length,C=G[0].length;for(const [dr,dc] of [[0,1],[0,-1],[1,0],[-1,0]]){let n=0,a=r+dr,b=c+dc;while(a>=0&&b>=0&&a<R&&b<C&&G[a][b]!=="#"){n++;a+=dr;b+=dc;}if(n===2)return true;}return false;}
+function complete(){
+ fixAll();const R=S.R,C=S.C;const base=S.g.map(r=>r.slice());const t0=performance.now();let best=null,runs=0;
+ const fragOk=(G,a,b)=>{for(const [dr,dc] of [[0,1],[0,-1],[1,0],[-1,0]]){let x=a+dr,y=b+dc,w="",emp=false;while(x>=0&&y>=0&&x<R&&y<C&&G[x][y]!=="#"){if(G[x][y]==="")emp=true;w=(dr<0||dc<0)?G[x][y]+w:w+G[x][y];x+=dr;y+=dc;}if(!emp&&w.length>=2&&!valid(w))return false;}return true;};
+ const blackPick=(cells,G)=>{const sc=cells.map(([a,b])=>{let d=0;for(const [dr,dc] of [[-1,-1],[-1,1],[1,-1],[1,1]]){const x=a+dr,y=b+dc;if(x>=0&&y>=0&&x<R&&y<C&&G[x][y]==="#")d++;}return {a,b,v:(fragOk(G,a,b)?0:-50)+(makes2(G,a,b)?-3:0)+d+Math.random()*1.5};});sc.sort((p,q)=>q.v-p.v);return [sc[0].a,sc[0].b];};
+ while(performance.now()-t0<12000){runs++;S.g=base.map(r=>r.slice());let guard=0,ok=true;
+  while(guard++<600){computeSlots();
+   for(let r=0;r<R;r++)for(let c=0;c<C;c++)if(S.g[r][c]===""&&!CELL[r+","+c])S.g[r][c]="#";
+   computeSlots();
+   let fixedBad=false;for(const sl of SL){if(full(sl)&&!valid(pat(sl))){sl.cells.forEach(([a,b])=>{if(!locked(a,b))S.g[a][b]="";});fixedBad=true;}}
+   if(fixedBad)continue;
+   const used=new Set(SL.filter(full).map(pat));
+   const open=SL.filter(sl=>!full(sl));if(!open.length)break;
+   let bs=null,bm=null,bn=1e9;
+   for(const sl of open){const m=matchIdx(pat(sl));let n=0;for(const k of m){if(sl.len===2||!used.has(BYLEN[sl.len][k].w))n++;if(n>bn)break;}if(n<bn){bn=n;bs=sl;bm=m;if(n===0)break;}}
+   const empt=bs.cells.filter(([a,b])=>S.g[a][b]==="");
+   if(bn===0){if(!empt.length){ok=false;break;}const [a,b]=blackPick(empt,S.g);S.g[a][b]="#";continue;}
+   const arr=BYLEN[bs.len];
+   const cands=bm.filter(k=>bs.len===2||!used.has(arr[k].w)).sort((x,y)=>(arr[y].score+Math.random()*25)-(arr[x].score+Math.random()*25)).slice(0,25);
+   let pick=null,pv=-1e9;const saved=bs.cells.map(([a,b])=>S.g[a][b]);
+   for(const k of cands){const w=arr[k].w;placeWord(bs,w);let ok2=true,v=arr[k].score;
+    for(const cx of crossOf(bs)){const o=SL[cx.j];const p=pat(o);if(!p.includes(".")){if(!valid(p)){ok2=false;break;}}else{const n=countPat(p).n;if(!n){ok2=false;break;}v+=Math.log(1+n)*4;}}
+    bs.cells.forEach(([a,b],i)=>S.g[a][b]=saved[i]);
+    if(ok2&&v>pv){pv=v;pick=w;}}
+   if(pick){placeWord(bs,pick);}
+   else{if(!empt.length){ok=false;break;}const [a,b]=blackPick(empt,S.g);S.g[a][b]="#";}
+  }
+  computeSlots();if(!ok||SL.some(sl=>!full(sl)))continue;
+  const m=metrics();if(m.bad.length)continue;
+  const sc=m.b*1+m.two*4-m.pool*2;
+  if(!best||sc<best.sc)best={sc,g:S.g.map(r=>r.slice()),m};}
+ if(!best){S.g=base;return `Non sono riuscito a completare lo schema (${runs} tentativi). Prova a togliere o spostare una parola.`;}
+ S.g=best.g;return `Completato: migliore di ${runs} tentativi. ${best.m.b} caselle nere (${best.m.pct.toFixed(1)}%), ${best.m.two} parole da due lettere, ${best.m.pool} parole Amiata. Premi di nuovo per un’altra variante.`;
+}
+function compPanel(){
+ const ws=compWords();const opts=POOL.filter(p=>p.s>0).sort((a,b)=>b.s-a.s||b.ci-a.ci).map(p=>`<option value="${p.w}">${p.w} · schema ${p.s}</option>`).join("");
+ const top=POOL.filter(p=>p.s>=2&&!ws.includes(p.w)).sort((a,b)=>b.s-a.s);
+ const placedSet=new Set(SL.filter(full).map(pat));
+ return `<h3>Composizione automatica</h3>
+ <p class="muted">Scegli le parole: lo strumento le dispone da solo per farle incrociare il più possibile, e le ridispone a ogni parola aggiunta. Quando una disposizione ti piace, fissala; poi «Completa lo schema» aggiunge le caselle nere e riempie il resto. Puoi sempre intervenire a mano sullo schema.</p>
+ <p><label>Righe <input type="number" id="cr" min="7" max="21" value="${S.R}" style="width:4em"></label> <label>Colonne <input type="number" id="cc" min="7" max="23" value="${S.C}" style="width:4em"></label> <button class="btn ghost" data-act="compnew">Ricomincia da uno schema vuoto</button></p>
+ <p><input list="poolwords" id="cw" placeholder="Aggiungi una parola…" style="border:1px solid var(--rule);background:var(--bg);border-radius:6px;padding:5px 8px;width:14em"><datalist id="poolwords">${opts}</datalist> <button class="btn sm" data-act="compadd">Aggiungi</button> <label class="chk" style="display:inline-flex"><input type="checkbox" id="cauto" ${S.compAuto!==false?"checked":""}> ridisponi da solo</label></p>
+ ${top.length?`<p class="muted">Le tue preferite (voto 2–3): ${top.map(p=>`<button class="btn sm ghost" data-cadd="${p.w}">+ ${p.w}</button>`).join(" ")}</p>`:""}
+ <p>${ws.map(w=>`<span class="tag ${placedSet.has(w)?"t-pool":"t-bad"}" style="display:inline-block;margin:2px;font-size:.85rem;padding:2px 6px">${w}${wordCellsLocked(w)?" ●":""} <a href="#" data-crm="${w}" style="color:inherit;text-decoration:none">×</a></span>`).join("")||'<span class="muted">Nessuna parola scelta.</span>'}</p>
+ <p><button class="btn" data-act="arrange">Disponi</button> <button class="btn ghost" data-act="fixall">Fissa la disposizione</button> <button class="btn" data-act="complete">Completa lo schema</button></p>
+ <p id="compmsg" class="muted">${S.compMsg||""}</p>
+ <p class="muted">Verde = nello schema, rosso = non entrata. ● = fissata. Per spostare a mano una parola fissata: selezionala nello schema e sbloccala.</p>`;
+}
+
+// ---------- Forma libera (senza riquadro)
+function FS(){S.free=S.free||{words:[],auto:[],pos:{},fixed:[],grav:"c",shape:"round",tight:4,msg:""};return S.free;}
+function fKey(r,c){return r+","+c;}
+function fBuild(pos){const L=new Map();for(const [w,p] of Object.entries(pos)){for(let i=0;i<w.length;i++){const r=p.r+(p.d==="D"?i:0),c=p.c+(p.d==="A"?i:0);L.set(fKey(r,c),w[i]);}}return L;}
+function fRun(L,r,c,dr,dc,extra){// contiguous letters through (r,c) along (dr,dc), with extra=[r,c,ch] tentative
+ const get=(a,b)=>{if(extra&&extra.has(fKey(a,b)))return extra.get(fKey(a,b));return L.get(fKey(a,b));};
+ let a=r,b=c;while(get(a-dr,b-dc))a-=dr,b-=dc;let s="";while(get(a,b)){s+=get(a,b);a+=dr;b+=dc;}return s;}
+function fDist(r,c,F){let dx=c,dy=r;const ax=F.shape==="wide"?0.55:F.shape==="tall"?1.6:1,ay=F.shape==="wide"?1.6:F.shape==="tall"?0.55:1;return Math.sqrt((dx*ax)**2+(dy*ay)**2);}
+function fAllowed(r,c,F){const g=F.grav;if(g==="tl")return r>=0&&c>=0;if(g==="tr")return r>=0&&c<=0;if(g==="bl")return r<=0&&c>=0;if(g==="br")return r<=0&&c<=0;return true;}
+function fTry(L,w,r,c,d,F,need){const n=w.length;const dr=d==="D"?1:0,dc=d==="A"?1:0;
+ if(L.get(fKey(r-dr,c-dc))||L.get(fKey(r+dr*n,c+dc*n)))return null;
+ const extra=new Map();let x=0,touch=0;
+ for(let i=0;i<n;i++){const a=r+dr*i,b=c+dc*i;if(!fAllowed(a,b,F))return null;const v=L.get(fKey(a,b));if(v){if(v!==w[i])return null;x++;}extra.set(fKey(a,b),w[i]);}
+ if(x===n)return null;if(need&&x===0)return null;
+ for(let i=0;i<n;i++){const a=r+dr*i,b=c+dc*i;const run=fRun(L,a,b,dc,dr,extra);
+  if(run.length>=2){const was=L.get(fKey(a,b));if(!was){ // new adjacency
+    if(fDist(a,b,F)>F.tight)return null;if(!valid(run))return null;touch++;}
+   else if(!valid(run))return null;}}
+ const mid=fDist(r+dr*(n-1)/2,c+dc*(n-1)/2,F);
+ return {x,touch,mid};}
+function fLayout(){
+ const F=FS();const all=[...F.words,...F.auto.filter(w=>!F.words.includes(w))];
+ const fixed={};for(const w of F.fixed)if(F.pos[w]&&all.includes(w))fixed[w]=F.pos[w];
+ const todo=all.filter(w=>!fixed[w]);const t0=performance.now();let best=null;
+ while(performance.now()-t0<1200){
+  const pos={...fixed};let L=fBuild(pos);let sc=0,miss=[],cross=0,touch=0;
+  const order=todo.slice().sort(()=>Math.random()-0.5);
+  for(const w of order){const need=L.size>0;let bst=null;
+   const cand=new Set();if(!need){cand.add("0,0");}else{for(const k of L.keys()){const [a,b]=k.split(",").map(Number);for(let i=0;i<w.length;i++){if(w[i]!==L.get(k))continue;cand.add((a)+","+(b-i)+",A");cand.add((a-i)+","+(b)+",D");}}}
+   if(!need){for(const d of ["A","D"]){const r=d==="D"?(F.grav[0]==="b"?-(w.length-1):0):0,c=d==="A"?(F.grav[1]==="r"?-(w.length-1):0):0;const t=fTry(L,w,r,c,d,F,false);if(t){const v=Math.random();if(!bst||v>bst.v)bst={v,r,c,d,t};}}}
+   else for(const k of cand){const [a,b,d]=k.split(",");const r=+a,c=+b;const t=fTry(L,w,r,c,d,F,true);if(!t)continue;
+    const v=t.x*14+t.touch*6-t.mid*1.4+Math.random()*4;if(!bst||v>bst.v)bst={v,r,c,d,t};}
+   if(!bst){miss.push(w);continue;}
+   pos[w]={r:bst.r,c:bst.c,d:bst.d};L=fBuild(pos);sc+=bst.v+40;cross+=bst.t.x;touch+=bst.t.touch;}
+  sc-=miss.length*120;
+  if(!best||sc>best.sc)best={sc,pos,miss,cross,touch};}
+ F.pos=best?best.pos:{};
+ return best?`Unite ${Object.keys(best.pos).length} parole su ${all.length}: ${best.cross} incroci${best.touch?`, ${best.touch} accostamenti stretti vicino al punto di gravità`:""}.`+(best.miss.length?` Non entrate: ${best.miss.join(", ")}.`:""):"";
+}
+function fDensify(n){const F=FS();let L=fBuild(F.pos);const used=new Set(fWords(L).map(x=>x.w));let added=0;
+ const pool=POOL.filter(p=>p.s>0&&p.w.length>=3&&!used.has(p.w)&&!F.words.includes(p.w)&&!F.auto.includes(p.w)).sort((a,b)=>b.s-a.s||b.ci-a.ci);
+ for(const p of pool){if(added>=n)break;const w=p.w;let bst=null;
+  for(const k of L.keys()){const [a,b]=k.split(",").map(Number);for(let i=0;i<w.length;i++){if(w[i]!==L.get(k))continue;for(const [r,c,d] of [[a,b-i,"A"],[a-i,b,"D"]]){const t=fTry(L,w,r,c,d,F,true);if(!t||t.x<2&&t.mid>F.tight*1.5)continue;const v=t.x*14+t.touch*6-t.mid*2+p.s*8;if(!bst||v>bst.v)bst={v,r,c,d};}}}
+  if(bst){F.pos[w]={r:bst.r,c:bst.c,d:bst.d};F.auto.push(w);L=fBuild(F.pos);added++;}}
+ return `Aggiunte ${added} parole Amiata per infittire: ${F.auto.slice(-added).join(", ")||"nessuna"}.`;}
+function fWords(L){// all runs >=2 in both directions
+ const out=[];const keys=[...L.keys()].map(k=>k.split(",").map(Number));
+ for(const [r,c] of keys){if(!L.get(fKey(r,c-1))&&L.get(fKey(r,c+1))){let s="",b=c;while(L.get(fKey(r,b))){s+=L.get(fKey(r,b));b++;}out.push({w:s,r,c,d:"A"});}
+  if(!L.get(fKey(r-1,c))&&L.get(fKey(r+1,c))){let s="",a=r;while(L.get(fKey(a,c))){s+=L.get(fKey(a,c));a++;}out.push({w:s,r,c,d:"D"});}}
+ return out;}
+function freePanel(){
+ const F=FS();const L=fBuild(F.pos);const words=fWords(L);
+ const opts=POOL.filter(p=>p.s>0).sort((a,b)=>b.s-a.s||b.ci-a.ci).map(p=>`<option value="${p.w}">${p.w} · schema ${p.s}</option>`).join("");
+ const top=POOL.filter(p=>p.s>=2&&!F.words.includes(p.w)).sort((a,b)=>b.s-a.s);
+ let r0=1e9,r1=-1e9,c0=1e9,c1=-1e9;for(const k of L.keys()){const [a,b]=k.split(",").map(Number);r0=Math.min(r0,a);r1=Math.max(r1,a);c0=Math.min(c0,b);c1=Math.max(c1,b);}
+ const H=L.size?r1-r0+1:0,W=L.size?c1-c0+1:0;
+ // numbering
+ const starts={};let n=0;const sorted=words.slice().sort((a,b)=>a.r-b.r||a.c-b.c);for(const x of sorted){const k=fKey(x.r,x.c);if(!starts[k])starts[k]=++n;x.n=starts[k];}
+ let grid="";if(L.size){
+  grid=`<div class="fgrid" style="grid-template-columns:repeat(${W},1fr);grid-template-rows:repeat(${H},1fr);aspect-ratio:${W}/${H};width:min(100%,${W*30}px)">`;
+  const poolC=new Set();words.forEach(x=>{if(PM.has(x.w))for(let i=0;i<x.w.length;i++)poolC.add(fKey(x.r+(x.d==="D"?i:0),x.c+(x.d==="A"?i:0)));});
+  for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++){const v=L.get(fKey(r,c));const k=fKey(r,c);
+   grid+=v?`<div class="fc${poolC.has(k)?" pool":""}">${starts[k]?`<small>${starts[k]}</small>`:""}<span>${v}</span></div>`:`<div></div>`;}
+  grid+=`</div>`;}
+ const pool=words.filter(x=>PM.has(x.w)).length;const inc=words.filter(x=>!F.words.includes(x.w)&&!F.auto.includes(x.w));
+ const chip=(w,auto)=>`<span class="tag ${F.pos[w]&&(!PM.has(w)||PM.get(w).s>0)?"t-pool":"t-bad"}" style="display:inline-block;margin:2px;font-size:.85rem;padding:2px 6px" title="${PM.has(w)&&PM.get(w).s===0?"votata 0 nel sistema di voto":""}">${auto?"+ ":""}${w}${PM.has(w)&&PM.get(w).s===0?" (voto 0)":""}${F.fixed.includes(w)?" ●":""} <a href="#" data-frm="${w}" style="color:inherit;text-decoration:none">×</a></span>`;
+ const G=[["tl","↖ in alto a sinistra"],["tr","↗ in alto a destra"],["c","● centro"],["bl","↙ in basso a sinistra"],["br","↘ in basso a destra"]];
+ return `<h3>Forma libera</h3>
+ <p class="muted">Le parole si uniscono senza un riquadro: fitte vicino al punto di gravità, poi sempre più larghe, come radici o fiumi. Vicino al punto di gravità le parole possono accostarsi se formano parole valide; lontano si toccano solo negli incroci.</p>
+ <p><b>Punto di gravità:</b> ${G.map(([k,l])=>`<button class="btn sm ${F.grav===k?"":"ghost"}" data-fgrav="${k}">${l}</button>`).join(" ")}</p>
+ <p><b>Forma:</b> ${[["round","raccolta"],["wide","allungata in orizzontale"],["tall","allungata in verticale"]].map(([k,l])=>`<button class="btn sm ${F.shape===k?"":"ghost"}" data-fshape="${k}">${l}</button>`).join(" ")} · <label>Zona fitta <input type="range" id="ftight" min="0" max="12" value="${F.tight}" style="vertical-align:middle"> <span class="muted">${F.tight} caselle</span></label></p>
+ <p><input list="fpoolwords" id="fw" placeholder="Aggiungi una parola…" style="border:1px solid var(--rule);background:var(--bg);border-radius:6px;padding:5px 8px;width:14em"><datalist id="fpoolwords">${opts}</datalist> <button class="btn sm" data-act="fadd">Aggiungi</button> <button class="btn sm ghost" data-act="fcopy">Copia le parole della Composizione</button></p>
+ ${top.length?`<p class="muted">Le tue preferite (voto 2–3): ${top.map(p=>`<button class="btn sm ghost" data-fadd="${p.w}">+ ${p.w}</button>`).join(" ")}</p>`:""}
+ <p>${F.words.map(w=>chip(w,false)).join("")}${F.auto.map(w=>chip(w,true)).join("")||""}${!F.words.length&&!F.auto.length?'<span class="muted">Nessuna parola scelta.</span>':""}</p>
+ <p><button class="btn ghost sm" data-act="undo">↶ Annulla</button> <button class="btn" data-act="flayout">Riunisci di nuovo</button> <button class="btn ghost" data-act="fdense">Infittisci con altre parole Amiata</button> <button class="btn ghost" data-act="ffix">Fissa le posizioni</button> <button class="btn ghost" data-act="funfix">Sblocca tutto</button></p>
+ <p id="fmsg" class="muted">${F.msg||""}</p>
+ <p class="muted">${words.length} parole in tutto (${pool} Amiata${inc.length?`, ${inc.length} nate dagli accostamenti: ${inc.map(x=>x.w).join(", ")}`:""}) · ingombro ${W}×${H} caselle · «+» = aggiunta per infittire · ● = fissata.</p>
+ <h3>Esporta</h3><p><button class="btn" data-act="fexport">Prepara il testo per Claude</button> <button class="btn ghost" data-act="fcopyout">Copia</button> <span id="fcps" class="muted"></span></p><textarea id="fout" class="out" readonly></textarea>`;
+}
+function renderFreeArea(){const F=FS();const L=fBuild(F.pos);const words=fWords(L);const el=$("#freearea");if(!el)return;
+ if(!L.size){el.innerHTML='<p class="muted" style="padding:20px 0">Aggiungi parole nel riquadro a destra: compariranno qui, unite senza riquadro.</p>';return;}
+ let r0=1e9,r1=-1e9,c0=1e9,c1=-1e9;for(const k of L.keys()){const [a,b]=k.split(",").map(Number);r0=Math.min(r0,a);r1=Math.max(r1,a);c0=Math.min(c0,b);c1=Math.max(c1,b);}
+ const H=r1-r0+1,W=c1-c0+1;const starts={};let n=0;words.slice().sort((a,b)=>a.r-b.r||a.c-b.c).forEach(x=>{const k=fKey(x.r,x.c);if(!starts[k])starts[k]=++n;});
+ const poolC=new Set();words.forEach(x=>{if(PM.has(x.w))for(let i=0;i<x.w.length;i++)poolC.add(fKey(x.r+(x.d==="D"?i:0),x.c+(x.d==="A"?i:0)));});
+ let h=`<div class="fgrid" style="grid-template-columns:repeat(${W},1fr);grid-template-rows:repeat(${H},1fr);aspect-ratio:${W}/${H};width:min(100%,${W*36}px)">`;
+ for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++){const v=L.get(fKey(r,c));const k=fKey(r,c);h+=v?`<div class="fc${poolC.has(k)?" pool":""}">${starts[k]?`<small>${starts[k]}</small>`:""}<span>${v}</span></div>`:`<div></div>`;}
+ el.innerHTML=h+`</div><p class="muted">Ingombro ${W}×${H} caselle · ${words.length} parole · verde = parola Amiata.</p>`;}
+function fExport(){const F=FS();const L=fBuild(F.pos);const words=fWords(L);let r0=1e9,r1=-1e9,c0=1e9,c1=-1e9;for(const k of L.keys()){const [a,b]=k.split(",").map(Number);r0=Math.min(r0,a);r1=Math.max(r1,a);c0=Math.min(c0,b);c1=Math.max(c1,b);}
+ let s=`FORMA LIBERA gravità=${F.grav} forma=${F.shape} zona fitta=${F.tight}\n`;for(let r=r0;r<=r1;r++){let line="";for(let c=c0;c<=c1;c++)line+=L.get(fKey(r,c))||" ";s+=line.replace(/\s+$/,"")+"\n";}
+ s+="PAROLE\n";const starts={};let n=0;words.slice().sort((a,b)=>a.r-b.r||a.c-b.c).forEach(x=>{const k=fKey(x.r,x.c);if(!starts[k])starts[k]=++n;x.n=starts[k];});
+ for(const x of words.sort((a,b)=>a.d===b.d?a.n-b.n:(a.d>b.d?1:-1)))s+=`${x.n}${x.d==="A"?"O":"V"}\t${x.w}\t${PM.has(x.w)?"amiata":"comune"}\t${defOf(x.w)}\n`;
+ return s;}
+
 // actions
 function placeWord(s,w){s.cells.forEach(([r,c],i)=>{S.g[r][c]=w[i];});}
 function clearSlot(s){s.cells.forEach(([r,c])=>{if(locked(r,c))return;// keep letters shared with other complete words
@@ -288,22 +539,22 @@ function forceWord(w,i){const s=SL[i];const lost=new Set();
  placeWord(s,w);computeSlots();
  for(const j of lost){const o=SL[j];o.cells.forEach(([r,c])=>{if(locked(r,c))return;if(s.cells.some(([a,b])=>a===r&&b===c))return;const x=CELL[r+","+c][o.dir==="A"?"D":"A"];if(x!==undefined&&full(SL[x])&&valid(pat(SL[x])))return;S.g[r][c]="";});}
  s.cells.forEach(([r,c])=>{if(!locked(r,c))S.locks.push(r+","+c);});}
-function autofill(mode){
+function autofill(mode,budget=9000,attempts=12){
  computeSlots();const g0=S.g.map(r=>r.slice());
  if(mode==="rest"){for(let r=0;r<S.R;r++)for(let c=0;c<S.C;c++){if(S.g[r][c]!=="#"&&!locked(r,c))S.g[r][c]="";}}
  const todo=SL.filter(s=>!full(s));if(!todo.length){return "Niente da riempire.";}
  const patNow=s=>s.cells.map(([r,c])=>S.g[r][c]||".").join("");
  const usedBase=new Set(SL.filter(full).map(pat));
  const t0=performance.now();let deadSlot=null;
- for(let attempt=0;attempt<12;attempt++){
+ for(let attempt=0;attempt<attempts;attempt++){
   const used=new Set(usedBase);let nodes=0;const noise=attempt===0?0:20+attempt*10;
   const rnd=new Map();const rs=k=>{if(!rnd.has(k))rnd.set(k,Math.random()*noise);return rnd.get(k);};
-  function rec(){nodes++;if(nodes>6000||performance.now()-t0>9000)return null;
+  function rec(){nodes++;if(nodes>20000||performance.now()-t0>budget)return null;
    let best=null,bm=null,bn=1e9;
    for(const s of todo){const p=patNow(s);if(!p.includes("."))continue;const m=matchIdx(p);let n=0;for(const k of m){if(!used.has(BYLEN[s.len][k].w)){n++;if(n>bn)break;}}if(n===0){deadSlot=s;return false;}if(n<bn){bn=n;best=s;bm=m;if(n===1)break;}}
    if(!best)return true;
    const arr=BYLEN[best.len];const saved=best.cells.map(([r,c])=>S.g[r][c]);
-   const cands=bm.filter(k=>!used.has(arr[k].w)).sort((a,b)=>(arr[b].score+rs(arr[b].w))-(arr[a].score+rs(arr[a].w))).slice(0,10);
+   const cands=bm.filter(k=>best.len===2||!used.has(arr[k].w)).sort((a,b)=>(arr[b].score+rs(arr[b].w))-(arr[a].score+rs(arr[a].w))).slice(0,30);
    for(const k of cands){const w=arr[k].w;placeWord(best,w);used.add(w);
     let ok=true;for(const cx of crossOf(best)){const o=SL[cx.j];const p=patNow(o);if(!p.includes(".")){if(!valid(p)||(used.has(p)&&p!==w&&!usedBase.has(p)&&false)){ok=false;break;}}else if(!matchIdx(p).length){ok=false;break;}}
     if(ok){const r=rec();if(r)return true;if(r===null)return null;}
@@ -311,14 +562,14 @@ function autofill(mode){
    return false;}
   const res=rec();
   if(res===true)return mode==="rest"?"Rifatto: le parole bloccate sono rimaste, il resto è nuovo.":"Riempito.";
-  if(performance.now()-t0>9000)break;
+  if(performance.now()-t0>budget)break;
   for(let r=0;r<S.R;r++)for(let c=0;c<S.C;c++){if(S.g[r][c]!=="#"&&!locked(r,c))S.g[r][c]=mode==="rest"?"":g0[r][c];}
  }
  S.g=g0;
  return "Non ho trovato una soluzione in dieci secondi con queste caselle nere e queste parole bloccate. Prova a sbloccare qualche parola, a spostare o aggiungere una casella nera nella zona più piena, o semplicemente a ripetere.";
 }
 function exportText(){computeSlots();let s="SCHEMA "+S.R+"x"+S.C+"\n"+S.g.map(r=>r.map(v=>v===""?".":v).join("")).join("\n")+"\nBLOCCATE "+S.locks.join(" ")+"\nPAROLE\n";
- for(const sl of SL.filter(full).sort((a,b)=>(a.dir>b.dir?1:-1)||a.n-b.n)){const w=pat(sl);s+=`${sl.n}${sl.dir==="A"?"O":"V"}\t${w}\t${PM.has(w)?"amiata":(valid(w)?"comune":"NON VALIDA")}\t${defOf(w)}\n`;}
+ for(const sl of SL.filter(full).sort((a,b)=>a.dir===b.dir?a.n-b.n:(a.dir>b.dir?1:-1))){const w=pat(sl);s+=`${sl.n}${sl.dir==="A"?"O":"V"}\t${w}\t${PM.has(w)?"amiata":(valid(w)?"comune":"NON VALIDA")}\t${defOf(w)}\n`;}
  return s;}
 function importText(t){const L=t.trim().split("\n");const m=L[0].match(/SCHEMA (\d+)x(\d+)/);if(!m)return false;const R=+m[1];const rows=L.slice(1,1+R);
  const st=fresh(rows.map(r=>r.replace(/\./g,".")));st.g=rows.map(r=>[...r].map(ch=>ch==="#"?"#":ch==="."?"":ch));
@@ -327,23 +578,49 @@ function importText(t){const L=t.trim().split("\n");const m=L[0].match(/SCHEMA (
  st.maxB=S.maxB;st.maxTwo=S.maxTwo;S=st;return true;}
 // events
 let blackMode=false;
+const UNDO=[];function snap(){const j=JSON.stringify(S);if(UNDO.length&&UNDO[UNDO.length-1]===j)return;UNDO.push(j);if(UNDO.length>60)UNDO.shift();}
+function undo(){const cur=JSON.stringify(S);while(UNDO.length&&UNDO[UNDO.length-1]===cur)UNDO.pop();if(!UNDO.length){flash("Niente da annullare");return;}S=JSON.parse(UNDO.pop());render();flash("Annullato");}
 $("#grid").addEventListener("click",e=>{const d=e.target.closest(".cell");if(!d)return;const r=+d.dataset.r,c=+d.dataset.c;
- if(blackMode){if(locked(r,c))return;S.g[r][c]=S.g[r][c]==="#"?"":"#";render();return;}
- if(S.g[r][c]==="#")return;
+ if(blackMode){snap();const k=r+","+c;if(locked(r,c)){S.locks=S.locks.filter(x=>x!==k);flash("Casella sbloccata e resa nera");}S.g[r][c]=S.g[r][c]==="#"?"":"#";render();return;}
  if(S.sel.r===r&&S.sel.c===c)S.sel.dir=S.sel.dir==="A"?"D":"A";else S.sel={r,c,dir:S.sel.dir};tab="slot";render();$("#grid").focus();});
 $("#grid").addEventListener("keydown",e=>{const {r,c,dir}=S.sel;const k=e.key;
  const mv=(dr,dc)=>{let nr=r+dr,nc=c+dc;while(nr>=0&&nc>=0&&nr<S.R&&nc<S.C&&S.g[nr][nc]==="#"){nr+=dr;nc+=dc;}if(nr>=0&&nc>=0&&nr<S.R&&nc<S.C)S.sel={r:nr,c:nc,dir};};
- if(/^[a-zA-Z]$/.test(k)){e.preventDefault();if(S.g[r][c]==="#"||locked(r,c))return;S.g[r][c]=k.toUpperCase();if(dir==="A")mv(0,1);else mv(1,0);render();return;}
- if(k==="Backspace"){e.preventDefault();if(!locked(r,c)&&S.g[r][c]!=="#")S.g[r][c]="";if(dir==="A")mv(0,-1);else mv(-1,0);render();return;}
- if(k==="."||k===" "){e.preventDefault();if(!locked(r,c)){S.g[r][c]=S.g[r][c]==="#"?"":"#";}render();return;}
+ if(/^[a-zA-Z]$/.test(k)&&!e.ctrlKey&&!e.metaKey){e.preventDefault();if(S.g[r][c]==="#"||locked(r,c))return;snap();S.g[r][c]=k.toUpperCase();if(dir==="A")mv(0,1);else mv(1,0);render();return;}
+ if(k==="Backspace"){e.preventDefault();snap();if(!locked(r,c)&&S.g[r][c]!=="#")S.g[r][c]="";if(dir==="A")mv(0,-1);else mv(-1,0);render();return;}
+ if(k==="."||k===" "){e.preventDefault();snap();if(!locked(r,c)){S.g[r][c]=S.g[r][c]==="#"?"":"#";}render();return;}
  const map={ArrowRight:[0,1],ArrowLeft:[0,-1],ArrowDown:[1,0],ArrowUp:[-1,0]};if(map[k]){e.preventDefault();mv(...map[k]);render();}});
-$("#bm").addEventListener("change",e=>{blackMode=e.target.checked;});
-document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.t;renderTab();}));
-$("#panel").addEventListener("change",e=>{if(e.target.id==="onlypool"||e.target.id==="wthr")renderTab();
+document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"&&!e.target.matches("input,textarea")){e.preventDefault();undo();}});
+$("#undo").addEventListener("click",undo);
+document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",()=>{blackMode=b.dataset.mode==="black";document.querySelectorAll("[data-mode]").forEach(x=>x.setAttribute("aria-pressed",x===b));$("#grid").classList.toggle("blackmode",blackMode);}));
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.t;render();}));
+$("#panel").addEventListener("change",e=>{if(e.target.id==="ftight"){snap();FS().tight=+e.target.value;FS().msg=fLayout();render();return;}if(e.target.id==="cauto"){S.compAuto=e.target.checked;save();}if(e.target.id==="onlypool"||e.target.id==="wthr"||e.target.id==="fhthr")renderTab();
  if(e.target.id==="maxB"){S.maxB=+e.target.value;render();}if(e.target.id==="maxTwo"){S.maxTwo=+e.target.value;render();}});
 $("#panel").addEventListener("input",e=>{if(e.target.matches(".def")){const w=e.target.dataset.w;const p=PM.get(w);if(p&&e.target.value===p.d)delete S.defs[w];else S.defs[w]=e.target.value;save();}});
-$("#panel").addEventListener("click",async e=>{const b=e.target.closest("button");if(!b)return;const s=selSlot();
+$("#panel").addEventListener("click",async e=>{
+ {const t=e.target.closest("button,[data-frm],[data-crm]");if(t&&!/export|copy|fexport|fcopyout|undo/.test(t.dataset.act||"")&&!t.closest(".tabs"))snap();}
+ if(e.target.closest('[data-act="undo"]')){undo();return;}
+ const frm=e.target.closest("[data-frm]");if(frm){e.preventDefault();const F=FS();const w=frm.dataset.frm;F.words=F.words.filter(x=>x!==w);F.auto=F.auto.filter(x=>x!==w);F.fixed=F.fixed.filter(x=>x!==w);delete F.pos[w];F.msg=fLayout();render();return;}
+ {const fb=e.target.closest("button");if(fb){const F=FS();
+  if(fb.dataset.fadd||fb.dataset.act==="fadd"){const w=(fb.dataset.fadd||($("#fw").value||"")).toUpperCase().replace(/[^A-Z]/g,"");if(w.length>=2&&!PM.has(w)&&!valid(w)&&!confirm(w+" non è nel tuo elenco né nel dizionario. Aggiungerla comunque?"))return;if(w.length>=2&&!F.words.includes(w)){F.words.push(w);F.auto=F.auto.filter(x=>x!==w);F.msg=fLayout();}render();return;}
+  if(fb.dataset.fgrav){F.grav=fb.dataset.fgrav;F.msg=fLayout();render();return;}
+  if(fb.dataset.fshape){F.shape=fb.dataset.fshape;F.msg=fLayout();render();return;}
+  if(fb.dataset.act==="fcopy"){for(const w of compWords())if(!F.words.includes(w))F.words.push(w);F.msg=fLayout();render();return;}
+  if(fb.dataset.act==="flayout"){F.msg=fLayout();render();return;}
+  if(fb.dataset.act==="fdense"){F.msg=fDensify(5);render();return;}
+  if(fb.dataset.act==="ffix"){F.fixed=Object.keys(F.pos);F.msg="Posizioni fissate: «Riunisci» sposterà solo le parole nuove.";render();return;}
+  if(fb.dataset.act==="funfix"){F.fixed=[];F.msg="Tutte le parole possono di nuovo spostarsi.";render();return;}
+  if(fb.dataset.act==="fexport"){$("#fout").value=fExport();return;}
+  if(fb.dataset.act==="fcopyout"){const o=$("#fout");if(!o.value)o.value=fExport();let ok=false;try{await navigator.clipboard.writeText(o.value);ok=true;}catch(_){o.select();try{ok=document.execCommand("copy");}catch(__){}}$("#fcps").textContent=ok?"Copiato":"Seleziona e copia a mano";return;}
+ }}
+ const rm=e.target.closest("[data-crm]");if(rm){e.preventDefault();S.comp=compWords().filter(w=>w!==rm.dataset.crm);const p=(S.compPos||{})[rm.dataset.crm];if(p){cellsFrom(p.r,p.c,p.dir,rm.dataset.crm.length).forEach(([a,b])=>{S.locks=S.locks.filter(k=>k!==a+","+b);});delete S.compPos[rm.dataset.crm];}if(S.compAuto!==false)S.compMsg=arrange();render();return;}
+ const b=e.target.closest("button");if(!b)return;const s=selSlot();
+ if(b.dataset.cadd||b.dataset.act==="compadd"){const w=(b.dataset.cadd||($("#cw").value||"")).toUpperCase().replace(/[^A-Z]/g,"");if(w.length>=2&&!PM.has(w)&&!valid(w)&&!confirm(w+" non è nel tuo elenco né nel dizionario. Aggiungerla comunque?"))return;if(w.length>=2&&!compWords().includes(w)){S.comp.push(w);if(S.compAuto!==false)S.compMsg=arrange();}render();return;}
+ if(b.dataset.act==="arrange"){S.compMsg=arrange();render();return;}
+ if(b.dataset.act==="fixall"){fixAll();S.compMsg="Disposizione fissata: le parole non si sposteranno più da sole.";render();return;}
+ if(b.dataset.act==="complete"){$("#compmsg").textContent="Sto completando… (fino a 15 secondi)";setTimeout(()=>{S.compMsg=complete();CACHE=new Map();render();},30);return;}
+ if(b.dataset.act==="compnew"){const R=+$("#cr").value,C=+$("#cc").value;if(confirm("Ricominciare da uno schema vuoto "+R+"×"+C+"? Le parole scelte restano nell’elenco.")){const keep={maxB:S.maxB,maxTwo:S.maxTwo,comp:compWords(),compAuto:S.compAuto,defs:S.defs};S=fresh(Array(R).fill(".".repeat(C)));Object.assign(S,keep);S.compPos={};S.compMsg=S.comp.length?arrange():"";render();}return;}
  if(b.dataset.put&&s){placeWord(s,b.dataset.put);render();return;}
+ if(b.dataset.here){putFromHere(b.dataset.here,S.sel.r,S.sel.c,S.sel.dir);render();return;}
  if(b.dataset.open){openWant=openWant===b.dataset.open?null:b.dataset.open;renderTab();return;}
  if(b.dataset.show){const sl=SL[+b.dataset.show];S.sel={r:sl.r,c:sl.c,dir:sl.dir};render();tab="want";renderTab();return;}
  if(b.dataset.force){forceWord(b.dataset.force,+b.dataset.slot);openWant=null;render();return;}
