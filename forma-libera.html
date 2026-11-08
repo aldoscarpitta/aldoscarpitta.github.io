@@ -78,6 +78,8 @@ ul.props{list-style:none;margin:6px 0;padding:0}
 .prop .pd.none{color:var(--muted);font-style:italic}
 .prop button{grid-row:1/3;grid-column:2;align-self:center}
 .prop .po{grid-column:1/2;color:var(--warn);font-size:.85rem}
+.pd a.ban{color:var(--muted);text-decoration:none;margin-left:2px;padding:0 3px;font-family:var(--sans)}
+.pd a.ban:hover{color:var(--ko)}
 ul.props li.sep{font-size:.82rem;color:var(--muted);font-weight:600;padding:10px 4px 2px;border-bottom:1px solid var(--rule)}
 .def{font-family:var(--serif);font-size:1.05rem;margin:4px 0}
 .wd{font-weight:800;letter-spacing:.06em}
@@ -123,16 +125,17 @@ const cellsOf=(w,p)=>{const o=[];for(let i=0;i<w.length;i++)o.push([p.r+(p.d==="
 const clean=s=>String(s||"").toUpperCase().normalize("NFD").replace(/[^A-Z]/g,"");
 
 // ---------- words and votes (same model as the costruttore)
+var PRE=null,CORE=null,BAN=new Set();
 let POOL=[],PM=new Map(),BYLEN={},IDX={},VSRC="";
 function readVotes(){try{const r=localStorage.getItem(VKEY);if(r){const o=JSON.parse(r);if(o&&o.v){VSRC="dal sistema di voto";return o;}}}catch(e){}VSRC="voti di partenza (il sistema di voto non è ancora stato aperto su questo sito)";return {v:DEFV,custom:[]};}
-function loadPool(){
+function loadPool(){PRE=null;CORE=null;
  const V=readVotes();const vv=V.v||{};
  const rows=BASE.map(r=>({c:r[0],w:r[1],st:r[3],d:r[5]})).concat((V.custom||[]).map(x=>({c:x.c,w:x.w,st:"",d:x.d||""})));
  POOL=rows.map(r=>{const o=vv[r.w]||{};let d=o.def!==undefined?o.def:r.d;let rw=false;if(/\*\s*$/.test(d)){rw=true;d=d.replace(/\*\s*$/,"").trim()||r.d;}
   return {w:r.w,c:r.c,s:o.g===undefined?1:o.g,ci:o.d===undefined?1:o.d,d,rw,st:r.st};});
  PM=new Map(POOL.map(p=>[p.w,p]));
  BYLEN={};
- const addW=(w,score,pool)=>{(BYLEN[w.length]=BYLEN[w.length]||[]).push({w,score,pool});};
+ const addW=(w,score,pool)=>{if(BAN.has(w))return;(BYLEN[w.length]=BYLEN[w.length]||[]).push({w,score,pool});};
  for(const p of POOL) if(p.s>0&&p.w.length>=2) addW(p.w,100+p.s*40+p.ci*10,true);
  for(const [w,f] of Object.entries(DICT)) if(!PM.has(w)) addW(w,f,false);
  for(const w of TWO) if(!PM.has(w)) addW(w,8,false);
@@ -145,7 +148,7 @@ function matchIdx(p){const L=p.length;const arr=BYLEN[L]||[];const ix=IDX[L];if(
  if(!lists.length)return arr.map((_,k)=>k);lists.sort((a,b)=>a.length-b.length);let cur=lists[0];
  for(let j=1;j<lists.length;j++){const set=lists[j];const out=[];let a=0,b=0;while(a<cur.length&&b<set.length){if(cur[a]===set[b]){out.push(cur[a]);a++;b++;}else if(cur[a]<set[b])a++;else b++;}cur=out;if(!cur.length)break;}
  return cur;}
-function valid(w){if(PM.has(w))return PM.get(w).s>0;return w.length===2?TWO.includes(w):w in DICT;}
+function valid(w){if(BAN.has(w))return false;if(PM.has(w))return PM.get(w).s>0;return w.length===2?TWO.includes(w):w in DICT;}
 const known=w=>PM.has(w)||(w.length===2?TWO.includes(w):w in DICT);
 
 // ---------- state
@@ -159,10 +162,11 @@ function importOld(){try{const o=JSON.parse(localStorage.getItem(OLDKEY)||"null"
 let S=null;
 try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);if(o&&o.v===1&&o.place)S=Object.assign(blank(),o);}}catch(e){}
 if(!S)S=importOld()||blank();
+if(S.ban&&S.ban.length){BAN=new Set(S.ban);loadPool();}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 const UNDO=[];
 function snap(){const j=JSON.stringify(S);if(UNDO.length&&UNDO[UNDO.length-1]===j)return;UNDO.push(j);if(UNDO.length>80)UNDO.shift();}
-function undo(){const cur=JSON.stringify(S);while(UNDO.length&&UNDO[UNDO.length-1]===cur)UNDO.pop();if(!UNDO.length){flash("Niente da annullare");return;}S=JSON.parse(UNDO.pop());PREV=null;PROPS=null;render();flash("Annullato");}
+function undo(){const cur=JSON.stringify(S);while(UNDO.length&&UNDO[UNDO.length-1]===cur)UNDO.pop();if(!UNDO.length){flash("Niente da annullare");return;}S=JSON.parse(UNDO.pop());const nb=new Set(S.ban||[]);if([...nb].join()!==[...BAN].join()){BAN=nb;loadPool();}PREV=null;PROPS=null;render();flash("Annullato");}
 
 // ---------- geometry of the shape
 function fDist(r,c){const ax=S.shape==="wide"?0.55:S.shape==="tall"?1.6:1,ay=S.shape==="wide"?1.6:S.shape==="tall"?0.55:1;return Math.sqrt((c*ax)**2+(r*ay)**2);}
@@ -223,15 +227,20 @@ function tryAt(L,w,r,c,d,need,occ,opt){opt=opt||{};const fence=opt.fence||"soft"
  for(let i=0;i<n;i++){const a=r+dr*i,b=c+dc*i;if(!fAllowed(a,b)){if(fence==="hard")return null;if(fence==="soft")offq++;}
   const k=K(a,b);const v=L.get(k);if(v){if(v!==w[i]||occ[d].has(k))return null;x++;xc.push(k);}extra.set(k,w[i]);}
  if(x===n)return null;if(need&&x===0)return null;
- let touch=0,two=0;const open=[];
+ let touch=0,two=0;const open=[],made=[];
  for(let i=0;i<n;i++){const a=r+dr*i,b=c+dc*i;if(L.get(K(a,b)))continue;
   let q=a-dc,z=b-dr;while(L.get(K(q,z))){if(occ[pd].has(K(q,z)))return null;q-=dc;z-=dr;}
   q=a+dc;z=b+dr;while(L.get(K(q,z))){if(occ[pd].has(K(q,z)))return null;q+=dc;z+=dr;}
   const run=fRun(L,a,b,dc,dr,extra);
-  if(run.length>=2){const ok=valid(run);if(!loose&&(!ok||fDist(a,b)>S.tight))return null;if(ok){touch++;if(run.length===2)two++;}else open.push(run);}}
+  if(run.length>=2){const ok=valid(run);if(!loose&&(!ok||fDist(a,b)>S.tight))return null;if(ok){touch++;made.push(run);if(run.length===2)two++;}else open.push(run);}}
  if(n===2)two++;
  const mid=fDist(r+dr*(n-1)/2,c+dc*(n-1)/2);
- return {x,touch,two,mid,open,offq:offq>0,xc,fit:x*14+touch*6-mid*1.4-open.length*12-(offq?10:0)};}
+ return {x,touch,two,mid,open,made,offq:offq>0,xc,fit:x*14+touch*6-mid*1.4-open.length*12-(offq?10:0)};}
+// duplicates (a word already on the page) and the two-letter cap: flagged and ranked lower, never refused
+function annotate(list,exclude){const ex=new Set();for(const x of M.runs)if(x.w.length>2&&!x.own.includes(exclude))ex.add(x.w);
+ const ex2=exclude&&exclude.length===2&&S.place[exclude]?1:0;
+ for(const o of list){if(o.ann)continue;o.ann=true;o.dups=[...new Set([o.w,...(o.made||[])].filter(w=>w.length>2&&ex.has(w)))];o.twoOver=o.two>0&&M.two+o.two-ex2>S.maxTwo;o.fit-=o.dups.length*8+(o.twoOver?6:0);}
+ return list;}
 const cleanFirst=(a,b)=>((a.open.length>0)-(b.open.length>0))||(b.fit-a.fit);
 // names of the words a proposal crosses (to tell apart proposals that look alike)
 function crossNames(o,exclude){const out=[];const pd=o.d==="A"?"D":"A";
@@ -245,7 +254,7 @@ function letterIndex(L){const o={};for(const [k,ch] of L)(o[ch]=o[ch]||[]).push(
 function spotsForWord(w,lim,opt){opt=opt||{fence:"soft",loose:true};const placed=!!S.place[w];const L=placed?resolve(w).L:M.L;const byL=placed?letterIndex(L):M.byL;const occ=placed?occOf(S.place,w):M.occ;const out=[];const seen=new Set();
  if(!L.size){for(const d of ["A","D"]){const r=d==="D"&&S.grav[0]==="b"?-(w.length-1):0;const c=d==="A"&&S.grav[1]==="r"?-(w.length-1):0;const t=tryAt(L,w,r,c,d,false,occ,opt);if(t)out.push({w,r,c,d,...t});}}
  else for(let i=0;i<w.length;i++)for(const [a,b] of (byL[w[i]]||[]))for(const [r,c,d] of [[a,b-i,"A"],[a-i,b,"D"]]){const k=r+","+c+d;if(seen.has(k))continue;seen.add(k);const t=tryAt(L,w,r,c,d,true,occ,opt);if(t)out.push({w,r,c,d,...t});}
- out.sort(cleanFirst);
+ annotate(out,placed?w:null);out.sort(cleanFirst);
  if(placed){const p=S.place[w];out.forEach(o=>{o.here=o.r===p.r&&o.c===p.c&&o.d===p.d;});}
  return lim?out.slice(0,lim):out;}
 // words along one line (row or column) that cover a span: a single cell, a contact-born run, or a placed word
@@ -265,7 +274,72 @@ function lineSpots(span,d,exclude,onlyPool,only){const L=exclude?resolve(exclude
    for(const x of cand){if(!only){if(used.has(x.w))continue;if(!x.pool&&(onlyPool||nCom>=40))continue;}
     const t=tryAt(L,x.w,r0,c0,d,need,occ,{fence:"off",loose:true});if(!t)continue;if(!x.pool)nCom++;
     const o={w:x.w,r:r0,c:c0,d,pool:x.pool,...t};const b=best.get(x.w);if(!b||better(o,b))best.set(x.w,o);}}}
- return [...best.values()].sort((a,b)=>((a.open.length>0)-(b.open.length>0))||(b.pool-a.pool)||(b.fit-a.fit)).slice(0,40);}
+ return annotate([...best.values()],exclude).sort((a,b)=>((a.open.length>0)-(b.open.length>0))||(b.pool-a.pool)||(b.fit-a.fit)).slice(0,40);}
+// ---------- dense core: fill a pocket around a centre like a small crossword (empty cells act as black squares)
+// Every run that gains a new letter must be a valid word; no placed word is lengthened or broken; no new
+// isolated letter; no new separate group. Letters are tried more eagerly near the centre, so density fades outward.
+const ALPH="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+function buildPre(){PRE=new Map();for(const n in BYLEN)for(const x of BYLEN[n]){const w=x.w;for(let i=1;i<=w.length;i++){const p=w.slice(0,i);PRE.set(p,(PRE.get(p)||0)+1);}}}
+function densePatches(cr,cc,half,fill,ms){if(!PRE)buildPre();
+ const L=M.L,occ=M.occ;const r0=cr-half,r1=cr+half,c0=cc-half,c1=cc+half;
+ const inR=(r,c)=>r>=r0&&r<=r1&&c>=c0&&c<=c1;
+ const order=[];for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++)order.push([r,c]);
+ const fixed=new Map();for(const [r,c] of order){const v=L.get(K(r,c));if(v)fixed.set(K(r,c),v);}
+ const A=new Map();
+ const get=(r,c)=>{const k=K(r,c);if(inR(r,c))return A.has(k)?A.get(k):"";return L.get(k)||"";};
+ const isNew=(r,c)=>{const k=K(r,c);return inR(r,c)&&!fixed.has(k)&&!!A.get(k);};
+ function back(r,c,dr,dc){const d=dr?"D":"A";let s="",nw=false,oc=false,a=r-dr,b=c-dc;for(;;){const v=get(a,b);if(!v)break;s=v+s;if(isNew(a,b))nw=true;if(occ[d].has(K(a,b)))oc=true;a-=dr;b-=dc;}return {s,nw,oc};}
+ function after(r,c,dr,dc){const d=dr?"D":"A";let s="",oc=false,a=r+dr,b=c+dc;while(!inR(a,b)){const v=L.get(K(a,b));if(!v)break;s+=v;if(occ[d].has(K(a,b)))oc=true;a+=dr;b+=dc;}return {s,oc};}
+ // letter v at (r,c): returns a weight (>0) if allowed, 0 if not
+ function okLetter(r,c,v,isFixed){let wgt=1;
+  for(const [dr,dc] of [[0,1],[1,0]]){const d=dr?"D":"A";const B=back(r,c,dr,dc);const nw=B.nw||!isFixed;const s=B.s+v;
+   if(nw&&(B.oc||occ[d].has(K(r,c))))return 0;
+   if(nw){const n=PRE.get(s);if(!n)return 0;wgt*=Math.sqrt(n);}
+   if(dr?r===r1:c===c1){const F=after(r,c,dr,dc);if(nw){if(F.oc)return 0;const full=s+F.s;if(full.length>=2&&!valid(full))return 0;}}}
+  return wgt;}
+ const hlen=(r,c)=>{let n=1,b=c-1;while(get(r,b)){n++;b--;}b=c+1;while(get(r,b)){n++;b++;}return n;};
+ function okEmpty(r,c){for(const [dr,dc] of [[0,1],[1,0]]){const B=back(r,c,dr,dc);
+   if(B.s.length>=2&&B.nw&&!valid(B.s))return false;
+   if(dr&&B.s.length===1&&isNew(r-1,c)&&hlen(r-1,c)<2)return false;}
+  return true;}
+ const before=new Set(M.runs.filter(x=>x.w.length>2).map(x=>x.w));const placed=new Set(Object.keys(S.place));
+ const sols=new Map();
+ function leaf(){const nc=[];for(const [k,v] of A)if(v&&!fixed.has(k))nc.push(k);if(nc.length<3)return;
+  const sig=nc.sort().join(";");if(sols.has(sig))return;
+  const L2=new Map(L);for(const k of nc)L2.set(k,A.get(k));const ncs=new Set(nc);
+  const runs=fWords(L2).filter(x=>runCells(x).some(([a,b])=>ncs.has(K(a,b))));
+  const cov=new Set();for(const x of runs){if(!valid(x.w))return;runCells(x).forEach(([a,b])=>cov.add(K(a,b)));}
+  for(const k of nc)if(!cov.has(k))return;
+  for(const [w,p] of Object.entries(S.place)){const rr=runAt(L2,p.r,p.c,p.d);if(rr.s!==w||rr.r!==p.r||rr.c!==p.c){if(!M.broken[w])return;}}
+  // no new separate group
+  const seen=new Set();let g=0;for(const k of L2.keys()){if(seen.has(k))continue;g++;const st=[k];seen.add(k);while(st.length){const [a,b]=unK(st.pop());for(const q of [K(a+1,b),K(a-1,b),K(a,b+1),K(a,b-1)])if(L2.has(q)&&!seen.has(q)){seen.add(q);st.push(q);}}}
+  if(g>M.groups)return;
+  const words=runs.map(x=>({w:x.w,r:x.r,c:x.c,d:x.d}));const ws=words.map(x=>x.w);
+  // a word can be on the page only once as a placed word: no repeats inside the patch or of placed words
+  if(ws.some((w,i)=>placed.has(w)||ws.indexOf(w)!==i))return;
+  const dupLong=ws.filter(w=>w.length>2&&before.has(w)).length;
+  const two=ws.filter(w=>w.length===2).length,pool=ws.filter(w=>PM.has(w)).length,rare=ws.filter(w=>w.length>2&&!PM.has(w)&&(DICT[w]||0)<6).length;
+  let cross=0;const cnt={};for(const x of runs)for(const [a,b] of runCells(x)){const k=K(a,b);cnt[k]=(cnt[k]||0)+1;}for(const k in cnt)if(cnt[k]>1)cross++;
+  let dens=0;for(const k of nc){const [a,b]=unK(k);dens+=Math.max(0.05,1-Math.hypot(a-cr,b-cc)/(half+1));}
+  const over=Math.max(0,M.two+two-S.maxTwo);
+  const score=dens*10+pool*8+cross*2-two*2-rare*3-over*8-dupLong*15;
+  sols.set(sig,{w:"#nucleo"+sols.size+"-"+Math.round(t0),r:cr,c:cc,d:"N",cells:nc.map(k=>{const [a,b]=unK(k);return [a,b,A.get(k)];}),words,n:nc.length,pool,two,cross,dupLong,over,score});}
+ const t0=performance.now();let stop=false,nodes=0,cap=0;
+ function rec(i){if(stop)return;if(nodes>cap)return;if((nodes&255)===0&&performance.now()-t0>ms){stop=true;return;}
+  if(i===order.length){leaf();return;}
+  const [r,c]=order[i];const k=K(r,c);
+  if(fixed.has(k)){const v=fixed.get(k);if(okLetter(r,c,v,true)){A.set(k,v);nodes++;rec(i+1);A.delete(k);}return;}
+  const lets=[];for(const v of ALPH){const w=okLetter(r,c,v,false);if(w)lets.push([v,w*Math.random()]);}
+  lets.sort((a,b)=>b[1]-a[1]);const top=lets.slice(0,3).map(x=>x[0]);
+  const p=fill*Math.max(0.05,1-Math.hypot(r-cr,c-cc)/(half+1));
+  const vals=Math.random()<p?[...top,""]:["",...top.slice(0,2)];
+  for(const v of vals){if(stop||nodes>cap)return;if(v===""&&!okEmpty(r,c))continue;A.set(k,v);nodes++;rec(i+1);A.delete(k);}}
+ const FF=[1,0.7,0.45];let it=0;const fill0=fill;while(!stop&&performance.now()-t0<ms){fill=fill0*FF[it%3];it++;nodes=0;cap=1500;rec(0);}
+ // keep the best variants with different word sets
+ const out=[],seenW=new Set();for(const s of [...sols.values()].sort((a,b)=>b.score-a.score)){const key=s.words.map(x=>x.w).sort().join(",");if(seenW.has(key))continue;seenW.add(key);out.push(s);if(out.length>=6)break;}
+ return {list:out,tried:sols.size};}
+function applyPatch(p){snap();let n=0;for(const x of p.words){S.place[x.w]={r:x.r,c:x.c,d:x.d,t:++S.seq,pin:false,src:"nucleo"};n++;}
+ PREV=null;PROPS=null;CORE=null;model();const k=M.nBroken+M.bad.length;S.msg=`Messo il nucleo: ${p.n} lettere, ${n} parole nuove.`+(k?` Da sistemare: ${k}.`:"");render();}
 let PROPS=null;
 function globalProps(){const present=new Set(M.runs.map(x=>x.w));const out=[],none=[];
  for(const w of M.unplaced){const s=spotsForWord(w,1,{fence:"soft"})[0];if(s)out.push({...s,mine:true});else none.push(w);}
@@ -286,7 +360,7 @@ function replaceWord(o){const old=o.replace;const op=old?S.place[old]:null;if(op
  if(old){S.place[o.w].src=op.src;const i=S.words.indexOf(old);if(i>=0){if(S.words.includes(o.w))S.words.splice(i,1);else S.words[i]=o.w;}}
  S.sel={r:o.r,c:o.c,d:o.d};FOCUS=null;PREV=null;PROPS=null;model();
  const n=M.nBroken+M.bad.length;S.msg=(old?`${old} sostituita da ${o.w}.`:`Messa ${o.w} sopra «${o.from}».`)+(n?` Da sistemare: ${n} (in giallo).`:"");render();}
-function accept(p){if(!p)return;if(p.replace!==undefined){replaceWord(p);return;}snap();if(putWord(p.w,p.r,p.c,p.d)){S.sel={r:p.r,c:p.c,d:p.d};FOCUS=null;S.msg=`Messa ${p.w}.`;}PREV=null;PROPS=null;render();}
+function accept(p){if(!p)return;if(p.cells){applyPatch(p);return;}if(p.replace!==undefined){replaceWord(p);return;}snap();if(putWord(p.w,p.r,p.c,p.d)){S.sel={r:p.r,c:p.c,d:p.d};FOCUS=null;S.msg=`Messa ${p.w}.`;}PREV=null;PROPS=null;render();}
 function relayout(){const all=[...new Set([...S.words,...Object.keys(S.place)])];const fixed={};for(const [w,p] of Object.entries(S.place))if(p.pin)fixed[w]=p;
  const todo=all.filter(w=>!fixed[w]);if(!todo.length)return "Tutte le parole sono fissate: niente da riunire.";
  const build=pos=>{const L=new Map();for(const [w,p] of Object.entries(pos))cellsOf(w,p).forEach(([a,b],i)=>L.set(K(a,b),w[i]));return L;};
@@ -311,7 +385,7 @@ function rotateSel(){const h=selPlace();if(!h)return;const nd=h.p.d==="A"?"D":"A
 function defOf(w){if(S.defs[w]!==undefined)return S.defs[w];const p=PM.get(w);return p?p.d:"";}
 
 // ---------- rendering
-let PREV=null,LISTS=[],FOCUS=null,OPEN={words:true,props:false,shape:false,tools:false},ONLYPOOL=true;
+let PREV=null,LISTS=[],FOCUS=null,OPEN={words:true,props:false,core:false,shape:false,tools:false},ONLYPOOL=true;
 const CS=[20,26,32,40];
 function render(){model();renderMetrics();renderSheet();renderPanel();save();}
 function renderMetrics(){const m=M;const nw=m.runs.length,np=m.poolRuns.length;
@@ -323,7 +397,7 @@ function renderMetrics(){const m=M;const nw=m.runs.length,np=m.poolRuns.length;
  <div class="m ${m.unplaced.length?"wn":""}"><b>${m.unplaced.length}</b> tue parole non ancora nel disegno</div>
  <div class="m"><i>Voti: ${VSRC}</i></div>`;}
 function renderSheet(){const m=M;const L=m.L;const el=$("#sheet");const cs=CS[S.zoom]||26;
- const ghost=new Map();if(PREV)cellsOf(PREV.w,PREV).forEach(([a,b],i)=>ghost.set(K(a,b),PREV.w[i]));
+ const ghost=new Map();if(PREV){if(PREV.cells)PREV.cells.forEach(([a,b,ch])=>ghost.set(K(a,b),ch));else cellsOf(PREV.w,PREV).forEach(([a,b],i)=>ghost.set(K(a,b),PREV.w[i]));}
  let r0=0,r1=0,c0=0,c1=0;const inc=(r,c)=>{r0=Math.min(r0,r);r1=Math.max(r1,r);c0=Math.min(c0,c);c1=Math.max(c1,c);};
  for(const k of L.keys())inc(...unK(k));for(const k of ghost.keys())inc(...unK(k));if(S.sel)inc(S.sel.r,S.sel.c);
  const pad=2;r0-=pad;r1+=pad;c0-=pad;c1+=pad;const W=c1-c0+1,H=r1-r0+1;
@@ -354,7 +428,7 @@ const getProp=s=>{const [a,b]=String(s).split(":").map(Number);return (LISTS[a]|
 function propList(list,mineFn){const id=LISTS.length;LISTS.push(list);let h=`<ul class="props">`;let sepDone=false;
  list.forEach((o,i)=>{if(o.open&&o.open.length&&!sepDone){sepDone=true;h+=`<li class="sep">Con accostamenti da completare: diventano gialli, poi li allunghi o li cambi</li>`;}
   const xn=crossNames(o,o.replace||null);const btn=o.replace?"Sostituisci":"Metti";
-  h+=`<li class="prop${same(PREV,o)?" act":""}" data-pi="${id}:${i}"><div class="pw"><b>${o.w}</b> ${tagOf(o.w,mineFn?mineFn(o):false)} <span class="muted">${o.d==="A"?"orizz.":"vert."}${xn.length?` · incrocia ${xn.join(", ")}`:""} · ${fitTxt(o)}${o.offq?" · fuori dal quadrante":""}${o.here?" · posto attuale":""}</span></div>${defLine(o.w)}${o.open&&o.open.length?`<div class="po">da completare: ${o.open.map(x=>`«${esc(x)}»`).join(", ")}</div>`:""}<button class="btn sm" data-acc="${id}:${i}" ${o.here?"disabled":""}>${btn}</button></li>`;});
+  h+=`<li class="prop${same(PREV,o)?" act":""}" data-pi="${id}:${i}"><div class="pw"><b>${o.w}</b> ${tagOf(o.w,mineFn?mineFn(o):false)} <span class="muted">${o.d==="A"?"orizz.":"vert."}${xn.length?` · incrocia ${xn.join(", ")}`:""} · ${fitTxt(o)}${o.offq?" · fuori dal quadrante":""}${o.here?" · posto attuale":""}</span></div>${defLine(o.w)}${o.open&&o.open.length?`<div class="po">da completare: ${o.open.map(x=>`«${esc(x)}»`).join(", ")}</div>`:""}${o.dups&&o.dups.length?`<div class="po">doppione: ${o.dups.join(", ")} è già nel disegno</div>`:""}${o.twoOver?`<div class="po">supera il massimo di ${S.maxTwo} parole da due lettere</div>`:""}<button class="btn sm" data-acc="${id}:${i}" ${o.here?"disabled":""}>${btn}</button></li>`;});
  return h+`</ul>`;}
 function forceForm(prefill){const s=S.sel;if(!s)return `<p class="muted">Per mettere una parola dove vuoi tu, anche se rompe altre parole: scegli prima una casella nel disegno.</p>`;
  return `<div class="row"><span class="muted">Metti dalla casella selezionata, ${s.d==="A"?"verso destra":"verso il basso"}:</span><input class="inp" id="fword" list="allwords" value="${esc(prefill||"")}" placeholder="parola…"><button class="btn sm ghost" data-act="force">Metti qui</button></div>`;}
@@ -403,10 +477,11 @@ function changeHTML(F){const p=F.old?S.place[F.old]:null;
  if(FOCUS)h+=`<p><button class="btn sm ghost" data-act="unfocus">Chiudi</button></p>`;
  return h;}
 function probsHTML(){const m=M;const items=[];
- for(const w in m.broken){const p=S.place[w];items.push(`<li><a data-goto="${p.r},${p.c},${p.d}"><b>${w}</b></a>: ${m.broken[w].read!==w?`si legge «${esc(m.broken[w].read)}»`:"votata 0"}</li>`);}
- for(const x of m.bad)items.push(`<li><a data-goto="${x.r},${x.c},${x.d}"><b>${esc(x.w)}</b></a>: accostamento da completare</li>`);
+ for(const w in m.broken){const p=S.place[w];const br=m.broken[w];const by=[...new Set(br.over.map(o=>o.by))];
+  items.push(`<li><a data-goto="${p.r},${p.c},${p.d}"><b>${w}</b></a>: ${br.read!==w?`si legge «${esc(br.read)}»`:"votata 0"} <button class="btn sm ghost" data-fix="${w}" ${p.pin?"disabled":""}>Cambia o allunga</button>${by.map(b=>{const q=S.place[b];return q?` <button class="btn sm ghost" data-goto="${q.r},${q.c},${q.d}">vai a ${b}</button>`:"";}).join("")}</li>`);}
+ for(const x of m.bad)items.push(`<li><a data-goto="${x.r},${x.c},${x.d}"><b>${esc(x.w)}</b></a>: accostamento da completare <button class="btn sm ghost" data-goto="${x.r},${x.c},${x.d}">Cambia o allunga</button></li>`);
  if(!items.length)return "";
- return `<div class="probs"><b>Da sistemare (${items.length})</b><ul>${items.join("")}</ul><span class="muted">Clicca una parola gialla: puoi cambiarla o allungarla («Cambia o allunga»), spostarla o toglierla.</span></div>`;}
+ return `<div class="probs"><b>Da sistemare (${items.length})</b><ul>${items.join("")}</ul><span class="muted">«Cambia o allunga» propone parole che tengono gli incroci; «vai a» seleziona la parola che ha sovrascritto le lettere, da spostare o cambiare.</span></div>`;}
 function wordsHTML(){const opts=POOL.filter(p=>p.s>0).sort((a,b)=>b.s-a.s||b.ci-a.ci||a.w.localeCompare(b.w)).map(p=>`<option value="${p.w}">${p.w} · ${p.s}</option>`).join("");
  const fav=POOL.filter(p=>p.s>=2&&!S.words.includes(p.w)&&!S.place[p.w]).sort((a,b)=>b.s-a.s||a.w.localeCompare(b.w));
  const extra=Object.keys(S.place).filter(w=>!S.words.includes(w));
@@ -420,13 +495,30 @@ function propsHTML(){let h=`<p class="muted">Il miglior posto per ognuna delle t
  if(!PROPS)return h;
  if(PROPS.none.length)h+=`<p class="warn">Senza un posto che non rompa nulla: ${PROPS.none.join(", ")}.</p>`;
  return h+(PROPS.list.length?propList(PROPS.list,o=>o.mine):`<p class="muted">Nessuna proposta.</p>`);}
+function coreHTML(){if(CORE&&CORE.at!==JSON.stringify(S.place))CORE=null;const ctr=S.sel?`alla casella selezionata`:`al punto di gravità ◯`;
+ const sz=S.coreSize||7,fl=S.coreFill||0.65;
+ let h=`<p class="muted">Riempie una zona attorno ${ctr} come un piccolo cruciverba: le caselle vuote fanno da caselle nere, ogni nuova fila di lettere è una parola valida, nessuna parola già messa si rompe. Più fitto al centro, più rado ai bordi. Seleziona un’altra casella per spostare il centro.</p>
+ <p><b>Ampiezza</b> ${[5,7,9].map(n=>`<button class="btn sm ${sz===n?"":"ghost"}" data-csize="${n}">${n}×${n}</button>`).join(" ")}</p>
+ <p><b>Riempimento</b> ${[[0.4,"rado"],[0.65,"medio"],[0.9,"pieno"]].map(([v,l])=>`<button class="btn sm ${fl===v?"":"ghost"}" data-cfill="${v}">${l}</button>`).join(" ")}</p>
+ <p><button class="btn sm" data-act="core">${CORE?"Cerca altri nuclei":"Proponi nuclei"}</button> <span class="muted">circa due secondi</span></p>`;
+ if(!CORE)return h;
+ if(!CORE.list.length)return h+`<p class="warn">Nessun nucleo trovato qui. Prova un’altra casella come centro, un’ampiezza diversa o «rado».</p>`;
+ const id=LISTS.length;LISTS.push(CORE.list);
+ h+=`<ul class="props">${CORE.list.map((p,i)=>{const ws=p.words.slice().sort((a,b)=>(PM.has(b.w)-PM.has(a.w))||b.w.length-a.w.length);
+  return `<li class="prop${same(PREV,p)?" act":""}" data-pi="${id}:${i}"><div class="pw"><b>Variante ${i+1}</b> <span class="muted">+${p.n} lettere · ${p.words.length} parole nuove · ${p.pool} Amiata · ${p.cross} incroci · ${p.two} da due lettere</span></div>
+  <div class="pd">${ws.map(x=>PM.has(x.w)?`<b class="t-pool">${x.w}</b>`:`${x.w}<a href="#" class="ban" data-ban="${x.w}" title="Escludi ${x.w} dal dizionario" aria-label="Escludi ${x.w}">×</a>`).join(", ")}</div>
+  ${ws.filter(x=>PM.has(x.w)&&defOf(x.w)).slice(0,4).map(x=>`<div class="pd" style="font-size:.88rem"><b>${x.w}</b>: ${esc(defOf(x.w))}</div>`).join("")}
+  ${p.dupLong?`<div class="po">${p.dupLong} doppion${p.dupLong===1?"e":"i"} con parole già nel disegno</div>`:""}${p.over?`<div class="po">supera di ${p.over} il massimo di parole da due lettere</div>`:""}
+  <button class="btn sm" data-acc="${id}:${i}">Metti il nucleo</button></li>`;}).join("")}</ul>`;
+ return h;}
 function shapeHTML(){const G=[["tl","↖ in alto a sinistra"],["tr","↗ in alto a destra"],["c","◯ centro"],["bl","↙ in basso a sinistra"],["br","↘ in basso a destra"]];
- return `<p class="muted">Cambiano l’ordine delle proposte e «Riunisci». Non spostano le parole già messe.</p>
+ return `<p class="muted">Cambiano l’ordine delle proposte. Non spostano le parole già messe: per ridisporle usa «Riunisci», qui sotto.</p>
  <p><b>Punto di gravità</b><br>${G.map(([k,l])=>`<button class="btn sm ${S.grav===k?"":"ghost"}" data-grav="${k}">${l}</button>`).join(" ")}</p>
  <p><b>Forma</b><br>${[["round","raccolta"],["wide","allungata in orizzontale"],["tall","allungata in verticale"]].map(([k,l])=>`<button class="btn sm ${S.shape===k?"":"ghost"}" data-shape="${k}">${l}</button>`).join(" ")}</p>
- <p><label><b>Zona fitta</b> <input type="range" id="tight" min="0" max="12" value="${S.tight}" style="vertical-align:middle"> <span class="muted">${S.tight} caselle</span></label><br><span class="muted">Dentro la zona fitta le proposte possono accostare parole, se formano parole valide.</span></p>`;}
+ <p><label><b>Zona fitta</b> <input type="range" id="tight" min="0" max="12" value="${S.tight}" style="vertical-align:middle"> <span class="muted">${S.tight} caselle</span></label><br><span class="muted">Dentro la zona fitta le proposte possono accostare parole, se formano parole valide.</span></p>
+ <h3>Riunisci</h3><p class="muted">Ridispone da capo tutte le parole non fissate secondo il punto di gravità, la forma e la zona fitta scelti qui. Con un punto d’angolo nessuna parola esce dal suo quadrante. Le parole fissate (●) restano dove sono. Si può annullare.</p><p><button class="btn sm" data-act="relayout">Riunisci</button> <button class="btn sm ghost" data-act="pinall">Fissa tutte</button> <button class="btn sm ghost" data-act="unpinall">Sblocca tutte</button></p>`;}
 function toolsHTML(){const np=M.nBroken+M.bad.length;
- return `<h3>Riunisci</h3><p class="muted">Ridispone da capo tutte le parole non fissate, per incastrarle il più possibile. Le parole fissate (●) restano dove sono.</p><p><button class="btn sm" data-act="relayout">Riunisci</button> <button class="btn sm ghost" data-act="pinall">Fissa tutte</button> <button class="btn sm ghost" data-act="unpinall">Sblocca tutte</button></p>
+ return `<h3>Parole escluse dal dizionario</h3><p class="muted">Parole comuni che non vuoi nel cruciverba (abbreviazioni, frammenti). Le escludi con × nelle varianti del nucleo; × qui le rimette.</p><p>${(S.ban||[]).length?(S.ban||[]).map(w=>`<span class="chip no">${w}<a href="#" data-unban="${w}" aria-label="Rimetti ${w}">×</a></span>`).join(""):'<span class="muted">Nessuna.</span>'}</p>
  <h3>Limiti</h3><p><label>Parole da due lettere al massimo <input type="number" id="maxTwo" min="0" max="40" value="${S.maxTwo}" style="width:4em"></label></p>
  <h3>Esporta per Claude</h3>${np?`<p class="warn">Attenzione: ${np} ${np===1?"parola è":"parole sono"} da sistemare. Il testo esportato le segnala.</p>`:""}
  <p><button class="btn sm" data-act="export">Prepara il testo</button> <button class="btn sm ghost" data-act="copy">Copia</button> <span id="cps" class="muted"></span></p><textarea id="out" class="out" readonly></textarea>
@@ -436,7 +528,7 @@ function toolsHTML(){const np=M.nBroken+M.bad.length;
 function renderPanel(){const keep=$("#panel").scrollTop;LISTS=[];
  const sec=(k,title,body)=>`<details data-k="${k}" ${OPEN[k]?"open":""}><summary>${title}</summary>${body}</details>`;
  $("#panel").innerHTML=`<div class="ctx">${ctxHTML()}${S.msg?`<p class="muted" id="msg">${esc(S.msg)}</p>`:""}</div>${probsHTML()}
- ${sec("words",`Le tue parole (${S.words.length})`,wordsHTML())}${sec("props","Proposte dello strumento",propsHTML())}${sec("shape","Gravità, forma, zona fitta",shapeHTML())}${sec("tools","Strumenti ed esportazione",toolsHTML())}`;
+ ${sec("words",`Le tue parole (${S.words.length})`,wordsHTML())}${sec("props","Proposte dello strumento",propsHTML())}${sec("core","Nucleo fitto",coreHTML())}${sec("shape","Gravità, forma, zona fitta e Riunisci",shapeHTML())}${sec("tools","Strumenti ed esportazione",toolsHTML())}`;
  $("#panel").scrollTop=keep;}
 function markActive(){document.querySelectorAll(".prop").forEach(li=>li.classList.toggle("act",same(PREV,getProp(li.dataset.pi))));}
 function preview(o){PREV=o||null;model();renderSheet();markActive();}
@@ -479,10 +571,13 @@ panel.addEventListener("change",e=>{const t=e.target;
  if(t.id==="tight"){snap();S.tight=+t.value;PROPS=null;render();return;}
  if(t.id==="maxTwo"){snap();S.maxTwo=Math.max(0,+t.value||0);render();return;}});
 panel.addEventListener("click",async e=>{const t=e.target;
+ const bn=t.closest("[data-ban]");if(bn){e.preventDefault();e.stopPropagation();const w=bn.dataset.ban;snap();S.ban=[...new Set([...(S.ban||[]),w])];BAN=new Set(S.ban);loadPool();PROPS=null;PREV=null;S.msg=`${w} esclusa dal dizionario: non verrà più proposta. Si toglie in «Strumenti ed esportazione».`;render();return;}
+ const ub=t.closest("[data-unban]");if(ub){e.preventDefault();const w=ub.dataset.unban;snap();S.ban=(S.ban||[]).filter(x=>x!==w);BAN=new Set(S.ban);loadPool();PROPS=null;S.msg=`${w} di nuovo nel dizionario.`;render();return;}
  const acc=t.closest("[data-acc]");if(acc){accept(getProp(acc.dataset.acc));return;}
  const li=t.closest(".prop");if(li){preview(getProp(li.dataset.pi));return;}
  const rm=t.closest("[data-crm]");if(rm){e.preventDefault();e.stopPropagation();const w=rm.dataset.crm;const p=S.place[w];if(p&&p.pin){flash(`${w} è fissata: sbloccala prima di toglierla.`);return;}snap();S.words=S.words.filter(x=>x!==w);delete S.place[w];if(FOCUS&&FOCUS.w===w)FOCUS=null;PREV=null;PROPS=null;S.msg=`Tolta ${w}.`;render();return;}
  const ch=t.closest("[data-chip]");if(ch){const w=ch.dataset.chip;const p=S.place[w];PREV=null;if(p){S.sel={r:p.r,c:p.c,d:p.d};FOCUS=null;}else{FOCUS={type:"word",w};const sp=spotsForWord(w,1)[0];render();if(sp)preview(sp);return;}render();return;}
+ const fx=t.closest("[data-fix]");if(fx){const w=fx.dataset.fix;const p=S.place[w];if(p){S.sel={r:p.r,c:p.c,d:p.d};FOCUS={type:"change",old:w,span:{r:p.r,c:p.c,len:w.length},d:p.d,from:w};PREV=null;render();$("#panel").scrollTop=0;}return;}
  const go=t.closest("[data-goto]");if(go){const [r,c,d]=go.dataset.goto.split(",");S.sel={r:+r,c:+c,d};FOCUS=null;PREV=null;render();return;}
  const b=t.closest("button");if(!b)return;
  if(b.dataset.fadd||b.dataset.act==="add"){const raw=b.dataset.fadd||$("#addw").value;const w=clean(raw);if(w.length<2){flash("Scrivi una parola di almeno due lettere.");return;}
@@ -492,6 +587,8 @@ panel.addEventListener("click",async e=>{const t=e.target;
   if(!S.place[w]){const sp=spotsForWord(w,1)[0];if(sp){preview(sp);flash(`Proposta per ${w}: premi Invio o «Metti» per accettarla.`);}else flash(`${w} non si incrocia da nessuna parte senza rompere qualcosa: puoi metterla comunque da una casella.`);}
   return;}
  if(b.dataset.mv){const [dr,dc]=b.dataset.mv.split(",").map(Number);moveSel(dr,dc);return;}
+ if(b.dataset.csize){S.coreSize=+b.dataset.csize;CORE=null;renderPanel();return;}
+ if(b.dataset.cfill){S.coreFill=+b.dataset.cfill;CORE=null;renderPanel();return;}
  if(b.dataset.grav){snap();S.grav=b.dataset.grav;PROPS=null;render();return;}
  if(b.dataset.shape){snap();S.shape=b.dataset.shape;PROPS=null;render();return;}
  const a=b.dataset.act;const h=selPlace();
@@ -509,6 +606,7 @@ panel.addEventListener("click",async e=>{const t=e.target;
  if(a==="spots"&&h){FOCUS={type:"word",w:h.w};PREV=null;render();return;}
  if(a==="rmd"&&h){if(h.p.pin){flash(`${h.w} è fissata: sbloccala prima di toglierla.`);return;}snap();delete S.place[h.w];S.msg=`Tolta ${h.w} dal disegno${S.words.includes(h.w)?": resta nel tuo elenco":""}.`;PROPS=null;render();return;}
  if(a==="unfocus"){FOCUS=null;PREV=null;render();return;}
+ if(a==="core"){b.disabled=true;b.textContent="Sto cercando…";setTimeout(()=>{model();const c=S.sel||{r:0,c:0};const half=((S.coreSize||7)-1)/2;CORE=densePatches(c.r,c.c,half,S.coreFill||0.65,1800);CORE.at=JSON.stringify(S.place);OPEN.core=true;PREV=null;renderPanel();if(CORE.list.length)preview(CORE.list[0]);},20);return;}
  if(a==="props"){b.disabled=true;b.textContent="Sto calcolando…";setTimeout(()=>{model();PROPS=globalProps();OPEN.props=true;PREV=null;renderPanel();},20);return;}
  if(a==="relayout"){const un=Object.values(S.place).filter(p=>!p.pin).length;if(un&&!confirm(`Riunisci sposterà ${un} parole non fissate. Continuare? (Si può annullare.)`))return;snap();S.msg=relayout();PREV=null;PROPS=null;render();return;}
  if(a==="pinall"){snap();Object.values(S.place).forEach(p=>p.pin=true);S.msg="Tutte le parole sono fissate.";render();return;}
