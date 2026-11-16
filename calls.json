@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:15:58.871Z",
+  "updated": "2026-11-16T18:16:04.018Z",
   "calls": [
     {
       "id": 4,
@@ -576,6 +576,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-c0ed5f8908",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852964015,
+      "title": "Sony World Photography Awards 2027 — Professional, categoria Creative",
+      "org": "World Photography Organisation",
+      "deadline": "2027-01-12",
+      "status": "curious",
+      "url": "https://www.worldphoto.org/pro",
+      "notes": "Proposta scraper 2026-11-16\nprize · Dysographies\nMoney: Gratuito. Vincitore assoluto $25.000; vincitori di categoria: attrezzatura, viaggio a Londra, libro e mostra.\nEligibility: 18+, qualsiasi livello: OK. Al massimo il 20% della serie già pubblicato (online o in mostra) prima del 1/1/2026.\n16:00 GMT. Verificare dove e quando la serie è già stata mostrata. Concorso commerciale di massa, non curato come un festival.\nSource: https://www.worldphoto.org/blogs/01-06-26/sony-world-photography-awards-2027-have-just-launched",
+      "fit": "Medium — Gratuito, serie da 5–10 immagini; la categoria Creative accoglie esplicitamente il lavoro astratto: la serie completa entra così com'è.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-a08d902f69",
       "proposedOn": "2026-11-16"
     }
   ],
