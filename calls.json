@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:16:10.688Z",
+  "updated": "2026-11-16T18:16:14.043Z",
   "calls": [
     {
       "id": 4,
@@ -610,6 +610,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-dfb4169ff1",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852974042,
+      "title": "Akademie der Künste — residenza Studio für Elektroakustische Musik (apr–giu 2027)",
+      "org": "Akademie der Künste, Berlino",
+      "deadline": "2027-01-31",
+      "status": "curious",
+      "url": "https://www.adk.de/en/academy/studio-for-electroacoustic-music/residency.htm",
+      "notes": "Proposta scraper 2026-11-16\nresidency · pratica live (piano a contatto + modulare); Cialoma; radio art\nMoney: Accesso a studio e tecnica; alloggio di norma escluso, viaggio/alloggio solo in casi singoli. Onorario non indicato; nessuna quota.\nEligibility: Qualsiasi disciplina, singoli o gruppi; nessuna clausola su nazionalità, età o studenti: OK.\nProssima finestra (set–nov) con scadenza 30 giugno. Chiedere se è previsto un onorario.\nSource: https://adk.de/studio-fuer-elektroakustische-musik",
+      "fit": "High — Fino a 2 settimane in studio a Berlino, aperto a live electronics, radio art e progetti educativi sul suono; rafforza il legame con Berlino.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-e3429be38a",
       "proposedOn": "2026-11-16"
     }
   ],
