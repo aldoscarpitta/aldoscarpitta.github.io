@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:12:49.161Z",
+  "updated": "2026-11-16T18:12:55.768Z",
   "calls": [
     {
       "id": 4,
@@ -423,6 +423,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-f690230bc6",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852775766,
+      "title": "Wave Farm Residency + Fellowship Programs 2027",
+      "org": "Wave Farm, Acra NY (USA)",
+      "deadline": "2026-12-01",
+      "status": "curious",
+      "url": "https://wavefarm.org/ta/residency-program/info-apply",
+      "notes": "Proposta scraper 2026-11-16\nresidency · installazione FM / transmission art; Cialoma o WILD:CARE come serie radio\nMoney: Residenza 10 gg: $1.000; Radio Art Fellowship 2 mesi: $2.000. Viaggio e vitto a carico dell'artista; nessuna quota.\nEligibility: Call internazionale: OK. Esclusi studenti full-time: OK (IUAV part-time). Serve un corpus di lavori di trasmissione o capacità dimostrata: borderline.\nScadenza 23:59 EST. Il volo transatlantico supera lo stipendio. Verificare il tipo di visto USA per uno stipendio.\nSource: https://www.reviewedbyartists.com/open-call/a56ef851-4994-409d-940a-96d73f8819e0",
+      "fit": "High — Il riferimento internazionale per la transmission art; la Community Engagement fellowship aggiunge un laboratorio pubblico.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-ae23d763dc",
       "proposedOn": "2026-11-16"
     }
   ],
