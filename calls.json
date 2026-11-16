@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T17:29:09.521Z",
+  "updated": "2026-11-16T18:12:49.161Z",
   "calls": [
     {
       "id": 4,
@@ -407,6 +407,23 @@
         "pattern": ""
       },
       "history": []
+    },
+    {
+      "id": 1794852769159,
+      "title": "Mensch Maschine VISIT Residency 2027 — ENERGY GHOSTS",
+      "org": "E.ON Stiftung VISIT, Junge Akademie AdK, E-WERK Luckenwalde, CCA Ujazdowski",
+      "deadline": "2026-12-01",
+      "status": "curious",
+      "url": "https://visit-energy.com/en/programme",
+      "notes": "Proposta scraper 2026-11-16\nresidency · nuovo site-specific (FM / elettromagnetismo in un'ex centrale)\nMoney: €20.000 a fellow (compenso + produzione), studio e alloggio a Luckenwalde o Berlino; nessuna quota.\nEligibility: Internazionale, nessun limite d'età: OK. Rivolto a 'emerging artists' senza definizione: rischio per un mid-career.\nPresenza ≥75% tra metà agosto e metà novembre 2027: verificare la compatibilità con IUAV. Candidatura su visit-energy.com/bewerben.\nSource: https://adk.de/news/2026/10/open-call-mensch-maschine-stipendium",
+      "fit": "Medium — Quattro fellowship interamente finanziate su arte, energia ed ecologia; il suono è ammesso esplicitamente.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-f690230bc6",
+      "proposedOn": "2026-11-16"
     }
   ],
   "dismissed": []
