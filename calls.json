@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:15:22.889Z",
+  "updated": "2026-11-16T18:15:31.295Z",
   "calls": [
     {
       "id": 4,
@@ -508,6 +508,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-684e4c5c83",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852931293,
+      "title": "Segesta Teatro Festival 2027 — call per proposte",
+      "org": "Segesta Teatro Festival, Parco Archeologico di Segesta (TP)",
+      "deadline": "2026-12-20",
+      "status": "curious",
+      "url": "https://www.segestateatrofestival.com/call2027/",
+      "notes": "Proposta scraper 2026-11-16\nfestival · Cialoma / live piano a contatto + modulare; in alternativa laboratorio d'ascolto\nMoney: Cachet e rimborsi non indicati; nessuna quota.\nEligibility: Qualsiasi nazionalità, singoli o gruppi: OK. Priorità (non limite) a emergenti/under 35.\nChiedere il compenso a segreteria@segestateatrofestival.com. Servono trailer ≤50 s, 5 foto, scheda tecnica, dossier PDF. Esiti entro il 15/01/2027.\nSource: https://www.dieci.media/2026/10/segesta-teatro-festival-2027-call-candidature/",
+      "fit": "High — Ammette esplicitamente musica sperimentale e laboratori esperienziali condotti da una persona, in un sito archeologico del trapanese all'alba e al tramonto.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-9f52f825a3",
       "proposedOn": "2026-11-16"
     }
   ],
