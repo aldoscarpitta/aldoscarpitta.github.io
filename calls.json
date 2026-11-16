@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:15:46.038Z",
+  "updated": "2026-11-16T18:15:58.871Z",
   "calls": [
     {
       "id": 4,
@@ -559,6 +559,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-6b1d29c348",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852958870,
+      "title": "Ortung 15 — Schwabach Art Prize 2027",
+      "org": "Stadt Schwabach, Kulturamt (Germania)",
+      "deadline": "2027-01-11",
+      "status": "curious",
+      "url": "https://www.schwabach.de/images/referate/Kulturamt/ortung/ortung_15/ortung_15_Call_online_final.pdf",
+      "notes": "Proposta scraper 2026-11-16\nsite-specific · nuovo site-specific (installazione sonora in centro città; tema 'Inspired by gold')\nMoney: €1.000 di rimborso spese a ciascuno dei 20 selezionati, più eventuale supporto a produzione e soggiorno. Premi della giuria €6.000/€3.000, del pubblico €3.000/€2.000/€1.000. Nessuna quota.\nEligibility: Nessuna clausola su età, nazionalità o residenza. Ammessi 'tutti i tipi di installazione (anche video e architettura)'; il suono non è nominato: DA VERIFICARE.\nScadenza a mezzanotte, un solo PDF ≤20 MB. Colloquio obbligatorio il 6/3/2027, concept entro il 5/4, installazione pronta il 1/8, mostra 7–22/8/2027. Chiedere a kulturamt@schwabach.de se l'installazione sonora è ammessa.\nSource: https://on-the-move.org/news/schwabach-ortung-15-competition-schwabach-art-prize-germany",
+      "fit": "Medium — Gli artisti trasformano spazi del centro di Schwabach in luoghi espositivi o performativi; il tema (oro) è dato.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-c0ed5f8908",
       "proposedOn": "2026-11-16"
     }
   ],
