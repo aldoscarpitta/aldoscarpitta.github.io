@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:16:04.018Z",
+  "updated": "2026-11-16T18:16:10.688Z",
   "calls": [
     {
       "id": 4,
@@ -593,6 +593,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-a08d902f69",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852970686,
+      "title": "Roman J. Witt Visiting Artist Residency",
+      "org": "Penny W. Stamps School of Art & Design, University of Michigan, con UMMA",
+      "deadline": "2027-01-25",
+      "status": "curious",
+      "url": "https://stamps.umich.edu/about/visiting/witt-residency-application",
+      "notes": "Proposta scraper 2026-11-16\nresidency · nuovo site-specific + ruolo educativo (studenti, programma pubblico)\nMoney: Onorario $20.000 + fino a $5.000 per materiali e ricerca, alloggio e studio. Viaggio solo 'limitato'. QUOTA DI CANDIDATURA $15 (SlideRoom).\nEligibility: 'Artisti e designer affermati': OK per un mid-career. Nazionalità e studenti non specificati.\nFino a 12 settimane ad Ann Arbor tra settembre 2027 e giugno 2028; mostra in apertura a marzo 2028. Chiedere a UMMA se la galleria Stenn è adatta a un'installazione sonora. Visto USA e tassazione dell'onorario non verificati.\nSource: https://www.e-flux.com/announcements/6788578/roman-witt-residency",
+      "fit": "Medium — Residenza ben finanziata per artisti affermati, con mostra personale e programmi obbligatori con studenti e pubblico: unisce il profilo di artista e di educatore.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-dfb4169ff1",
       "proposedOn": "2026-11-16"
     }
   ],
