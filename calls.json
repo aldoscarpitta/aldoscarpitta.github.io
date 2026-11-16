@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:15:41.178Z",
+  "updated": "2026-11-16T18:15:46.038Z",
   "calls": [
     {
       "id": 4,
@@ -542,6 +542,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-7734ee994e",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852946037,
+      "title": "6° Concorso internazionale di musica elettronica 'Iannis Xenakis'",
+      "org": "Aristotle University of Thessaloniki — Contemporary Music Lab",
+      "deadline": "2027-01-01",
+      "status": "curious",
+      "url": "https://xenakis.web.auth.gr/rules/",
+      "notes": "Proposta scraper 2026-11-16\nprize · Cialoma (versione elettroacustica fissa)\nMoney: Quota di candidatura €15. Premi €600, €400, €300; cinque opere segnalate eseguite in concerto.\nEligibility: Qualsiasi nazionalità ed età: OK. Una sola opera, anonima, 7–15 minuti, fino a 8 canali. Niente interventi live.\nL'opera non deve essere legata a diritti discografici o editoriali: se Cialoma è uscita su etichetta non è ammissibile. Priorità bassa, premi piccoli.\nSource: https://britishelectroacousticnetwork.com/opportunities/",
+      "fit": "Medium — Premio internazionale per opere elettroacustiche, con concerto a novembre 2027; rilevante solo per una versione su supporto di Cialoma.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-6b1d29c348",
       "proposedOn": "2026-11-16"
     }
   ],
