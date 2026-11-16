@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:15:14.589Z",
+  "updated": "2026-11-16T18:15:18.522Z",
   "calls": [
     {
       "id": 4,
@@ -474,6 +474,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-60ea2b5a7f",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852918520,
+      "title": "IN SITU Open Call #3 — online support & Immersive Lab (spazio pubblico)",
+      "org": "IN SITU / Lieux publics (Europa Creativa)",
+      "deadline": "2026-12-09",
+      "status": "curious",
+      "url": "https://form.jotform.com/262783691249369",
+      "notes": "Proposta scraper 2026-11-16\ntraining · Æ / Passèggi Sonori o nuovo site-specific\nMoney: Nessuna quota. Lab: €1.500 per la scrittura, volo fino a €300, vitto e alloggio (cifre solo dall'aggregatore).\nEligibility: Residenza in Europa: OK. 'Emerging' autodichiarato in 150 parole: va argomentato. Il progetto deve essere oltre l'idea e non ancora debuttato.\n'12AM CET 9 dicembre' è ambiguo: inviare entro l'8. Solo inglese. Il PDF completo su Google Drive non è stato letto.\nSource: https://on-the-move.org/news/situ-online-support-and-immersive-lab-emerging-artists-creating-public-space-3rd-call",
+      "fit": "Medium — Mentoring più laboratorio immersivo per un nuovo lavoro nello spazio pubblico non ancora debuttato; ~10 progetti vanno in residenza di produzione.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-da1bf95e6e",
       "proposedOn": "2026-11-16"
     }
   ],
