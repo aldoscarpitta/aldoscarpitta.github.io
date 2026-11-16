@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:13:01.093Z",
+  "updated": "2026-11-16T18:14:36.224Z",
   "calls": [
     {
       "id": 4,
@@ -460,5 +460,13 @@
       "proposedOn": "2026-11-16"
     }
   ],
-  "dismissed": []
+  "dismissed": [
+    {
+      "cid": "oc-98d52ee2ce",
+      "title": "Catalysi 2027 — due residenze al Teatro Comandini",
+      "url": "https://www.societas.es/p/catalysi-residenze-2027-bando/",
+      "date": "2026-11-16",
+      "reason": "rejected"
+    }
+  ]
 }
