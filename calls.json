@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:15:18.522Z",
+  "updated": "2026-11-16T18:15:22.889Z",
   "calls": [
     {
       "id": 4,
@@ -491,6 +491,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-da1bf95e6e",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852922887,
+      "title": "Rotterdam Photo 2027 'VIBRANCE' — categoria Single Image",
+      "org": "Rotterdam Photo",
+      "deadline": "2026-12-10",
+      "status": "curious",
+      "url": "https://site.picter.com/rotterdam-photo-2027/timeline",
+      "notes": "Proposta scraper 2026-11-16\nfestival · Dysographies\nMoney: Single Image: €19 a candidatura + IVA olandese 21% (circa €23), stampa a carico del festival. Sconsigliata la categoria Projects: circa €42 più stampa, spedizione, assicurazione e allestimento a carico dell'artista (quasi pay-to-exhibit).\nEligibility: Aperto a tutti, emergenti o affermati, 16+: OK.\nScadenza 10/12 secondo la timeline ufficiale (alcuni siti riportano ancora il 4/10: sembra prorogata). Festival 17–21/3/2027 durante la Rotterdam Art Week. Verificare che la Single Image sia ancora aperta.\nSource: https://site.picter.com/rotterdam-photo-2027",
+      "fit": "Medium — Il tema (vibrazione, pulsazione del vivente) si accorda ai tramonti a campo di colore; la Single Image viene stampata 2,5×2,5 m, adatta al grande formato della serie.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-684e4c5c83",
       "proposedOn": "2026-11-16"
     }
   ],
