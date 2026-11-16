@@ -487,6 +487,37 @@
   #backupStatus.err { color: var(--red-ink); }
   #backupStatus.busy { color: var(--yellow-ink); }
 
+  /* ---------- proposals inbox ----------
+     Written by the monthly scraper into candidates.json; nothing enters
+     the list until accepted here. Black bar = not yet yours. */
+  .proposals { border: 1px solid var(--rule); border-left: 8px solid var(--ink); margin-bottom: 24px; }
+  .proposals[hidden] { display: none; }
+  .prop-head {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    padding: 12px 20px; border-bottom: 1px solid var(--rule-thin);
+  }
+  .prop-head h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.14em; text-transform: lowercase; }
+  .prop-head span { font-size: 11.5px; color: var(--ink-mid); }
+  .prop-row {
+    display: grid; grid-template-columns: 84px 1fr auto; gap: 20px; align-items: start;
+    padding: 14px 20px; border-bottom: 1px solid var(--rule-thin);
+  }
+  .prop-row:last-of-type { border-bottom: none; }
+  .prop-title { font-size: 15.5px; font-weight: 500; line-height: 1.3; }
+  .prop-badge {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: lowercase;
+    border: 1px solid var(--ink); padding: 1px 7px; white-space: nowrap;
+  }
+  .prop-badge.high { background: var(--ink); color: var(--paper); }
+  .prop-actions { display: flex; flex-direction: column; gap: 4px; }
+  .prop-actions .accept { background: var(--ink); color: var(--paper); }
+  .prop-actions .accept:hover { background: var(--blue); border-color: var(--blue); }
+  .prop-empty { padding: 12px 20px; font-size: 12.5px; color: var(--ink-mid); }
+  details.prop-dismissed { padding: 10px 20px 12px; border-top: 1px solid var(--rule-thin); }
+  details.prop-dismissed summary { cursor: pointer; font-size: 11.5px; color: var(--ink-mid); text-transform: lowercase; letter-spacing: 0.05em; }
+  .dismissed-row { display: flex; gap: 12px; align-items: center; font-size: 12px; color: var(--ink-mid); margin-top: 6px; }
+  .dismissed-row button { font: inherit; font-size: 11px; background: none; border: none; border-bottom: 1px solid var(--rule-thin); cursor: pointer; color: var(--blue-ink); padding: 2px 0; }
+
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; animation: none !important; }
   }
@@ -497,7 +528,8 @@
     .header-bar { padding: 24px 20px 14px; }
     .main { padding: 20px 20px 40px; }
     .stats { gap: 16px; }
-    .call-card { grid-template-columns: 72px 1fr; }
+    .call-card, .prop-row { grid-template-columns: 72px 1fr; }
+    .prop-actions { grid-column: 1 / -1; flex-direction: row; }
     .call-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; opacity: 1; }
     .setup-bar { flex-direction: column; }
     .setup-divider { display: none; }
@@ -547,6 +579,8 @@
     </div>
     <button class="dismiss-btn" id="dismissSetup">dismiss ✕</button>
   </div>
+
+  <section class="proposals" id="proposals" aria-labelledby="propTitle" hidden></section>
 
   <nav class="toolbar" aria-label="Filters and actions">
     <button class="filter-btn active" data-filter="all">all</button>
@@ -646,7 +680,7 @@
         <div class="form-group"></div>
       </div>
       <div class="form-group rec-sub" id="subApprox">
-        <label class="check-row"><input type="checkbox" id="fieldApprox"> date is approximate — cycle not announced yet (shows as <b>~</b>)</label>
+        <label class="check-row"><input type="checkbox" id="fieldApprox"> <span>date is approximate — not confirmed by the organiser yet (shows as <b>~</b>)</span></label>
       </div>
     </div>
 
@@ -685,9 +719,9 @@
 <div class="modal-overlay" id="syncModalOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="syncModalTitle" style="max-width:460px">
     <h2 id="syncModalTitle">github sync</h2>
-    <p class="modal-subtitle" style="color:var(--text-dim);margin-bottom:16px">Calls are written to <code>calls.json</code> in your repo on every save.</p>
+    <p class="modal-subtitle" style="color:var(--ink-muted);margin-bottom:16px">Calls are written to <code>calls.json</code> in your repo whenever they change.</p>
     <div class="sync-modal-note">
-      When configured, every time you add, edit, or delete a call, the page silently commits <strong>calls.json</strong> to your GitHub repository. GitHub Pages then serves it at <strong>aldoweb.xyz/calls.json</strong> — readable by the weekly Cowork automation.
+      When configured, every change (add, edit, delete, accept or reject a proposal) commits <strong>calls.json</strong> to your repository; opening the page commits nothing unless the list actually changed. If GitHub holds a different list (edited from another browser), you are asked before anything is overwritten. The monthly scraper writes <strong>candidates.json</strong> — this page only reads it.
     </div>
     <div class="form-group">
       <label class="form-label" for="ghRepo">Repository <span style="font-weight:400;text-transform:none;letter-spacing:0">(username/repo)</span></label>
@@ -714,8 +748,10 @@
         <button class="tool-btn" id="restoreFromFile">↑ restore from file</button>
         <button class="tool-btn" id="restoreFromGh">⟲ restore from github</button>
         <button class="tool-btn" id="undoRestore" style="display:none">↩ undo restore</button>
+        <button class="tool-btn" id="loadProposals" title="Load a candidates.json file (e.g. from the monthly email) into the proposals inbox">↑ load proposals file</button>
       </div>
       <input type="file" id="backupFileInput" accept="application/json,.json" style="display:none">
+      <input type="file" id="proposalsFileInput" accept="application/json,.json" style="display:none">
       <p class="backup-hint" id="backupStatus" role="status" aria-live="polite"></p>
     </div>
 
@@ -796,6 +832,15 @@ const STATUS_MAP = { urgent:'interested', upcoming:'curious', watch:'observe' };
 const STATUSES = ['interested','curious','observe','applied'];
 
 let calls=[], editingId=null, currentFilter='all';
+
+// Proposals inbox. candidates.json has ONE writer (the monthly scraper);
+// calls.json has ONE writer (this page). Decisions therefore live here:
+// accepted proposals become calls carrying their `cid`, rejected ones go
+// into `dismissed`, and both travel inside calls.json so the scraper can
+// read them and never propose the same thing twice.
+const LS_DISMISSED = 'openCalls_dismissed';
+const LS_CAND_LOCAL = 'openCalls_candidates_local';
+let dismissed=[], remoteCandidates=[], localCandidates=[], pendingCid=null, candidatesMeta=null;
 
 // ---------------------------------------------------------------
 // Date core — every "next occurrence" calculation goes through here
@@ -954,11 +999,16 @@ function loadData(){
     }
     saveLocal();
   }
+  dismissed = readKey(LS_DISMISSED) || [];
+  localCandidates = (readKey(LS_CAND_LOCAL) || []).filter(validCandidate);
   rollDueCalls();
   saveLocal();
 }
 
-function saveLocal(){ localStorage.setItem(LS_KEY, JSON.stringify(calls)); }
+function saveLocal(){
+  localStorage.setItem(LS_KEY, JSON.stringify(calls));
+  localStorage.setItem(LS_DISMISSED, JSON.stringify(dismissed));
+}
 function saveData(){ saveLocal(); syncToGitHub(); }
 
 
@@ -977,6 +1027,12 @@ function esc(s){
   return String(s==null?'':s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+// Only http(s) links become clickable. Proposals carry text scraped from
+// third-party pages; a javascript: URL must never reach an href.
+function safeUrl(u){
+  const s=String(u||'').trim();
+  return /^https?:\/\//i.test(s) ? s : '';
 }
 // Kandinsky's 1923 correspondence: red square, yellow triangle, blue circle.
 // Used so relevance is readable without relying on hue alone.
@@ -1071,7 +1127,7 @@ function renderCalls(){
         ${locked?`<div class="lock-note">🔒 locked until ${formatDate(call.lockedUntil)}${call.lockNote?' — '+esc(call.lockNote):''}</div>`:''}
         ${call.fit?`<div class="call-fit"><b>fit</b> ${esc(call.fit)}</div>`:''}
         ${call.notes?`<div class="call-notes">${esc(call.notes)}</div>`:''}
-        ${call.url?`<a class="call-url" href="${esc(call.url)}" target="_blank" rel="noopener noreferrer">${esc(call.url)}</a>`:''}
+        ${safeUrl(call.url)?`<a class="call-url" href="${esc(safeUrl(call.url))}" target="_blank" rel="noopener noreferrer">${esc(call.url)}</a>`:(call.url?`<span class="call-notes">url: ${esc(call.url)}</span>`:'')}
         ${histBlock}
       </div>
       <div class="call-actions">
@@ -1091,6 +1147,183 @@ function renderCalls(){
   document.getElementById('stat-curious').textContent=live.filter(c=>c.status==='curious').length;
   document.getElementById('stat-observe').textContent=live.filter(c=>c.status==='observe').length;
   document.getElementById('stat-recurring').textContent=calls.filter(isRecurring).length;
+  renderProposals();   // accepting/deleting a call changes what is still pending
+}
+
+// ---------------------------------------------------------------
+// Proposals inbox
+// candidates.json contract (schema 1), written only by the scraper:
+// { schema:1, generated:ISO, run:"YYYY-MM", candidates:[{
+//     cid:"oc-<stable id>"  REQUIRED, never reused for another call
+//     title                 REQUIRED
+//     deadline:"YYYY-MM-DD" or "" ; dateApprox:bool
+//     org, url (organiser page), source (aggregator page),
+//     rating:"High"|"Medium", kind:"residency|grant|training|workshop|
+//     seminar|prize|commission|festival|site-specific", project (which
+//     strand it serves, or "practice development"/"new site-specific"),
+//     fit, money (what is paid / any fee), eligibility, notes,
+//     found:"YYYY-MM-DD" }] }
+// Rows failing validCandidate are ignored, not shown half-broken.
+// ---------------------------------------------------------------
+function validCandidate(c){
+  return !!(c && typeof c==='object' && typeof c.cid==='string' && c.cid.trim()
+            && String(c.title||'').trim()
+            && (!c.deadline || /^\d{4}-\d{2}-\d{2}$/.test(c.deadline)));
+}
+// Same call, different spelling of its address: scheme, www, trailing
+// slash, fragment and tracking parameters do not make it a new call.
+function normUrl(u){
+  const s=safeUrl(u); if(!s) return '';
+  try{
+    const x=new URL(s);
+    [...x.searchParams.keys()].forEach(k=>{ if(/^(utm_|fbclid|gclid)/i.test(k)) x.searchParams.delete(k); });
+    const q=x.searchParams.toString();
+    return (x.hostname.replace(/^www\./i,'')+x.pathname.replace(/\/+$/,'')+(q?'?'+q:'')).toLowerCase();
+  }catch(e){ return ''; }
+}
+function allCandidates(){
+  const byCid=new Map();
+  // Remote wins over a locally loaded file for the same cid (it is newer).
+  localCandidates.concat(remoteCandidates).forEach(c=>byCid.set(c.cid, c));
+  return [...byCid.values()];
+}
+function pendingCandidates(){
+  const trackedCids=new Set(calls.map(c=>c.cid).filter(Boolean));
+  const trackedUrls=new Set(calls.map(c=>normUrl(c.url)).filter(Boolean));
+  const gone=new Set(dismissed.map(d=>d.cid));
+  return allCandidates().filter(c=>{
+    if(trackedCids.has(c.cid) || gone.has(c.cid)) return false;
+    const u=normUrl(c.url), s=normUrl(c.source);
+    if((u && trackedUrls.has(u)) || (s && trackedUrls.has(s))) return false;
+    const d=daysUntil(c.deadline);
+    return !(d!==null && d<0);                         // expired proposals just disappear
+  }).sort((a,b)=> (a.deadline||'9999') < (b.deadline||'9999') ? -1 : 1);
+}
+
+function renderProposals(){
+  const box=$('proposals'); if(!box) return;
+  // No proposals loaded → no panel. (Restoring a rejection only matters
+  // while its proposal still exists, so the rejected list lives in here too.)
+  if(!allCandidates().length){ box.hidden=true; box.innerHTML=''; return; }
+  const pend=pendingCandidates();
+  box.hidden=false;
+  const meta=candidatesMeta && candidatesMeta.generated
+    ? 'from the run of '+formatDate(String(candidatesMeta.generated).slice(0,10)) : '';
+  const rows=pend.map(c=>{
+    const d=daysUntil(c.deadline);
+    const cd = d===null ? '—' : d===0 ? '!' : d;
+    const cl = d===null ? 'no date' : d===0 ? 'today' : (d===1?'day left':'days left');
+    const uc = urgencyClass(d);
+    const link=safeUrl(c.url)||safeUrl(c.source);
+    const rating=String(c.rating||'').toLowerCase();
+    const extra=[c.money?('money: '+c.money):'', c.eligibility?('eligibility: '+c.eligibility):''].filter(Boolean).join(' · ');
+    return `<div class="prop-row" data-cid="${esc(c.cid)}">
+      <div class="call-countdown"><span class="countdown-days ${uc}">${cd}</span><span class="countdown-label">${cl}</span></div>
+      <div class="call-body">
+        <div class="prop-title">${esc(c.title)}</div>
+        <div class="call-meta">
+          ${c.org?`<span class="call-org">${esc(c.org)}</span>`:''}
+          <span class="call-deadline">deadline: ${c.dateApprox?'<span class="approx">~</span>':''}${c.deadline?formatDate(c.deadline):'—'}</span>
+          ${rating?`<span class="prop-badge ${rating==='high'?'high':''}">${esc(rating)}</span>`:''}
+          ${c.kind?`<span class="call-org">${esc(c.kind)}</span>`:''}
+          ${c.project?`<span class="call-org">→ ${esc(c.project)}</span>`:''}
+        </div>
+        ${c.fit?`<div class="call-fit"><b>fit</b> ${esc(c.fit)}</div>`:''}
+        ${extra?`<div class="call-notes">${esc(extra)}</div>`:''}
+        ${link?`<a class="call-url" href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(link)}</a>`:''}
+      </div>
+      <div class="prop-actions">
+        <button class="action-btn accept" data-act="accept" data-cid="${esc(c.cid)}">accept…</button>
+        <button class="action-btn" data-act="reject" data-cid="${esc(c.cid)}">reject</button>
+      </div>
+    </div>`;
+  }).join('');
+  const rej=dismissed.slice().sort((a,b)=> (a.date||'') < (b.date||'') ? 1 : -1);
+  box.innerHTML=`
+    <div class="prop-head"><h2 id="propTitle">proposte · ${pend.length}</h2><span>${esc(meta)}${meta?' · ':''}accept to add to the list, reject to never see it again</span></div>
+    ${pend.length?rows:'<div class="prop-empty">No proposals waiting.</div>'}
+    ${rej.length?`<details class="prop-dismissed"><summary>rejected · ${rej.length}</summary>
+      ${rej.slice(0,30).map(r=>`<div class="dismissed-row"><span>${esc(r.date||'')}</span><span>${esc(r.title||r.cid)}</span>
+        <button data-act="undismiss" data-cid="${esc(r.cid)}">restore</button></div>`).join('')}
+    </details>`:''}`;
+}
+
+function findCandidate(cid){ return allCandidates().find(c=>c.cid===cid); }
+
+function acceptCandidate(cid){
+  const c=findCandidate(cid); if(!c) return;
+  const notes=[
+    'Proposta scraper '+(c.found||''),
+    [c.kind,c.project].filter(Boolean).join(' · '),
+    c.money?('Money: '+c.money):'',
+    c.eligibility?('Eligibility: '+c.eligibility):'',
+    c.notes||'',
+    (safeUrl(c.source) && c.source!==c.url)?('Source: '+c.source):''
+  ].filter(Boolean).join('\n');
+  openAddModal({
+    title:c.title, org:c.org||'', url:safeUrl(c.url)||safeUrl(c.source),
+    deadline:c.deadline||'', status:'curious', notes,
+    fit:[c.rating, c.fit].filter(Boolean).join(' — '),
+    dateApprox:!!c.dateApprox
+  });
+  pendingCid=cid;   // after openAddModal, which resets it
+  $('modalSubtitle').textContent='↓ Proposal — check the deadline and status, then save.';
+}
+
+function rejectCandidate(cid){
+  const c=findCandidate(cid); if(!c) return;
+  if(!dismissed.some(d=>d.cid===cid)){
+    dismissed.push({cid, title:c.title, url:safeUrl(c.url)||safeUrl(c.source), date:todayISO(), reason:'rejected'});
+  }
+  saveData(); renderProposals();
+  showToast('Rejected — it will not be proposed again');
+}
+
+function undismiss(cid){
+  dismissed=dismissed.filter(d=>d.cid!==cid);
+  saveData(); renderProposals();
+  showToast('Restored to proposals');
+}
+
+async function fetchRemoteCandidates(){
+  let text=null;
+  try{
+    if(isGhConfigured()){
+      const r=await fetch('https://api.github.com/repos/'+ghGet('repo')+'/contents/candidates.json',
+        { headers:{ 'Authorization':'token '+ghGet('token'), 'Accept':'application/vnd.github.raw+json' }, cache:'no-store' });
+      if(r.ok) text=await r.text();
+    } else if(/^https?:$/.test(location.protocol)){
+      const r=await fetch('candidates.json', { cache:'no-store' });
+      if(r.ok) text=await r.text();
+    }
+  }catch(e){ /* offline or no file yet: the inbox simply stays empty */ }
+  if(text===null) return;
+  try{
+    const data=JSON.parse(text);
+    remoteCandidates=(Array.isArray(data.candidates)?data.candidates:[]).filter(validCandidate);
+    candidatesMeta={ generated:data.generated||'', run:data.run||'' };
+  }catch(e){ console.warn('candidates.json unreadable', e); remoteCandidates=[]; }
+  renderProposals();
+}
+
+function handleProposalsFile(file){
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(String(reader.result));
+      const arr=(Array.isArray(data)?data:(data&&data.candidates)||[]).filter(validCandidate);
+      if(!arr.length){ backupStatus('No valid proposals in that file.', 'err'); return; }
+      const byCid=new Map(localCandidates.map(c=>[c.cid,c]));
+      arr.forEach(c=>byCid.set(c.cid,c));
+      localCandidates=[...byCid.values()];
+      localStorage.setItem(LS_CAND_LOCAL, JSON.stringify(localCandidates));
+      if(data && data.generated) candidatesMeta={ generated:data.generated, run:data.run||'' };
+      renderProposals();
+      backupStatus('Loaded '+arr.length+' proposals; '+pendingCandidates().length+' waiting.', 'ok');
+    }catch(e){ backupStatus('Could not read proposals: not valid JSON.', 'err'); }
+  };
+  reader.readAsText(file);
 }
 
 const $=id=>document.getElementById(id);
@@ -1148,7 +1381,9 @@ document.addEventListener('keydown', e=>{
 function syncRecFields(){
   const t=$('fieldRecType').value;
   $('subPattern').classList.toggle('show', !!t);
-  $('subApprox').classList.toggle('show', !!t);
+  // Approximate applies to one-off dates too (e.g. a date only an aggregator
+  // gives). It used to be hidden for one-offs while still being saved.
+  $('subApprox').classList.add('show');
   $('subWindow').classList.toggle('show', t==='window');
   $('subRolling').classList.toggle('show', t==='rolling');
   $('subMulti').classList.toggle('show', t==='multi-year');
@@ -1176,10 +1411,10 @@ function fillModal(c, pre){
 }
 
 function openAddModal(pre={}){
-  editingId=null;
+  editingId=null; pendingCid=null;
   $('modalTitle').textContent='Add Open Call';
   $('modalSubtitle').textContent=pre._fromBookmarklet?'↓ Title and URL filled — add deadline and save.':'';
-  fillModal({title:pre.title,url:pre.url,deadline:pre.deadline,status:pre.status||'observe',notes:pre.notes,org:pre.org});
+  fillModal({title:pre.title,url:pre.url,deadline:pre.deadline,status:pre.status||'observe',notes:pre.notes,org:pre.org,fit:pre.fit,dateApprox:pre.dateApprox});
   setTimeout(()=>{
     const dl=$('fieldDeadline');
     if(pre._fromBookmarklet){dl.classList.add('highlight');dl.focus();}
@@ -1189,7 +1424,7 @@ function openAddModal(pre={}){
 
 function editCall(id){
   const c=calls.find(c=>c.id===id); if(!c) return;
-  editingId=id;
+  editingId=id; pendingCid=null;
   $('modalTitle').textContent='Edit Call';
   $('modalSubtitle').textContent='';
   fillModal(c);
@@ -1216,6 +1451,11 @@ function markApplied(id){
 
 function deleteCall(id){
   if(!confirm('Delete this call?')) return;
+  const c=calls.find(c=>c.id===id);
+  // A deleted proposal must not come straight back as "pending".
+  if(c && c.cid && !dismissed.some(d=>d.cid===c.cid)){
+    dismissed.push({cid:c.cid, title:c.title, url:c.url||'', date:todayISO(), reason:'deleted'});
+  }
   calls=calls.filter(c=>c.id!==id); saveData(); renderCalls();
 }
 
@@ -1248,13 +1488,20 @@ function saveCallFromModal(){
   };
   if(data.recurs){ Object.keys(data.recurs).forEach(k=>{ if(data.recurs[k]===undefined) delete data.recurs[k]; }); }
 
+  const wasEdit=!!editingId;
   if(editingId){ Object.assign(calls.find(c=>c.id===editingId), data); }
-  else { calls.push(normalise({id:Date.now(), ...data})); }
+  else {
+    const row=normalise({id:Date.now(), ...data});
+    if(pendingCid){ row.cid=pendingCid; row.proposedOn=todayISO(); }
+    calls.push(row);
+  }
+  const accepted=!wasEdit && !!pendingCid;
+  pendingCid=null;
   calls.forEach(normalise);
   rollDueCalls();
   saveData(); renderCalls();
   closeModal('modalOverlay');
-  showToast(editingId?'Call updated':'Call saved');
+  showToast(wasEdit?'Call updated':accepted?'Proposal accepted':'Call saved');
 }
 
 // ---------------------------------------------------------------
@@ -1338,10 +1585,12 @@ function updateSyncStatus(msg, state){
   const el = document.getElementById('syncStatus');
   if(!el) return;
   el.textContent = msg;
-  if(state==='ok') el.style.color='var(--cool)';
-  else if(state==='error') el.style.color='var(--hot)';
-  else if(state==='busy') el.style.color='var(--warm)';
-  else el.style.color='var(--text-dim)';
+  // (These pointed at --cool/--hot/--warm/--text-dim, which no longer
+  // exist, so the status never changed colour — errors looked like "ok".)
+  if(state==='ok') el.style.color='var(--blue-ink)';
+  else if(state==='error') el.style.color='var(--red-ink)';
+  else if(state==='busy') el.style.color='var(--yellow-ink)';
+  else el.style.color='var(--ink-mid)';
 }
 
 function toBase64Unicode(str){
@@ -1360,8 +1609,21 @@ function fromBase64Unicode(b64){
 // ---------------------------------------------------------------
 const BACKUP_KEY = LS_KEY + '_prerestore';
 
+// schema 4 = schema 3 + top-level `dismissed` (rejected/deleted proposals)
+// + optional `cid`/`proposedOn` on calls that came from a proposal.
+// `updated` is now the time of the last real change: pushes only happen
+// when the content differs, so it no longer moves just because the page
+// was opened.
 function buildPayload(){
-  return { schema: 3, updated: new Date().toISOString(), calls: calls };
+  return { schema: 4, updated: new Date().toISOString(), calls: calls, dismissed: dismissed };
+}
+// Fingerprint of what matters (not the timestamp). FNV-1a is plenty for
+// "did anything change since the last push".
+function contentHash(c, d){
+  const s=JSON.stringify({calls:c, dismissed:d||[]});
+  let h=0x811c9dc5;
+  for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,0x01000193); }
+  return (h>>>0).toString(16);
 }
 
 function backupStatus(msg, state){
@@ -1398,8 +1660,17 @@ function parseBackup(text){
   if(!clean.length) throw new Error('That file contains no usable calls.');
   return clean;
 }
+// The rejected-proposals list travels with a backup (schema 4); older
+// backups have none, in which case the current list is kept.
+function parseDismissed(text){
+  try{
+    const data=JSON.parse(text);
+    return (data && Array.isArray(data.dismissed))
+      ? data.dismissed.filter(d=>d && typeof d.cid==='string') : null;
+  }catch(e){ return null; }
+}
 
-function applyRestore(rows, source){
+function applyRestore(rows, source, dismissedIn){
   const incomingRec = rows.filter(c => c && c.recurs && c.recurs.type).length;
   const ok = confirm(
     'Restore from ' + source + '?\n\n' +
@@ -1410,7 +1681,11 @@ function applyRestore(rows, source){
   if(!ok){ backupStatus('Restore cancelled — nothing changed.', ''); return false; }
 
   // Snapshot before overwriting, so a wrong restore is recoverable.
-  try { localStorage.setItem(BACKUP_KEY, JSON.stringify(calls)); } catch(e){}
+  try {
+    localStorage.setItem(BACKUP_KEY, JSON.stringify(calls));
+    localStorage.setItem(BACKUP_KEY+'_dismissed', JSON.stringify(dismissed));
+  } catch(e){}
+  if(Array.isArray(dismissedIn)) dismissed = dismissedIn;
 
   // Reassign ids: a backup may carry duplicates, or rows saved without one.
   const seen = new Set();
@@ -1440,8 +1715,11 @@ function undoRestore(){
   if(!snap){ backupStatus('No pre-restore snapshot available.', 'err'); return; }
   if(!confirm('Undo the last restore and put back the previous ' + snap.length + ' calls?')) return;
   calls = snap.map(c => normalise({ ...c }));
+  const snapD = readKey(BACKUP_KEY+'_dismissed');
+  if(snapD) dismissed = snapD;
   rollDueCalls(); saveLocal(); renderCalls();
   localStorage.removeItem(BACKUP_KEY);
+  localStorage.removeItem(BACKUP_KEY+'_dismissed');
   const undoBtn = document.getElementById('undoRestore');
   if(undoBtn) undoBtn.style.display = 'none';
   backupStatus('Reverted to the pre-restore list.', 'ok');
@@ -1453,8 +1731,9 @@ function handleBackupFile(file){
   const reader = new FileReader();
   reader.onload = () => {
     try {
-      const rows = parseBackup(String(reader.result));
-      applyRestore(rows, 'file "' + file.name + '"');
+      const text = String(reader.result);
+      const rows = parseBackup(text);
+      applyRestore(rows, 'file "' + file.name + '"', parseDismissed(text));
     } catch(e){
       backupStatus('Could not restore: ' + e.message, 'err');
     }
@@ -1479,61 +1758,114 @@ async function restoreFromGitHub(){
       return;
     }
     const d = await r.json();
-    const rows = parseBackup(fromBase64Unicode(d.content));
-    if(applyRestore(rows, 'GitHub (' + repo + ')')){
-      // The fetched sha is current; caching it avoids a needless conflict retry
-      // on the next push.
+    const text = fromBase64Unicode(d.content);
+    const rows = parseBackup(text);
+    if(applyRestore(rows, 'GitHub (' + repo + ')', parseDismissed(text))){
+      // GitHub's sha is now the one we build on, so the next push is a
+      // clean update, not a conflict. lasthash is cleared: the restored list
+      // may have been rolled forward, and if so that difference should go up.
       if(d.sha) ghSet('sha', d.sha);
+      ghClear('lasthash');
+      updateSyncStatus('↑ restored from github', 'ok');
     }
   } catch(e){
     backupStatus('Could not restore from GitHub: ' + (e.message || 'network error'), 'err');
   }
 }
 
-async function syncToGitHub(){
+// Push rules:
+//  1. Nothing changed since the last push → no commit (opening the page used
+//     to commit every time, so `updated` said nothing about real activity).
+//  2. Unknown or stale sha (first connect, another browser wrote, a manual
+//     edit on GitHub) → read GitHub's copy first. Identical → adopt its sha.
+//     Different → ASK before overwriting. Previously a fresh browser with the
+//     seed list would silently replace the real calls.json on connect, and a
+//     409 was "fixed" by refetching the sha and overwriting regardless.
+//  3. One sync at a time; changes made during a push trigger one follow-up.
+let syncing=false, syncAgain=false;
+
+async function readRemoteCalls(repo, headers){
+  const r = await fetch('https://api.github.com/repos/'+repo+'/contents/calls.json', { headers, cache:'no-store' });
+  if(r.status === 404) return { exists:false };
+  if(!r.ok){ const e=await r.json().catch(()=>({})); throw new Error(e.message || ('HTTP '+r.status)); }
+  const d = await r.json();
+  const text = fromBase64Unicode(d.content);
+  let rows=[], dis=[], updated='';
+  try { const j=JSON.parse(text); rows=Array.isArray(j)?j:(j.calls||[]); dis=j.dismissed||[]; updated=j.updated||''; } catch(e){}
+  return { exists:true, sha:d.sha, rows, dismissed:dis, updated };
+}
+
+async function syncToGitHub(opts={}){
   if(!isGhConfigured()) return;
+  if(syncing){ syncAgain=true; return; }
   if(calls.length === 0) { updateSyncStatus('↑ skipped — tracker empty', 'idle'); return; }
+  syncing=true;
   const repo = ghGet('repo');
-  const token = ghGet('token');
-  const path = 'calls.json';
-  const headers = { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' };
-
-  updateSyncStatus('↑ syncing…', 'busy');
-
-  // Get current file SHA (needed to update an existing file)
-  let sha = ghGet('sha') || null;
-  if(!sha){
-    try {
-      const r = await fetch('https://api.github.com/repos/'+repo+'/contents/'+path, { headers });
-      if(r.ok){ const d=await r.json(); sha=d.sha; ghSet('sha', sha); }
-    } catch(e){}
-  }
-
-  const payload = buildPayload();
-  const content = toBase64Unicode(JSON.stringify(payload, null, 2));
-  const body = { message: 'Open calls update · ' + new Date().toISOString().split('T')[0], content };
-  if(sha) body.sha = sha;
-
+  const headers = { 'Authorization': 'token ' + ghGet('token'), 'Content-Type': 'application/json' };
+  const hash = contentHash(calls, dismissed);
   try {
-    const r = await fetch('https://api.github.com/repos/'+repo+'/contents/'+path, {
-      method: 'PUT', headers, body: JSON.stringify(body)
-    });
-    if(r.ok){
-      const d = await r.json();
-      ghSet('sha', d.content.sha);
-      const t = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-      updateSyncStatus('↑ synced ' + t, 'ok');
-    } else if(r.status === 409){
-      // SHA conflict — clear cached SHA and retry once
-      ghClear('sha');
-      updateSyncStatus('↑ sync conflict, retrying…', 'busy');
-      setTimeout(syncToGitHub, 1500);
-    } else {
+    if(!opts.force && ghGet('sha') && ghGet('lasthash') === hash){
+      updateSyncStatus('↑ github up to date', 'ok');
+      return;
+    }
+    updateSyncStatus('↑ syncing…', 'busy');
+
+    for(let attempt=0; attempt<2; attempt++){
+      let sha = ghGet('sha') || null;
+      if(!sha){
+        const remote = await readRemoteCalls(repo, headers);
+        if(remote.exists){
+          if(contentHash(remote.rows, remote.dismissed) === hash){
+            ghSet('sha', remote.sha); ghSet('lasthash', hash);
+            updateSyncStatus('↑ github up to date', 'ok');
+            return;
+          }
+          if(!opts.force){
+            const ok = confirm(
+              'GitHub already has a different calls.json' +
+              ' (' + remote.rows.length + ' calls, updated ' + (remote.updated||'?').slice(0,16).replace('T',' ') + ').\n' +
+              'This browser has ' + calls.length + ' calls.\n\n' +
+              'OK = replace GitHub with this browser\'s list.\n' +
+              'Cancel = change nothing (then use "restore from github" to take GitHub\'s list).'
+            );
+            if(!ok){ updateSyncStatus('↑ not synced — github differs (open sync)', 'error'); return; }
+          }
+          sha = remote.sha;
+        }
+      }
+
+      const body = {
+        message: 'Open calls update · ' + todayISO(),
+        content: toBase64Unicode(JSON.stringify(buildPayload(), null, 2))
+      };
+      if(sha) body.sha = sha;
+      const r = await fetch('https://api.github.com/repos/'+repo+'/contents/calls.json', {
+        method: 'PUT', headers, body: JSON.stringify(body)
+      });
+      if(r.ok){
+        const d = await r.json();
+        ghSet('sha', d.content.sha);
+        ghSet('lasthash', hash);
+        const t = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+        updateSyncStatus('↑ synced ' + t, 'ok');
+        return;
+      }
+      if(r.status === 409 || r.status === 422){
+        // Someone else wrote calls.json. Forget our sha and go round once:
+        // the next pass reads GitHub's copy and asks before overwriting it.
+        ghClear('sha');
+        continue;
+      }
       const err = await r.json().catch(()=>({}));
       updateSyncStatus('↑ sync error: ' + (err.message || r.status), 'error');
+      return;
     }
+    updateSyncStatus('↑ sync conflict — open sync and restore or retry', 'error');
   } catch(e){
-    updateSyncStatus('↑ sync failed (network?)', 'error');
+    updateSyncStatus('↑ sync failed: ' + (e.message || 'network?'), 'error');
+  } finally {
+    syncing=false;
+    if(syncAgain){ syncAgain=false; syncToGitHub(); }
   }
 }
 
@@ -1563,6 +1895,22 @@ document.getElementById('backupFileInput').addEventListener('change', e=>{
   e.target.value = '';   // allow re-selecting the same file after a failed parse
 });
 document.getElementById('restoreFromGh').addEventListener('click', restoreFromGitHub);
+document.getElementById('loadProposals').addEventListener('click', ()=>{
+  document.getElementById('proposalsFileInput').click();
+});
+document.getElementById('proposalsFileInput').addEventListener('change', e=>{
+  handleProposalsFile(e.target.files && e.target.files[0]);
+  e.target.value = '';
+});
+// One delegated listener: proposal ids are scraper strings, so they are
+// never interpolated into inline onclick JavaScript.
+document.getElementById('proposals').addEventListener('click', e=>{
+  const b = e.target.closest('button[data-act]'); if(!b) return;
+  const cid = b.dataset.cid;
+  if(b.dataset.act === 'accept') acceptCandidate(cid);
+  else if(b.dataset.act === 'reject') rejectCandidate(cid);
+  else if(b.dataset.act === 'undismiss') undismiss(cid);
+});
 document.getElementById('undoRestore').addEventListener('click', undoRestore);
 
 document.getElementById('openSyncModal').addEventListener('click', openSyncModal);
@@ -1606,10 +1954,11 @@ loadData(); updateSetupBar(); renderCalls(); checkBookmarkletParams();
 if(isGhConfigured()){
   document.getElementById('openSyncModal').classList.add('connected');
   updateSyncStatus('↑ github connected', 'ok');
-  syncToGitHub();
+  syncToGitHub();   // pushes only if something changed (e.g. a roll-forward on load)
 } else {
   updateSyncStatus('↑ connect github', 'idle');
 }
+fetchRemoteCandidates();
 </script>
 </body>
 </html>
