@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:14:36.224Z",
+  "updated": "2026-11-16T18:15:14.589Z",
   "calls": [
     {
       "id": 4,
@@ -457,6 +457,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-33f97b71e5",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852914587,
+      "title": "Dirtly Lab Residencies 2027 — European Hybrid Intelligence Network",
+      "org": "EHIN (Gluon, Kersnikova, Kontejner, LABoral, ZKM, CPN)",
+      "deadline": "2026-12-04",
+      "status": "curious",
+      "url": "https://europeanhybridintelligencenetwork.eu/open-call/",
+      "notes": "Proposta scraper 2026-11-16\nresidency · pratica (idrofoni, ascolto interspecie); nuovo site-specific\nMoney: Fino a €25.000 per residenza (compenso max 35% = €8.750, il resto produzione); nessuna quota.\nEligibility: Residenti UE: OK. 'Artisti affermati': OK. Serve partita IVA/codice fiscale.\n23:59 CET. ~12 mesi con almeno 30 giorni sul posto. Chiedere a ramona@gluon.be se il lavoro sonoro rientra.\nSource: https://on-the-move.org/news/european-hybrid-intelligence-network-dirtly-lab-residencies-2027-belgium-croatia-germany",
+      "fit": "Medium — Il metodo è 'osservare, misurare e ascoltare' i segnali tra organismi; l'host Kontejner (Zagabria) lavora su sound art. Il tema biocomputing/ibrido è però lontano dal suo nucleo.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-60ea2b5a7f",
       "proposedOn": "2026-11-16"
     }
   ],
