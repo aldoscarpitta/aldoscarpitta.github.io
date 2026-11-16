@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:15:31.295Z",
+  "updated": "2026-11-16T18:15:41.178Z",
   "calls": [
     {
       "id": 4,
@@ -525,6 +525,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-9f52f825a3",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852941177,
+      "title": "Ars Electronica Forum Wallis 2027 — Call for Acousmatic Works",
+      "org": "Ars Electronica Forum Wallis (Svizzera)",
+      "deadline": "2026-12-31",
+      "status": "curious",
+      "url": "https://forumwallis.ch/programm-2027arselectronicaforumwallis.htm",
+      "notes": "Proposta scraper 2026-11-16\nfestival · Cialoma (versione su supporto) o brani da field recording / idrofoni\nMoney: Nessuna quota. Ai selezionati: diritti d'autore e alloggio; nessun premio in denaro indicato.\nEligibility: Nessun limite di età o di stile: OK. Solo opere su supporto fisso (2–16 canali), niente live. Massimo 2 opere per compositore.\nScadenza ore 10:00 UTC. Invio via email a calls@forumwallis.ch, oggetto 'ARS ELECTRONICA 2027', un PDF per brano (bio, descrizione, link d'ascolto valido fino al 1/8/2027). Esiti entro il 1/3/2027. Ha senso solo se esiste una versione su supporto.\nSource: https://britishelectroacousticnetwork.com/opportunities/",
+      "fit": "Medium — Call gratuita; le opere selezionate vengono eseguite da UMS'nJIP e Simone Conforti (IRCAM) al festival, 3–6 giugno 2027.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-7734ee994e",
       "proposedOn": "2026-11-16"
     }
   ],
