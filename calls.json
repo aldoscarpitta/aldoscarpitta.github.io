@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-16T18:12:55.768Z",
+  "updated": "2026-11-16T18:13:01.093Z",
   "calls": [
     {
       "id": 4,
@@ -440,6 +440,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-ae23d763dc",
+      "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1794852781092,
+      "title": "ECF Creative Research Fellowship — ERASMUS and European Belonging",
+      "org": "European Cultural Foundation",
+      "deadline": "2026-12-01",
+      "status": "curious",
+      "url": "https://culturalfoundation.eu/open-calls/erasmus-fellowship-call/",
+      "notes": "Proposta scraper 2026-11-16\ngrant · WILD:CARE\nMoney: €10.000 (viaggio, alloggio, vita, produzione); nessuna quota.\nEligibility: Residenti in uno Stato del Consiglio d'Europa: OK. Richiesto track record di lavori di ricerca adatti a un museo: punto debole. Fellowship unica.\nScadenza 17:00 CET. Soggiorno gen–mar 2027, opera entro il 31/07/2027. Diverso dalle ECF Archives fellowships già nel tracker. Leggere PDF e FAQ del bando.\nSource: https://on-the-move.org/news/european-cultural-foundation-creative-research-fellowship-research-erasmus-and-european",
+      "fit": "High — Ricerca negli Archivi storici UE a Firenze sui 40 anni di ERASMUS, con un'opera pubblica in qualsiasi medium: esperienza Erasmus+ diretta e legame con Firenze.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-33f97b71e5",
       "proposedOn": "2026-11-16"
     }
   ],
