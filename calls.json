@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-17T00:42:23.448Z",
+  "updated": "2026-11-17T00:42:26.408Z",
   "calls": [
     {
       "id": 4,
@@ -337,21 +337,6 @@
       "deadline": "2026-12-31",
       "status": "curious",
       "url": "https://on-the-move.org/news/kiruna-2029-european-capital-culture-artistic-projects-and-early-ideas-sweden",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1792948914497,
-      "title": "Dresden University of Technology/The Schaufler Foundation: Schaufler Lab@TU Dresden 2027 Residency (Germany) | On the Move",
-      "org": "",
-      "deadline": "2026-11-09",
-      "status": "interested",
-      "url": "https://on-the-move.org/news/dresden-university-technologythe-schaufler-foundation-schaufler-labtu-dresden-2027-residency",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
