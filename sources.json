@@ -1,123 +1,592 @@
 {
-  "schema": 1,
-  "updated": "2026-11-16",
-  "about": "Directory of pages the monthly open-calls scraper visits. Edit freely on GitHub: add a source by copying an entry, set active:false to pause one. mode 'fetch' = read the url directly; mode 'search' = the site blocks automated reading, so the scraper runs the query with web search instead. months = only check in these months (1-12); omit to check every run.",
-  "sources": [
-    { "id": "otm-deadlines", "name": "On the Move — deadlines", "type": "aggregator", "cluster": "international",
-      "url": "https://on-the-move.org/news/deadlines", "mode": "fetch", "lang": "en",
-      "notes": "Best single source. Grouped by category, ~60 dated calls. Also scan https://on-the-move.org/news (6 pages) for new posts." },
-    { "id": "transartists-calls", "name": "TransArtists — open calls", "type": "aggregator", "cluster": "residencies",
-      "url": "https://www.transartists.org/en/transartists-calls", "mode": "fetch", "lang": "en",
-      "notes": "Sorted by posting date; read the first 2-3 pages. Deadlines list: https://www.transartists.org/en/deadlines" },
-    { "id": "resartis", "name": "Res Artis — open calls", "type": "aggregator", "cluster": "residencies",
-      "url": "https://resartis.org/open-calls/", "mode": "fetch", "lang": "en",
-      "notes": "~120 calls, many pay-to-stay. Propose fully funded programmes only." },
-    { "id": "ben-opps", "name": "British Electroacoustic Network — opportunities", "type": "aggregator", "cluster": "sound",
-      "url": "https://britishelectroacousticnetwork.com/opportunities/", "mode": "fetch", "lang": "en",
-      "notes": "Best sound-specific listing (source of Forum Wallis and Xenakis). Skip UK-residents-only calls." },
-    { "id": "artificialnouveau-eu", "name": "Artificial Nouveau — EU grants", "type": "aggregator", "cluster": "international",
-      "url": "https://www.artificialnouveau.com/smalltools/grants/eu/", "mode": "fetch", "lang": "en",
-      "notes": "~170 curated grants and residencies, all disciplines." },
-    { "id": "artconnect", "name": "ArtConnect — residencies and grants", "type": "aggregator", "cluster": "international",
-      "url": "https://www.artconnect.com/opportunities/residencies", "mode": "fetch", "lang": "en",
-      "notes": "Relative deadlines only ('in 4 days'): open each call for the date. Also /opportunities/grant-or-stipend. Many fee-based photo calls." },
-    { "id": "reviewedbyartists", "name": "Reviewed by Artists — open calls", "type": "aggregator", "cluster": "international",
-      "url": "https://www.reviewedbyartists.com/open-calls", "mode": "fetch", "lang": "en",
-      "notes": "Only ~5 calls visible without a paid account; low yield, keep as a cross-check." },
-    { "id": "salto-training", "name": "SALTO — European training calendar", "type": "aggregator", "cluster": "training",
-      "url": "https://www.salto-youth.net/tools/european-training-calendar/browse/", "mode": "fetch", "lang": "en",
-      "notes": "Erasmus+ trainings for youth workers (WILD:CARE). Dates are event dates; open each for the application deadline. Filter 'creativity & arts'." },
-    { "id": "ec-culture", "name": "Creative Europe — calls", "type": "aggregator", "cluster": "eu",
-      "query": "Creative Europe call for proposals artists individuals open 2027", "mode": "search", "lang": "en",
-      "notes": "culture.ec.europa.eu renders its list with JavaScript, so it reads as empty." },
-    { "id": "ecf", "name": "European Cultural Foundation — open calls", "type": "organiser", "cluster": "eu",
-      "query": "European Cultural Foundation open call fellowship 2027", "mode": "search", "lang": "en",
-      "notes": "culturalfoundation.eu/open-calls/ is a stub; calls get their own pages." },
-
-    { "id": "artapart", "name": "Art a part of cult(ure) — bandi in scadenza", "type": "aggregator", "cluster": "italia",
-      "url": "https://www.artapartofculture.net/category/concorsi-e-bandi-in-scadenza/", "mode": "fetch", "lang": "it",
-      "notes": "Cleanest Italian list: dated deadlines." },
-    { "id": "gai", "name": "GAI Giovani Artisti Italiani — concorsi", "type": "aggregator", "cluster": "italia",
-      "url": "https://www.giovaniartisti.it/concorsi", "mode": "fetch", "lang": "it",
-      "notes": "Filterable by sector (Video & Sound Art, Musica Elettronica). Many under-35 limits: check age." },
-    { "id": "theatron", "name": "Theatron 2.0 — bandi e audizioni", "type": "aggregator", "cluster": "italia",
-      "url": "https://webzine.theatronduepuntozero.it/bandi-e-audizioni/", "mode": "fetch", "lang": "it",
-      "notes": "High volume, mostly theatre/dance; keep residencies, festival calls and site-specific." },
-    { "id": "artribune-jobs", "name": "Artribune — opportunità", "type": "aggregator", "cluster": "italia",
-      "url": "https://www.artribune.com/category/jobs/", "mode": "fetch", "lang": "it",
-      "notes": "Roundup articles: open the last 3-4, deadlines are in the body." },
-    { "id": "teatroecritica", "name": "Teatro e Critica — bandi e concorsi", "type": "aggregator", "cluster": "italia",
-      "query": "teatroecritica bando residenza 2027", "mode": "search", "lang": "it",
-      "notes": "Site blocks automated reading." },
-    { "id": "mic-dgcc", "name": "MiC — Creatività Contemporanea (Italian Council, avvisi)", "type": "organiser", "cluster": "italia",
-      "url": "https://creativitacontemporanea.cultura.gov.it/", "mode": "fetch", "lang": "it",
-      "notes": "Homepage block 'Avvisi pubblici e premi'. National portal (unverified): https://portalebandidgcc.cultura.gov.it/" },
-    { "id": "cariplo", "name": "Fondazione Cariplo — bandi", "type": "organiser", "cluster": "italia",
-      "query": "Fondazione Cariplo bando cultura 2027 scadenza", "mode": "search", "lang": "it",
-      "notes": "Site blocks automated reading. Usually organisation-only: propose only with a partner route." },
-    { "id": "consud", "name": "Fondazione con il Sud — bandi", "type": "organiser", "cluster": "italia",
-      "query": "Fondazione con il Sud bando cultura 2027", "mode": "search", "lang": "it",
-      "notes": "Site blocks automated reading. Organisation-only (Curva Minore route, Sicily)." },
-    { "id": "csp", "name": "Compagnia di San Paolo — bandi", "type": "organiser", "cluster": "italia",
-      "query": "Compagnia di San Paolo bando arti 2027", "mode": "search", "lang": "it",
-      "notes": "Site blocks automated reading." },
-
-    { "id": "sonitus", "name": "SONITUS — Centro Musica Modena", "type": "organiser", "cluster": "sound",
-      "query": "SONITUS residenza Centro Musica Modena bando", "mode": "search", "lang": "it", "months": [11, 12],
-      "notes": "Landscape + instrument residency, ideal fit. 2026 edition closed 18 Dec 2025, under 36 and Emilia-Romagna domicile: check 2027 terms." },
-    { "id": "murate", "name": "MAD Murate Art District — residenze", "type": "organiser", "cluster": "italia",
-      "query": "MAD Murate residenze bando 2027", "mode": "search", "lang": "it", "months": [11, 12, 1],
-      "notes": "Florence (TAB tie). Last edition closed 7 Jan 2026." },
-    { "id": "fotografia-europea", "name": "Fotografia Europea — open call", "type": "organiser", "cluster": "photo",
-      "query": "Fotografia Europea 2027 open call", "mode": "search", "lang": "it", "months": [11, 12, 1],
-      "notes": "Dysographies. Last edition opened ~20 Nov, closed 9 Jan, €25 fee, €3,000 production." },
-    { "id": "zigurajg", "name": "ŻiguŻajg festival (Malta) — call", "type": "organiser", "cluster": "early-years",
-      "query": "ŻiguŻajg festival open call artists", "mode": "search", "lang": "en", "months": [9, 10, 11],
-      "notes": "Playground fit. 2027 call closed 30 Nov 2026." },
-    { "id": "visioni", "name": "La Baracca – Testoni Ragazzi — Visioni", "type": "organiser", "cluster": "early-years",
-      "query": "Visioni festival prima infanzia La Baracca masterclass bando", "mode": "search", "lang": "it", "months": [8, 9, 10],
-      "notes": "Bologna, early years 0-6 (Playground). Masterclass call closed 15 Oct 2026." },
-    { "id": "castello-mutamenti", "name": "Il Castello dei Mutamenti — residenza", "type": "organiser", "cluster": "italia",
-      "query": "Castello dei Mutamenti residenza bando", "mode": "search", "lang": "it", "months": [10, 11],
-      "notes": "Arcidosso (existing tie). Under 36; 2027 closed 30 Nov 2026." },
-    { "id": "segesta", "name": "Segesta Teatro Festival — call", "type": "organiser", "cluster": "italia",
-      "url": "https://www.segestateatrofestival.com/", "mode": "fetch", "lang": "it", "months": [9, 10, 11, 12],
-      "notes": "Trapani. Call page /call2027/ (server error when checked)." },
-    { "id": "ctm", "name": "CTM Festival — open calls", "type": "organiser", "cluster": "sound",
-      "url": "https://www.ctm-festival.de/festival-2027/open-calls", "mode": "fetch", "lang": "en",
-      "notes": "Update the year in the url each autumn. Lab calls close Sep-Nov." },
-    { "id": "wavefarm", "name": "Wave Farm — residencies and fellowships", "type": "organiser", "cluster": "sound",
-      "url": "https://wavefarm.org/ta/residency-program", "mode": "fetch", "lang": "en", "months": [9, 10, 11],
-      "notes": "Transmission/radio art. Deadline 1 Dec." },
-    { "id": "adk-studio", "name": "Akademie der Künste — Studio für Elektroakustische Musik", "type": "organiser", "cluster": "sound",
-      "url": "https://adk.de/studio-fuer-elektroakustische-musik", "mode": "fetch", "lang": "de", "months": [1, 6],
-      "notes": "Two windows: deadline 31 Jan (Apr-Jun) and 30 Jun (Sep-Nov)." },
-    { "id": "prix-ars", "name": "Prix Ars Electronica + open calls", "type": "organiser", "cluster": "sound",
-      "url": "https://ars.electronica.art/news/en/opencalls/", "mode": "fetch", "lang": "en", "months": [1, 2, 3],
-      "notes": "Prix submissions start early January." },
-    { "id": "forum-wallis", "name": "Ars Electronica Forum Wallis — call", "type": "organiser", "cluster": "sound",
-      "query": "Forum Wallis call for acousmatic works", "mode": "search", "lang": "en", "months": [10, 11, 12],
-      "notes": "Fixed-media works only. Homepage is out of date." },
-    { "id": "naisa", "name": "NAISA — calls for submissions", "type": "organiser", "cluster": "sound",
-      "url": "https://naisa.ca/opportunities/calls-for-submissions/naisa-general-call-for-submissions/", "mode": "fetch", "lang": "en", "months": [3, 4],
-      "notes": "Next call announced March 2027." },
-    { "id": "phonurgia", "name": "Phonurgia Nova — awards", "type": "organiser", "cluster": "sound",
-      "url": "https://phonurgia.fr/concours/inscriptions-ouvertes/", "mode": "fetch", "lang": "fr", "months": [3, 4, 5, 6],
-      "notes": "Radio/sound art awards, June deadline." },
-    { "id": "biennale-musica", "name": "Biennale College Musica", "type": "organiser", "cluster": "sound",
-      "query": "Biennale College Musica call 2027", "mode": "search", "lang": "en", "months": [1, 2],
-      "notes": "Called in January, closes mid-February. Was under 30 in 2026: check." },
-    { "id": "matadero", "name": "Medialab Matadero — convocatorias", "type": "organiser", "cluster": "sound",
-      "url": "https://www.mataderomadrid.org/convocatorias", "mode": "fetch", "lang": "es", "months": [4, 5, 6, 7, 8],
-      "notes": "Calls published April or July, close Aug-Sep." },
-    { "id": "q-o2", "name": "Q-O2 — residencies", "type": "organiser", "cluster": "sound",
-      "url": "https://q-o2.be/in-residentie/", "mode": "fetch", "lang": "en", "months": [8, 9],
-      "notes": "Already tracked in calls.json; listed here so a new cycle gets noticed." },
-    { "id": "ircam", "name": "IRCAM — artistic research residency", "type": "organiser", "cluster": "sound",
-      "query": "IRCAM artistic research residency call", "mode": "search", "lang": "en",
-      "notes": "No call section on the homepage." },
-    { "id": "sonic-acts", "name": "Sonic Acts — open calls", "type": "organiser", "cluster": "sound",
-      "query": "Sonic Acts open call", "mode": "search", "lang": "en",
-      "notes": "No call section on the homepage." }
-  ]
+ "schema": 1,
+ "updated": "2026-11-17",
+ "about": "Directory of pages the open-calls scraper (every third Monday) visits. Edit freely on GitHub: add a source by copying an entry, set active:false to pause one. mode 'fetch' = read the url directly; mode 'search' = the site blocks automated reading, so the scraper runs the query with web search instead. months = only check in these months (1-12); omit to check every run.",
+ "sources": [
+  {
+   "id": "otm-deadlines",
+   "name": "On the Move — deadlines",
+   "type": "aggregator",
+   "cluster": "international",
+   "url": "https://on-the-move.org/news/deadlines",
+   "mode": "fetch",
+   "lang": "en",
+   "notes": "Best single source. Grouped by category, ~60 dated calls. Also scan https://on-the-move.org/news (6 pages) for new posts."
+  },
+  {
+   "id": "transartists-calls",
+   "name": "TransArtists — open calls",
+   "type": "aggregator",
+   "cluster": "residencies",
+   "url": "https://www.transartists.org/en/transartists-calls",
+   "mode": "fetch",
+   "lang": "en",
+   "notes": "Sorted by posting date; read the first 2-3 pages. Deadlines list: https://www.transartists.org/en/deadlines"
+  },
+  {
+   "id": "resartis",
+   "name": "Res Artis — open calls",
+   "type": "aggregator",
+   "cluster": "residencies",
+   "url": "https://resartis.org/open-calls/",
+   "mode": "fetch",
+   "lang": "en",
+   "notes": "~120 calls, many pay-to-stay. Propose fully funded programmes only."
+  },
+  {
+   "id": "ben-opps",
+   "name": "British Electroacoustic Network — opportunities",
+   "type": "aggregator",
+   "cluster": "sound",
+   "url": "https://britishelectroacousticnetwork.com/opportunities/",
+   "mode": "fetch",
+   "lang": "en",
+   "notes": "Best sound-specific listing (source of Forum Wallis and Xenakis). Skip UK-residents-only calls."
+  },
+  {
+   "id": "artificialnouveau-eu",
+   "name": "Artificial Nouveau — EU grants",
+   "type": "aggregator",
+   "cluster": "international",
+   "url": "https://www.artificialnouveau.com/smalltools/grants/eu/",
+   "mode": "fetch",
+   "lang": "en",
+   "notes": "~170 curated grants and residencies, all disciplines."
+  },
+  {
+   "id": "artconnect",
+   "name": "ArtConnect — residencies and grants",
+   "type": "aggregator",
+   "cluster": "international",
+   "url": "https://www.artconnect.com/opportunities/residencies",
+   "mode": "fetch",
+   "lang": "en",
+   "notes": "Relative deadlines only ('in 4 days'): open each call for the date. Also /opportunities/grant-or-stipend. Many fee-based photo calls."
+  },
+  {
+   "id": "reviewedbyartists",
+   "name": "Reviewed by Artists — open calls",
+   "type": "aggregator",
+   "cluster": "international",
+   "url": "https://www.reviewedbyartists.com/open-calls",
+   "mode": "fetch",
+   "lang": "en",
+   "notes": "Only ~5 calls visible without a paid account; low yield, keep as a cross-check."
+  },
+  {
+   "id": "salto-training",
+   "name": "SALTO — European training calendar",
+   "type": "aggregator",
+   "cluster": "training",
+   "url": "https://www.salto-youth.net/tools/european-training-calendar/browse/",
+   "mode": "fetch",
+   "lang": "en",
+   "notes": "Erasmus+ trainings for youth workers (WILD:CARE). Dates are event dates; open each for the application deadline. Filter 'creativity & arts'."
+  },
+  {
+   "id": "ec-culture",
+   "name": "Creative Europe — calls",
+   "type": "aggregator",
+   "cluster": "eu",
+   "query": "Creative Europe call for proposals artists individuals open 2027",
+   "mode": "search",
+   "lang": "en",
+   "notes": "culture.ec.europa.eu renders its list with JavaScript, so it reads as empty."
+  },
+  {
+   "id": "ecf",
+   "name": "European Cultural Foundation — open calls",
+   "type": "organiser",
+   "cluster": "eu",
+   "query": "European Cultural Foundation open call fellowship 2027",
+   "mode": "search",
+   "lang": "en",
+   "notes": "culturalfoundation.eu/open-calls/ is a stub; calls get their own pages."
+  },
+  {
+   "id": "artapart",
+   "name": "Art a part of cult(ure) — bandi in scadenza",
+   "type": "aggregator",
+   "cluster": "italia",
+   "url": "https://www.artapartofculture.net/category/concorsi-e-bandi-in-scadenza/",
+   "mode": "fetch",
+   "lang": "it",
+   "notes": "Cleanest Italian list: dated deadlines."
+  },
+  {
+   "id": "gai",
+   "name": "GAI Giovani Artisti Italiani — concorsi",
+   "type": "aggregator",
+   "cluster": "italia",
+   "url": "https://www.giovaniartisti.it/concorsi",
+   "mode": "fetch",
+   "lang": "it",
+   "notes": "Filterable by sector (Video & Sound Art, Musica Elettronica). Many under-35 limits: check age."
+  },
+  {
+   "id": "theatron",
+   "name": "Theatron 2.0 — bandi e audizioni",
+   "type": "aggregator",
+   "cluster": "italia",
+   "url": "https://webzine.theatronduepuntozero.it/bandi-e-audizioni/",
+   "mode": "fetch",
+   "lang": "it",
+   "notes": "High volume, mostly theatre/dance; keep residencies, festival calls and site-specific."
+  },
+  {
+   "id": "artribune-jobs",
+   "name": "Artribune — opportunità",
+   "type": "aggregator",
+   "cluster": "italia",
+   "url": "https://www.artribune.com/category/jobs/",
+   "mode": "fetch",
+   "lang": "it",
+   "notes": "Roundup articles: open the last 3-4, deadlines are in the body."
+  },
+  {
+   "id": "teatroecritica",
+   "name": "Teatro e Critica — bandi e concorsi",
+   "type": "aggregator",
+   "cluster": "italia",
+   "query": "teatroecritica bando residenza 2027",
+   "mode": "search",
+   "lang": "it",
+   "notes": "Site blocks automated reading."
+  },
+  {
+   "id": "mic-dgcc",
+   "name": "MiC — Creatività Contemporanea (Italian Council, avvisi)",
+   "type": "organiser",
+   "cluster": "italia",
+   "url": "https://creativitacontemporanea.cultura.gov.it/",
+   "mode": "fetch",
+   "lang": "it",
+   "notes": "Homepage block 'Avvisi pubblici e premi'. National portal (unverified): https://portalebandidgcc.cultura.gov.it/"
+  },
+  {
+   "id": "cariplo",
+   "name": "Fondazione Cariplo — bandi",
+   "type": "organiser",
+   "cluster": "italia",
+   "query": "Fondazione Cariplo bando cultura 2027 scadenza",
+   "mode": "search",
+   "lang": "it",
+   "notes": "Site blocks automated reading. Usually organisation-only: propose only with a partner route."
+  },
+  {
+   "id": "consud",
+   "name": "Fondazione con il Sud — bandi",
+   "type": "organiser",
+   "cluster": "italia",
+   "query": "Fondazione con il Sud bando cultura 2027",
+   "mode": "search",
+   "lang": "it",
+   "notes": "Site blocks automated reading. Organisation-only (Curva Minore route, Sicily)."
+  },
+  {
+   "id": "csp",
+   "name": "Compagnia di San Paolo — bandi",
+   "type": "organiser",
+   "cluster": "italia",
+   "query": "Compagnia di San Paolo bando arti 2027",
+   "mode": "search",
+   "lang": "it",
+   "notes": "Site blocks automated reading."
+  },
+  {
+   "id": "sonitus",
+   "name": "SONITUS — Centro Musica Modena",
+   "type": "organiser",
+   "cluster": "sound",
+   "query": "SONITUS residenza Centro Musica Modena bando",
+   "mode": "search",
+   "lang": "it",
+   "months": [
+    11,
+    12
+   ],
+   "notes": "Landscape + instrument residency, ideal fit. 2026 edition closed 18 Dec 2025, under 36 and Emilia-Romagna domicile: check 2027 terms."
+  },
+  {
+   "id": "murate",
+   "name": "MAD Murate Art District — residenze",
+   "type": "organiser",
+   "cluster": "italia",
+   "query": "MAD Murate residenze bando 2027",
+   "mode": "search",
+   "lang": "it",
+   "months": [
+    11,
+    12,
+    1
+   ],
+   "notes": "Florence (TAB tie). Last edition closed 7 Jan 2026."
+  },
+  {
+   "id": "fotografia-europea",
+   "name": "Fotografia Europea — open call",
+   "type": "organiser",
+   "cluster": "photo",
+   "query": "Fotografia Europea 2027 open call",
+   "mode": "search",
+   "lang": "it",
+   "months": [
+    11,
+    12,
+    1
+   ],
+   "notes": "Dysographies. Last edition opened ~20 Nov, closed 9 Jan, €25 fee, €3,000 production."
+  },
+  {
+   "id": "zigurajg",
+   "name": "ŻiguŻajg festival (Malta) — call",
+   "type": "organiser",
+   "cluster": "early-years",
+   "query": "ŻiguŻajg festival open call artists",
+   "mode": "search",
+   "lang": "en",
+   "months": [
+    9,
+    10,
+    11
+   ],
+   "notes": "Playground fit. 2027 call closed 30 Nov 2026."
+  },
+  {
+   "id": "visioni",
+   "name": "La Baracca – Testoni Ragazzi — Visioni",
+   "type": "organiser",
+   "cluster": "early-years",
+   "query": "Visioni festival prima infanzia La Baracca masterclass bando",
+   "mode": "search",
+   "lang": "it",
+   "months": [
+    8,
+    9,
+    10
+   ],
+   "notes": "Bologna, early years 0-6 (Playground). Masterclass call closed 15 Oct 2026."
+  },
+  {
+   "id": "castello-mutamenti",
+   "name": "Il Castello dei Mutamenti — residenza",
+   "type": "organiser",
+   "cluster": "italia",
+   "query": "Castello dei Mutamenti residenza bando",
+   "mode": "search",
+   "lang": "it",
+   "months": [
+    10,
+    11
+   ],
+   "notes": "Arcidosso (existing tie). Under 36; 2027 closed 30 Nov 2026."
+  },
+  {
+   "id": "segesta",
+   "name": "Segesta Teatro Festival — call",
+   "type": "organiser",
+   "cluster": "italia",
+   "url": "https://www.segestateatrofestival.com/",
+   "mode": "fetch",
+   "lang": "it",
+   "months": [
+    9,
+    10,
+    11,
+    12
+   ],
+   "notes": "Trapani. Call page /call2027/ (server error when checked)."
+  },
+  {
+   "id": "ctm",
+   "name": "CTM Festival — open calls",
+   "type": "organiser",
+   "cluster": "sound",
+   "url": "https://www.ctm-festival.de/festival-2027/open-calls",
+   "mode": "fetch",
+   "lang": "en",
+   "notes": "Update the year in the url each autumn. Lab calls close Sep-Nov."
+  },
+  {
+   "id": "wavefarm",
+   "name": "Wave Farm — residencies and fellowships",
+   "type": "organiser",
+   "cluster": "sound",
+   "url": "https://wavefarm.org/ta/residency-program",
+   "mode": "fetch",
+   "lang": "en",
+   "months": [
+    9,
+    10,
+    11
+   ],
+   "notes": "Transmission/radio art. Deadline 1 Dec."
+  },
+  {
+   "id": "adk-studio",
+   "name": "Akademie der Künste — Studio für Elektroakustische Musik",
+   "type": "organiser",
+   "cluster": "sound",
+   "url": "https://adk.de/studio-fuer-elektroakustische-musik",
+   "mode": "fetch",
+   "lang": "de",
+   "months": [
+    1,
+    6
+   ],
+   "notes": "Two windows: deadline 31 Jan (Apr-Jun) and 30 Jun (Sep-Nov)."
+  },
+  {
+   "id": "prix-ars",
+   "name": "Prix Ars Electronica + open calls",
+   "type": "organiser",
+   "cluster": "sound",
+   "url": "https://ars.electronica.art/news/en/opencalls/",
+   "mode": "fetch",
+   "lang": "en",
+   "months": [
+    1,
+    2,
+    3
+   ],
+   "notes": "Prix submissions start early January."
+  },
+  {
+   "id": "forum-wallis",
+   "name": "Ars Electronica Forum Wallis — call",
+   "type": "organiser",
+   "cluster": "sound",
+   "query": "Forum Wallis call for acousmatic works",
+   "mode": "search",
+   "lang": "en",
+   "months": [
+    10,
+    11,
+    12
+   ],
+   "notes": "Fixed-media works only. Homepage is out of date."
+  },
+  {
+   "id": "naisa",
+   "name": "NAISA — calls for submissions",
+   "type": "organiser",
+   "cluster": "sound",
+   "url": "https://naisa.ca/opportunities/calls-for-submissions/naisa-general-call-for-submissions/",
+   "mode": "fetch",
+   "lang": "en",
+   "months": [
+    3,
+    4
+   ],
+   "notes": "Next call announced March 2027."
+  },
+  {
+   "id": "phonurgia",
+   "name": "Phonurgia Nova — awards",
+   "type": "organiser",
+   "cluster": "sound",
+   "url": "https://phonurgia.fr/concours/inscriptions-ouvertes/",
+   "mode": "fetch",
+   "lang": "fr",
+   "months": [
+    3,
+    4,
+    5,
+    6
+   ],
+   "notes": "Radio/sound art awards, June deadline."
+  },
+  {
+   "id": "biennale-musica",
+   "name": "Biennale College Musica",
+   "type": "organiser",
+   "cluster": "sound",
+   "query": "Biennale College Musica call 2027",
+   "mode": "search",
+   "lang": "en",
+   "months": [
+    1,
+    2
+   ],
+   "notes": "Called in January, closes mid-February. Was under 30 in 2026: check."
+  },
+  {
+   "id": "matadero",
+   "name": "Medialab Matadero — convocatorias",
+   "type": "organiser",
+   "cluster": "sound",
+   "url": "https://www.mataderomadrid.org/convocatorias",
+   "mode": "fetch",
+   "lang": "es",
+   "months": [
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "notes": "Calls published April or July, close Aug-Sep."
+  },
+  {
+   "id": "q-o2",
+   "name": "Q-O2 — residencies",
+   "type": "organiser",
+   "cluster": "sound",
+   "url": "https://q-o2.be/in-residentie/",
+   "mode": "fetch",
+   "lang": "en",
+   "months": [
+    8,
+    9
+   ],
+   "notes": "Already tracked in calls.json; listed here so a new cycle gets noticed."
+  },
+  {
+   "id": "ircam",
+   "name": "IRCAM — artistic research residency",
+   "type": "organiser",
+   "cluster": "sound",
+   "query": "IRCAM artistic research residency call",
+   "mode": "search",
+   "lang": "en",
+   "notes": "No call section on the homepage."
+  },
+  {
+   "id": "sonic-acts",
+   "name": "Sonic Acts — open calls",
+   "type": "organiser",
+   "cluster": "sound",
+   "query": "Sonic Acts open call",
+   "mode": "search",
+   "lang": "en",
+   "notes": "No call section on the homepage."
+  },
+  {
+   "id": "per-chi-crea",
+   "name": "SIAE — Per Chi Crea (bandi e residenze)",
+   "type": "organiser",
+   "cluster": "italia",
+   "query": "SIAE Per Chi Crea bando 2027 musica arti residenze",
+   "mode": "search",
+   "lang": "it",
+   "notes": "Large national fund for authors; many strands are under 35: test the age clause literally."
+  },
+  {
+   "id": "nuovo-imaie",
+   "name": "Nuovo IMAIE — bandi per artisti interpreti",
+   "type": "organiser",
+   "cluster": "italia",
+   "query": "Nuovo IMAIE bando 2027 musicisti artisti interpreti",
+   "mode": "search",
+   "lang": "it",
+   "notes": "Funds performers (musicians included): check whether registration as a performer is required."
+  },
+  {
+   "id": "movinup",
+   "name": "Movin'Up — mobilità artisti italiani (GAI / MiC)",
+   "type": "organiser",
+   "cluster": "italia",
+   "query": "Movin'Up bando mobilità artisti 2027",
+   "mode": "search",
+   "lang": "it",
+   "notes": "Mobility grant for Italian artists invited abroad; historically age-limited: verify."
+  },
+  {
+   "id": "toscana-arte",
+   "name": "Regione Toscana — bandi arte contemporanea e spettacolo",
+   "type": "organiser",
+   "cluster": "italia",
+   "query": "Regione Toscana bando arte contemporanea 2027 artisti",
+   "mode": "search",
+   "lang": "it",
+   "notes": "Aldo lives in Tuscany. Many calls are for organisations: partner route via TAB ETS or Co-design Toscana."
+  },
+  {
+   "id": "cr-firenze",
+   "name": "Fondazione CR Firenze — bandi cultura",
+   "type": "organiser",
+   "cluster": "italia",
+   "query": "Fondazione CR Firenze bando cultura 2027",
+   "mode": "search",
+   "lang": "it",
+   "notes": "Usually organisation-only: propose only with a named partner route."
+  },
+  {
+   "id": "tempo-reale",
+   "name": "Tempo Reale (Firenze) — call e residenze",
+   "type": "organiser",
+   "cluster": "sound",
+   "query": "Tempo Reale Firenze call residenza musica elettronica",
+   "mode": "search",
+   "lang": "it",
+   "notes": "Florence centre for electronic music research: local tie in Tuscany."
+  },
+  {
+   "id": "iii",
+   "name": "iii — instrument inventors initiative (Den Haag) — open calls",
+   "type": "organiser",
+   "cluster": "sound",
+   "query": "instrument inventors initiative iii open call residency",
+   "mode": "search",
+   "lang": "en",
+   "notes": "Sound / instrument / installation residencies; check fee and travel."
+  },
+  {
+   "id": "zkm",
+   "name": "ZKM Karlsruhe — residencies and calls",
+   "type": "organiser",
+   "cluster": "sound",
+   "query": "ZKM Karlsruhe artist residency open call sound",
+   "mode": "search",
+   "lang": "en",
+   "notes": "Hertz-Lab and sound residencies; calls are irregular."
+  },
+  {
+   "id": "bogliasco",
+   "name": "Bogliasco Foundation — fellowships",
+   "type": "organiser",
+   "cluster": "residencies",
+   "query": "Bogliasco Foundation fellowship application deadline",
+   "mode": "search",
+   "lang": "en",
+   "notes": "Liguria study centre; music and visual arts eligible. Check the current cycle dates."
+  },
+  {
+   "id": "smallsize",
+   "name": "Small Size network — performing arts for early years",
+   "type": "network",
+   "cluster": "early-years",
+   "query": "Small Size network open call artists early years 2027",
+   "mode": "search",
+   "lang": "en",
+   "notes": "European network for 0-6 performing arts (secretariat at La Baracca, Bologna): direct fit for Playground."
+  },
+  {
+   "id": "ecoc",
+   "name": "European Capitals of Culture — artist calls",
+   "type": "aggregator",
+   "cluster": "eu",
+   "query": "European Capital of Culture 2028 open call artists",
+   "mode": "search",
+   "lang": "en",
+   "notes": "Search also 2029 and 2030 titleholders. Participatory/community strands fit WILD:CARE; without a local partner fit drops."
+  },
+  {
+   "id": "phd-funded",
+   "name": "Funded practice-based PhD in sound / participatory arts",
+   "type": "aggregator",
+   "cluster": "training",
+   "query": "funded practice-based PhD studentship sound art 2027",
+   "mode": "search",
+   "lang": "en",
+   "months": [
+    10,
+    11,
+    12,
+    1,
+    2
+   ],
+   "notes": "Targets on file: CRiSAP/UAL, SARC Belfast, NABA-Gothenburg, Norwegian Academy of Music. Only funded places (stipend or fee waiver)."
+  }
+ ]
 }
