@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-17T00:42:32.137Z",
+  "updated": "2026-11-17T00:43:09.913Z",
   "calls": [
     {
       "id": 4,
@@ -45,21 +45,6 @@
       "lockNote": "",
       "fit": "",
       "dateApprox": true
-    },
-    {
-      "id": 1782646063210,
-      "title": "A4 Residency Art Center International Residency 2027 (China) | On the Move",
-      "org": "",
-      "deadline": "2026-12-30",
-      "status": "curious",
-      "url": "https://on-the-move.org/news/a4-residency-art-center-international-residency-2027-china",
-      "notes": "",
-      "history": [],
-      "recurs": null,
-      "lockedUntil": null,
-      "lockNote": "",
-      "fit": "",
-      "dateApprox": false
     },
     {
       "id": 1783025037394,
