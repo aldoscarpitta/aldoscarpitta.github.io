@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "updated": "2026-11-17",
- "about": "Directory of pages the open-calls scraper (every third Monday) visits. Edit freely on GitHub: add a source by copying an entry, set active:false to pause one. mode 'fetch' = read the url directly; mode 'search' = the site blocks automated reading, so the scraper runs the query with web search instead. months = only check in these months (1-12); omit to check every run.",
+ "about": "Directory of pages the open-calls scraper (every third Monday) visits. Edit freely on GitHub: add a source by copying an entry, set active:false to pause one. mode 'fetch' = read the url directly; mode 'search' = the site blocks automated reading, so the scraper runs the query with web search instead. months = only check in these months (1-12); omit to check every run. fast:true = also checked on the light Mondays between full runs (keep it to 5-6 high-turnover listings).",
  "sources": [
   {
    "id": "otm-deadlines",
@@ -11,7 +11,8 @@
    "url": "https://on-the-move.org/news/deadlines",
    "mode": "fetch",
    "lang": "en",
-   "notes": "Best single source. Grouped by category, ~60 dated calls. Also scan https://on-the-move.org/news (6 pages) for new posts."
+   "notes": "Best single source. Grouped by category, ~60 dated calls. Also scan https://on-the-move.org/news (6 pages) for new posts.",
+   "fast": true
   },
   {
    "id": "transartists-calls",
@@ -21,7 +22,8 @@
    "url": "https://www.transartists.org/en/transartists-calls",
    "mode": "fetch",
    "lang": "en",
-   "notes": "Sorted by posting date; read the first 2-3 pages. Deadlines list: https://www.transartists.org/en/deadlines"
+   "notes": "Sorted by posting date; read the first 2-3 pages. Deadlines list: https://www.transartists.org/en/deadlines",
+   "fast": true
   },
   {
    "id": "resartis",
@@ -41,7 +43,8 @@
    "url": "https://britishelectroacousticnetwork.com/opportunities/",
    "mode": "fetch",
    "lang": "en",
-   "notes": "Best sound-specific listing (source of Forum Wallis and Xenakis). Skip UK-residents-only calls."
+   "notes": "Best sound-specific listing (source of Forum Wallis and Xenakis). Skip UK-residents-only calls.",
+   "fast": true
   },
   {
    "id": "artificialnouveau-eu",
@@ -111,7 +114,8 @@
    "url": "https://www.artapartofculture.net/category/concorsi-e-bandi-in-scadenza/",
    "mode": "fetch",
    "lang": "it",
-   "notes": "Cleanest Italian list: dated deadlines."
+   "notes": "Cleanest Italian list: dated deadlines.",
+   "fast": true
   },
   {
    "id": "gai",
@@ -121,7 +125,8 @@
    "url": "https://www.giovaniartisti.it/concorsi",
    "mode": "fetch",
    "lang": "it",
-   "notes": "Filterable by sector (Video & Sound Art, Musica Elettronica). Many under-35 limits: check age."
+   "notes": "Filterable by sector (Video & Sound Art, Musica Elettronica). Many under-35 limits: check age.",
+   "fast": true
   },
   {
    "id": "theatron",
@@ -131,7 +136,8 @@
    "url": "https://webzine.theatronduepuntozero.it/bandi-e-audizioni/",
    "mode": "fetch",
    "lang": "it",
-   "notes": "High volume, mostly theatre/dance; keep residencies, festival calls and site-specific."
+   "notes": "High volume, mostly theatre/dance; keep residencies, festival calls and site-specific.",
+   "fast": true
   },
   {
    "id": "artribune-jobs",
