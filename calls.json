@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-17T00:42:26.408Z",
+  "updated": "2026-11-17T00:42:29.235Z",
   "calls": [
     {
       "id": 4,
@@ -277,21 +277,6 @@
       "deadline": "2026-12-01",
       "status": "interested",
       "url": "about:home",
-      "notes": "",
-      "fit": "",
-      "lockedUntil": null,
-      "lockNote": "",
-      "dateApprox": false,
-      "recurs": null,
-      "history": []
-    },
-    {
-      "id": 1790633354228,
-      "title": "Campania Teatro Festival 2027: aperte le candidature per le selezioni artistiche - Webzine Theatron 2.0",
-      "org": "",
-      "deadline": "2026-11-14",
-      "status": "curious",
-      "url": "https://webzine.theatronduepuntozero.it/campania-teatro-festival-2027-aperte-le-candidature-per-le-selezioni-artistiche/",
       "notes": "",
       "fit": "",
       "lockedUntil": null,
