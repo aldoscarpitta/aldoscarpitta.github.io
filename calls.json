@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-23T11:13:25.229Z",
+  "updated": "2026-11-23T11:13:29.522Z",
   "calls": [
     {
       "id": 4,
@@ -620,6 +620,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-957c391242",
+      "proposedOn": "2026-11-23"
+    },
+    {
+      "id": 1795432409520,
+      "title": "Research Fellow Positions 2027 — PhD Programme in Artistic Research",
+      "org": "Norwegian Academy of Music (NMH), Oslo",
+      "deadline": "2027-01-15",
+      "status": "curious",
+      "url": "https://nmh.no/en/apply/artistic-phd-admission",
+      "notes": "Proposta scraper 2026-11-17\ngrant · Live\nMoney: Posizione di Research Fellow stipendiata (contratto di lavoro norvegese, importo non indicato); nessuna tassa di iscrizione indicata.\nEligibility: VERIFY: richiesto un 'terminal degree' equivalente a laurea magistrale biennale (120 ECTS) nella disciplina; verificare che il titolo del Conservatorio di Bologna (biennio?) soddisfi il requisito. Nessun limite di età o nazionalità indicato.\nSforzo alto — Il bando 2027 non è ancora pubblicato: la pagina dell'organizzatore annuncia fino a tre posizioni, scadenza 15 gennaio 2027 ore 15:00 (ora di Oslo, CET), avvio 1 settembre 2027; l'annuncio 2026 era uscito il 27/11/2025 su nmh.no/jobbnorge, quindi controllare a fine novembre. Serve progetto di ricerca artistica completo e portfolio.",
+      "fit": "Medium — Dottorato artistico finanziato (posizione di research fellow retribuita, 3 anni) in un dipartimento guidato da Ivar Grydeland (Improvisation): coerente con piano a contatto + modulare e improvvisazione elettroacustica come ricerca. Progetti aperti a tutti i generi e pratiche musicali.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-e4dc710aaa",
       "proposedOn": "2026-11-23"
     }
   ],
