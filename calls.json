@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-23T11:13:11.795Z",
+  "updated": "2026-11-23T11:13:18.505Z",
   "calls": [
     {
       "id": 4,
@@ -586,6 +586,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-176c776bb7",
+      "proposedOn": "2026-11-23"
+    },
+    {
+      "id": 1795432398503,
+      "title": "AIR InSILo — residenza 2027 'when the hourless seeps' (Hollabrunn, Austria)",
+      "org": "AIR InSILo",
+      "deadline": "2026-12-30",
+      "status": "curious",
+      "url": "https://in-silo.com/open_call_2027_stage_1",
+      "notes": "Proposta scraper 2026-11-23\nresidency · Live / Site-specific listening works\nMoney: Prima fase gratuita; seconda fase con 'solidarity fee' di 7 € (esenzioni limitate). Onorario fino a 2.450 €, materiali fino a 400 €, viaggio fino a 400 €, trasporto fino a 175 €. Alloggio non indicato sulla pagina.\nEligibility: Nessun limite d'età (attenzione ad artisti attorno ai 35 anni, late-emerging/early mid-career); nessun requisito di nazionalità o residenza. VERIFY: esclusi 'students currently enrolled in an undergraduate or graduate programme (except for PhD)' — il master IUAV è un master universitario post-laurea part-time, da chiarire con gli organizzatori.\nSforzo basso — prima fase: portfolio, lettera di tre frasi, prova di aver letto il testo curatoriale e visto il video, metafora obbligatoria 'Time peels away like the layers of an onion'. Scadenza 30/12/2026 ore 23:00 CET. Verificare se l'alloggio è incluso.",
+      "fit": "Medium — Residenza transdisciplinare di sette settimane (apr–mag o giu–lug 2027), tutti i media, a cura di Ahmad Darkhabani su fragilità, decadimento, tempo come sfruttamento, vulnerabilità del corpo. L'aggancio va costruito: tempo e decadimento del materiale sonoro, corpo come strumento di trasmissione.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-6ea1c8c178",
       "proposedOn": "2026-11-23"
     }
   ],
