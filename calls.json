@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-17T00:43:09.913Z",
+  "updated": "2026-11-23T11:12:46.255Z",
   "calls": [
     {
       "id": 4,
@@ -561,6 +561,13 @@
       "title": "Catalysi 2027 — due residenze al Teatro Comandini",
       "url": "https://www.societas.es/p/catalysi-residenze-2027-bando/",
       "date": "2026-11-16",
+      "reason": "rejected"
+    },
+    {
+      "cid": "oc-938a1dd424",
+      "title": "WONDER — residenza di ricerca e produzione al Museo delle Donne di Merano (Women in Resistance Movements)",
+      "url": "https://www.eccom.it/wonder-open-call-for-artists/",
+      "date": "2026-11-23",
       "reason": "rejected"
     }
   ]
