@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-23T11:13:33.756Z",
+  "updated": "2026-11-23T16:40:14.643Z",
   "calls": [
     {
       "id": 4,
@@ -655,6 +655,21 @@
       "history": [],
       "cid": "oc-33ec5ff984",
       "proposedOn": "2026-11-23"
+    },
+    {
+      "id": 1795452014639,
+      "title": "Open Call | Annotazioni Superficiali 2027 - Lavanderia a Vapore",
+      "org": "",
+      "deadline": "2026-12-15",
+      "status": "interested",
+      "url": "https://www.lavanderiaavapore.eu/2026/11/13/open-call-annotazioni-superficiali-2027/",
+      "notes": "",
+      "fit": "",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": []
     }
   ],
   "dismissed": [
