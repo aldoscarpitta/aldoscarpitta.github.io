@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-23T11:12:46.255Z",
+  "updated": "2026-11-23T11:12:58.322Z",
   "calls": [
     {
       "id": 4,
@@ -553,6 +553,23 @@
       "history": [],
       "cid": "oc-e3429be38a",
       "proposedOn": "2026-11-16"
+    },
+    {
+      "id": 1795432378320,
+      "title": "Humboldt Residency Programme 2027 — \"Oceanic Horizons: Navigating the Future of Our Blue Planet\"",
+      "org": "Alexander von Humboldt Foundation",
+      "deadline": "2026-12-14",
+      "status": "curious",
+      "url": "https://www.humboldt-foundation.de/en/apply/sponsorship-programmes/humboldt-residency-programme/humboldt-residency-programme-call-for-applications",
+      "notes": "Proposta scraper 2026-11-17\nresidency · site-specific listening works\nMoney: Indennità mensile per 6 settimane (importo non indicato), contributo viaggio, alloggio a Schloss Wiepersdorf e Berlino, budget per eventi pubblici/output.\nEligibility: Categoria 'civil society practitioners': richiesto di 'not currently hold an academic position' e connessione chiara col tema nel lavoro passato; nessun limite di età/nazionalità indicato. PASS (l'insegnamento part-time di inglese non è posizione accademica).\nSforzo basso — CV max 3 pagine + video di presentazione max 60 s; valutazione rolling, conviene inviare presto. Presenza obbligatoria 2 ago–10 set 2027; fuso orario della scadenza non indicato.",
+      "fit": "High — Residenza interdisciplinare sul tema oceano tra ricercatori e 'civil society practitioners' (artisti inclusi): idrofoni, field recording, Cialoma e il Mediterraneo di Dysographies danno un legame tematico concreto; Berlino è una geografia con legami (CRN).",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-2c00687801",
+      "proposedOn": "2026-11-23"
     }
   ],
   "dismissed": [
