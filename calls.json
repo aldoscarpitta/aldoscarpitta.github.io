@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-23T11:13:18.505Z",
+  "updated": "2026-11-23T11:13:25.229Z",
   "calls": [
     {
       "id": 4,
@@ -603,6 +603,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-6ea1c8c178",
+      "proposedOn": "2026-11-23"
+    },
+    {
+      "id": 1795432405227,
+      "title": "ligeti center — Artists and Scientists in Residence 2027 'Where Sound Shapes Space' (Amburgo)",
+      "org": "ligeti center, Hamburg",
+      "deadline": "2027-01-10",
+      "status": "curious",
+      "url": "https://ligeti-zentrum.de/residency-2027/",
+      "notes": "Proposta scraper 2026-11-23\nresidency · Site-specific listening works / Live\nMoney: Nessuna quota. Borsa 1.200 € netti/mese per tre mesi, alloggio ad Amburgo, spazio di lavoro, Production Lab, supporto tecnico e documentazione. Viaggio non indicato.\nEligibility: Solo candidature individuali; richiesta attività artistica e/o scientifica continuativa nel campo del progetto scelto. Nessun limite di età, nazionalità, residenza o titolo indicato. Scadenza 10/01/2027 a mezzanotte CET.\nSforzo medio — modulo unico: descrizione progetto (4.000 car.), aspetti innovativi (1.000), lettera motivazionale (4.000) su un progetto del centro, link portfolio, proposta di workshop. In tedesco o inglese; esito entro il 31/01/2027. Impegno di tre mesi in presenza da verificare con il calendario primaverile.",
+      "fit": "High — Residenza aprile–fine giugno 2027 su suono e spazio: si sceglie uno di quattro progetti del centro (Healing Soundscapes per ambienti ospedalieri, Snappi altoparlanti multicanale wireless, Sound Sculptures, Live 3D-Audio Effects). Sound Sculptures e Healing Soundscapes si agganciano a trasduttori, piano preparato a contatto e pratica d'ascolto; richiesto anche un workshop per studenti o pubblico di Amburgo, terreno partecipativo.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-957c391242",
       "proposedOn": "2026-11-23"
     }
   ],
