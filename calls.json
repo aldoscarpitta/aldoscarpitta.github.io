@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-23T11:12:58.322Z",
+  "updated": "2026-11-23T11:13:11.795Z",
   "calls": [
     {
       "id": 4,
@@ -569,6 +569,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-2c00687801",
+      "proposedOn": "2026-11-23"
+    },
+    {
+      "id": 1795432391793,
+      "title": "Sado Island Galaxy Art Festival 2027 — open call per opere ed eventi site-specific",
+      "org": "Sado Island Galaxy Art Festival",
+      "deadline": "2026-12-22",
+      "status": "curious",
+      "url": "https://sado-art.com/en/news/4499/",
+      "notes": "Proposta scraper 2026-11-17\nsite-specific · site-specific listening works\nMoney: Contributo di produzione fino a ~2.000.000 JPY (viaggio e alloggio da includere nel budget, nessun artist fee separato); quota di candidatura 1.500 JPY.\nEligibility: 18+, tutte le nazionalità, individui o gruppi: PASS; richiesta permanenza in loco e piena responsabilità di produzione e smontaggio.\nSforzo alto — proposta PDF max 8 pagine con budget dettagliato, portfolio, accordo copyright firmato; opera pronta entro 10 lug 2027. Scadenza 17:00 JST (UTC+9).",
+      "fit": "Medium — Call per opere ed eventi site-specific con sound art esplicitamente ammessa, aperta a tutte le nazionalità: adatta a un'installazione d'ascolto/idrofoni sull'isola; nessun legame col Giappone.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": false,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-176c776bb7",
       "proposedOn": "2026-11-23"
     }
   ],
