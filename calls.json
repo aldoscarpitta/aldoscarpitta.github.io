@@ -1,6 +1,6 @@
 {
   "schema": 4,
-  "updated": "2026-11-23T11:13:29.522Z",
+  "updated": "2026-11-23T11:13:33.756Z",
   "calls": [
     {
       "id": 4,
@@ -637,6 +637,23 @@
       "recurs": null,
       "history": [],
       "cid": "oc-e4dc710aaa",
+      "proposedOn": "2026-11-23"
+    },
+    {
+      "id": 1795432413754,
+      "title": "Bogliasco Fellowship — Spring 2028",
+      "org": "Bogliasco Foundation (Liguria Study Center)",
+      "deadline": "2027-03-14",
+      "status": "curious",
+      "url": "https://bfny.org/en/apply/faqs",
+      "notes": "Proposta scraper 2026-11-17\nresidency · practice development\nMoney: Vitto, alloggio e studio coperti; nessuno stipendio né viaggio; quota di candidatura 30 $ (45 $ nell'ultima settimana).\nEligibility: Nessun limite di età/nazionalità; 'Students enrolled in a degree-granting program at the time of application are not eligible' → VERIFY per il master IUAV ProPart.\nSforzo medio — candidatura online con campioni di lavoro e referenze. Data 14 marzo dedotta dalla regola 'March 14th for the subsequent spring' (anno non scritto); 11:59pm ET.",
+      "fit": "Medium — Fellowship di un mese in Liguria per Music o Visual Arts, adatta a un periodo di scrittura/composizione; nessun obbligo pubblico.",
+      "lockedUntil": null,
+      "lockNote": "",
+      "dateApprox": true,
+      "recurs": null,
+      "history": [],
+      "cid": "oc-33ec5ff984",
       "proposedOn": "2026-11-23"
     }
   ],
